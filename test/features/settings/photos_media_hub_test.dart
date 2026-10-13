@@ -218,7 +218,37 @@ void main() {
         tester.getCenter(button).dy,
         moreOrLessEquals(tester.getCenter(slider).dy, epsilon: 1),
       );
-      expect(find.byTooltip('Empty cache'), findsOneWidget);
+    });
+
+    testWidgets('is an outlined button with an icon and a label, like Test '
+        'Connection on the network page', (tester) async {
+      await pumpHub(tester);
+
+      expect(tester.widget(button), isA<OutlinedButton>());
+      expect(
+        find.descendant(of: button, matching: find.text('Empty cache')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: button, matching: find.byType(Icon)),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the memory slider is as wide as the disk slider, though it '
+        'has no button', (tester) async {
+      await pumpHub(tester);
+
+      final memory = tester.getRect(
+        find.byKey(const ValueKey('media_memory_cache_slider')),
+      );
+      final disk = tester.getRect(
+        find.byKey(const ValueKey('media_disk_cache_slider')),
+      );
+      expect(memory.width, disk.width);
+      expect(memory.left, disk.left);
+      // Only one button can be pressed or read out.
+      expect(find.bySubtype<OutlinedButton>().hitTestable(), findsOneWidget);
     });
 
     testWidgets('empties the cache and says so', (tester) async {

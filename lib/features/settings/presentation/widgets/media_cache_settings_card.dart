@@ -24,6 +24,15 @@ class MediaCacheSettingsCard extends ConsumerWidget {
     final settings = ref.watch(mediaCacheSettingsProvider);
     final notifier = ref.read(mediaCacheSettingsProvider.notifier);
 
+    // The same style as Test Connection on the network settings page.
+    Widget emptyButton({Key? key, VoidCallback? onPressed}) =>
+        OutlinedButton.icon(
+          key: key,
+          onPressed: onPressed,
+          icon: const Icon(Icons.delete_sweep_outlined),
+          label: Text(l10n.settings_mediaCache_disk_empty),
+        );
+
     return Card(
       child: Column(
         children: [
@@ -35,6 +44,18 @@ class MediaCacheSettingsCard extends ConsumerWidget {
             steps: kMemoryCacheStepsMb,
             valueMb: settings.memoryCacheMb,
             onChanged: notifier.setMemoryCacheMb,
+            // Nothing to empty here, but the two sliders should be the same
+            // width. An unseen copy of the disk row's button holds exactly
+            // its space, whatever the label's length in this language.
+            trailing: ExcludeSemantics(
+              child: Visibility(
+                visible: false,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: emptyButton(),
+              ),
+            ),
           ),
           const Divider(height: 1),
           _CacheSizeSlider(
@@ -45,10 +66,8 @@ class MediaCacheSettingsCard extends ConsumerWidget {
             steps: kDiskCacheStepsMb,
             valueMb: settings.diskCacheMb,
             onChanged: notifier.setDiskCacheMb,
-            trailing: IconButton.outlined(
+            trailing: emptyButton(
               key: const ValueKey('media_disk_cache_empty_button'),
-              icon: const Icon(Icons.delete_sweep_outlined),
-              tooltip: l10n.settings_mediaCache_disk_empty,
               onPressed: () async {
                 final messenger = ScaffoldMessenger.of(context);
                 final emptied = await notifier.emptyDiskCache();
