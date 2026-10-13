@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:submersion/features/media/domain/value_objects/media_source_data
 import 'package:submersion/features/media/presentation/providers/media_providers.dart';
 import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
 import 'package:submersion/features/media/presentation/providers/media_serving_providers.dart';
+import 'package:submersion/features/media/presentation/providers/media_tile_image_memo.dart';
 import 'package:submersion/features/media/presentation/widgets/limited_access_actions.dart';
 import 'package:submersion/features/media/presentation/widgets/unavailable_media_placeholder.dart';
 import 'package:submersion/features/media_store/presentation/providers/media_store_providers.dart';
@@ -43,7 +45,9 @@ const double _viewerZoomHeadroom = 2.0;
 ///   * [BytesData] — [Image.memory] (signatures, small assets only)
 ///   * [UnavailableData] — [UnavailableMediaPlaceholder] (badge with reason)
 ///
-/// While the future is loading, shows a [_ShimmerThumbnail] placeholder.
+/// While the future is loading, shows a [_ShimmerThumbnail] placeholder,
+/// unless the decoded image this item last drew is still in memory: then it
+/// paints that on the first frame (see [MediaTileImageMemo]).
 /// If the resolver future completes with an error, falls back to an
 /// [UnavailableMediaPlaceholder] (kind: [UnavailableKind.notFound]) so a
 /// failure never looks like a permanent shimmer.
@@ -178,7 +182,14 @@ class _MediaItemViewState extends ConsumerState<MediaItemView> {
           failure: data is UnavailableData ? data.kind : null,
           storeFallbackUsed: resolution.storeFallbackUsed,
         );
-    _reconcileOrphanState(resolution.nativeFailure);
+    // A thumbnail found again in the cache was served without looking at
+    // the original, so it proves nothing about whether the original is
+    // still there. Reconciling on it would clear the orphan flag of every
+    // missing photo that still has a thumbnail. The resolver checks the
+    // original itself, off this path, and reports what it finds.
+    if (!(data is FileData && data.originUntouched)) {
+      _reconcileOrphanState(resolution.nativeFailure);
+    }
     return resolution;
   }
 
@@ -332,8 +343,25 @@ class _MediaItemViewState extends ConsumerState<MediaItemView> {
     );
   }
 
+  /// Draws [file], and notes that it did so the next mount of this item can
+  /// find the decoded image without waiting on resolution.
+  Widget _fileImage(MediaTileImageMemo memo, File file, int cacheWidth) {
+    memo.remember(
+      widget.item,
+      thumbnail: widget.thumbnail,
+      cacheWidth: cacheWidth,
+      file: file,
+    );
+    return Image(
+      image: MediaTileImageMemo.providerFor(file, cacheWidth),
+      fit: widget.fit,
+      errorBuilder: _imageError,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final memo = ref.watch(mediaTileImageMemoProvider);
     return FutureBuilder<_Resolution>(
       future: _future,
       builder: (context, snapshot) {
@@ -342,19 +370,6 @@ class _MediaItemViewState extends ConsumerState<MediaItemView> {
             data: UnavailableData(kind: UnavailableKind.notFound),
           );
         }
-        if (!snapshot.hasData) {
-          return const _ShimmerThumbnail();
-        }
-        final resolution = snapshot.data!;
-        if (resolution.videoPosterMissing) {
-          return const _VideoThumbnailPlaceholder();
-        }
-        final data = resolution.data;
-        // A document resolves to raw document bytes (PDF, docx, ...), which
-        // the Image widgets cannot decode. The renderable exception is a
-        // PDF's page-1 image: rendered here for a tile, or served as the
-        // store's THUMB when this device cannot read the PDF itself.
-        final documentRenderable = resolution.documentRenderable;
         // Bound the DECODE, not just the layout. Photo resolvers hand back the
         // original file, so an unbounded Image.file holds a full-resolution
         // bitmap (a 12 MP JPEG is ~48 MB RGBA) for as long as the tile has a
@@ -391,6 +406,36 @@ class _MediaItemViewState extends ConsumerState<MediaItemView> {
                       dpr *
                       _viewerZoomHeadroom)
                   .round();
+        if (!snapshot.hasData) {
+          // A tile scrolling back into view: resolution is asynchronous, but
+          // the image it will resolve to may still be decoded in memory.
+          // Painting that now skips the placeholder (issue #3337). The
+          // resolution carries on behind it and replaces this if the answer
+          // has changed.
+          final remembered = memo.cachedProvider(
+            widget.item,
+            thumbnail: widget.thumbnail,
+            cacheWidth: cacheWidth,
+          );
+          if (remembered != null) {
+            return Image(
+              image: remembered,
+              fit: widget.fit,
+              errorBuilder: _imageError,
+            );
+          }
+          return const _ShimmerThumbnail();
+        }
+        final resolution = snapshot.data!;
+        if (resolution.videoPosterMissing) {
+          return const _VideoThumbnailPlaceholder();
+        }
+        final data = resolution.data;
+        // A document resolves to raw document bytes (PDF, docx, ...), which
+        // the Image widgets cannot decode. The renderable exception is a
+        // PDF's page-1 image: rendered here for a tile, or served as the
+        // store's THUMB when this device cannot read the PDF itself.
+        final documentRenderable = resolution.documentRenderable;
         return switch (data) {
           FileData() when widget.item.isDocument && !documentRenderable =>
             _DocumentThumbnailPlaceholder(item: widget.item),
@@ -404,12 +449,7 @@ class _MediaItemViewState extends ConsumerState<MediaItemView> {
           // JPEGs below and render normally.)
           FileData(isPoster: false) when widget.item.isVideo =>
             const _VideoThumbnailPlaceholder(),
-          FileData(file: final f) => Image.file(
-            f,
-            fit: widget.fit,
-            cacheWidth: cacheWidth,
-            errorBuilder: _imageError,
-          ),
+          FileData(file: final f) => _fileImage(memo, f, cacheWidth),
           NetworkData(url: final u, headers: final h) => CachedNetworkImage(
             imageUrl: u.toString(),
             httpHeaders: h,

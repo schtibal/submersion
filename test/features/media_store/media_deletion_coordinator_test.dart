@@ -140,4 +140,62 @@ void main() {
     await broken.deleteMedia('m4');
     expect(await repo.getMediaById('m4'), isNull);
   });
+
+  // Issue #3337: a row leaving the library takes its cached copies with it.
+  group('cache purge', () {
+    late List<List<String>> purged;
+
+    MediaDeletionCoordinator purging({
+      Future<void> Function(List<MediaItem> items)? onDeleted,
+    }) => MediaDeletionCoordinator(
+      mediaRepository: repo,
+      queue: () => queue,
+      onDeleted:
+          onDeleted ??
+          (items) async => purged.add([for (final item in items) item.id]),
+    );
+
+    setUp(() => purged = []);
+
+    test('hands over the rows it deleted, after they are gone', () async {
+      await repo.createMedia(photo('p1', hash: 'aa'));
+      await repo.createMedia(photo('p2'));
+      var rowsLeftAtPurge = -1;
+      final coordinator = purging(
+        onDeleted: (items) async {
+          purged.add([for (final item in items) item.id]);
+          rowsLeftAtPurge = [
+            await repo.getMediaById('p1'),
+            await repo.getMediaById('p2'),
+          ].nonNulls.length;
+        },
+      );
+
+      await coordinator.deleteMultipleMedia(['p1', 'p2']);
+
+      expect(purged, [
+        ['p1', 'p2'],
+      ]);
+      expect(rowsLeftAtPurge, 0);
+    });
+
+    test('uses the rows a caller already holds', () async {
+      await purging().deleteMediaItems([photo('ghost', hash: 'ee')]);
+
+      expect(purged, [
+        ['ghost'],
+      ]);
+    });
+
+    test('a failing purge never fails the deletion', () async {
+      await repo.createMedia(photo('p3'));
+      final coordinator = purging(
+        onDeleted: (_) async => throw StateError('cache db not initialized'),
+      );
+
+      await coordinator.deleteMedia('p3');
+
+      expect(await repo.getMediaById('p3'), isNull);
+    });
+  });
 }

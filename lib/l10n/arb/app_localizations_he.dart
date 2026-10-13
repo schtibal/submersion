@@ -48009,6 +48009,33 @@ class AppLocalizationsHe extends AppLocalizations {
       'סמל קטן שמראה מאיפה כל פריט מוגש. תגי בעיה מוצגים תמיד.';
 
   @override
+  String get settings_photosMedia_cacheHeader => 'מטמון';
+
+  @override
+  String get settings_mediaCache_memory_title => 'מטמון תמונות בזיכרון';
+
+  @override
+  String get settings_mediaCache_memory_subtitle =>
+      'תמונות מפוענחות שנשמרות בזיכרון עבור הגלריות והצגת מסך מלא. חל מיד, במכשיר זה בלבד.';
+
+  @override
+  String get settings_mediaCache_disk_title => 'מטמון תמונות ממוזערות בדיסק';
+
+  @override
+  String get settings_mediaCache_disk_subtitle =>
+      'תמונות ממוזערות שנשמרות במכשיר זה. קובצי מקור ועותקים דחוסים אינם נספרים.';
+
+  @override
+  String get settings_mediaCache_disk_empty => 'ריקון המטמון';
+
+  @override
+  String get settings_mediaCache_disk_emptied => 'מטמון התמונות הממוזערות רוקן';
+
+  @override
+  String get settings_mediaCache_disk_emptyFailed =>
+      'לא ניתן היה לרוקן את מטמון התמונות הממוזערות';
+
+  @override
   String get media_status_transferFailed => 'ההעלאה נכשלה';
 
   @override

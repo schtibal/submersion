@@ -21,13 +21,20 @@ class MediaDeletionCoordinator {
     required MediaRepository mediaRepository,
     required MediaTransferQueueRepository Function() queue,
     Future<void> Function()? kickWorker,
+    Future<void> Function(List<MediaItem> items)? onDeleted,
   }) : _mediaRepository = mediaRepository,
        _queue = queue,
-       _kickWorker = kickWorker;
+       _kickWorker = kickWorker,
+       _onDeleted = onDeleted;
 
   final MediaRepository _mediaRepository;
   final MediaTransferQueueRepository Function() _queue;
   final Future<void> Function()? _kickWorker;
+
+  /// Given the rows once they are gone, to clear them out of this device's
+  /// caches: thumbnails on disk, decoded images in memory (issue #3337).
+  /// Unlinking goes through here, as does every other user deletion.
+  final Future<void> Function(List<MediaItem> items)? _onDeleted;
   final _log = LoggerService.forClass(MediaDeletionCoordinator);
 
   Future<void> deleteMedia(String id) => deleteMultipleMedia([id]);
@@ -111,13 +118,19 @@ class MediaDeletionCoordinator {
     bool kick = true,
   }) async {
     var enqueued = false;
+    // The rows as they were, for the cache purge: nothing can be read back
+    // once they are deleted.
+    final doomed = <MediaItem>[];
     for (final id in ids) {
       // Untyped catch on purpose: an uninitialized
       // LocalCacheDatabaseService throws StateError (an Error, not an
       // Exception), and no media-store problem may ever block the user's
       // deletion.
       try {
-        if (await _enqueueIntent(id, known[id])) enqueued = true;
+        final item = known[id] ?? await _mediaRepository.getMediaById(id);
+        if (item == null) continue;
+        doomed.add(item);
+        if (await _enqueueIntent(id, item)) enqueued = true;
       } catch (e, stackTrace) {
         _log.warning(
           'Could not enqueue remote delete for media $id '
@@ -134,7 +147,27 @@ class MediaDeletionCoordinator {
     } else {
       await _mediaRepository.deleteMultipleMedia(ids);
     }
+    await _purge(doomed);
     if (enqueued && kick) await _kick('media delete');
+  }
+
+  /// A row [keepIf] spared is purged along with the rest. That costs it
+  /// nothing but a thumbnail made again on its next view.
+  Future<void> _purge(List<MediaItem> items) async {
+    final onDeleted = _onDeleted;
+    if (onDeleted == null || items.isEmpty) return;
+    // Untyped catch for the same reason as above: the rows are already
+    // gone, and a cache that cannot be cleared must not turn that into an
+    // error.
+    try {
+      await onDeleted(items);
+    } catch (e, stackTrace) {
+      _log.warning(
+        'Could not clear deleted media from the caches',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   Future<void> _kick(String after) async {
@@ -147,10 +180,9 @@ class MediaDeletionCoordinator {
     }
   }
 
-  Future<bool> _enqueueIntent(String id, MediaItem? known) async {
-    final item = known ?? await _mediaRepository.getMediaById(id);
-    final hash = item?.contentHash;
-    if (item == null || hash == null || hash.isEmpty) return false;
+  Future<bool> _enqueueIntent(String id, MediaItem item) async {
+    final hash = item.contentHash;
+    if (hash == null || hash.isEmpty) return false;
     final everUploaded =
         item.remoteUploadedAt != null ||
         item.remoteThumbUploadedAt != null ||
