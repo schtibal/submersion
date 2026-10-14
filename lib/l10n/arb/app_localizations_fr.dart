@@ -45673,7 +45673,7 @@ class AppLocalizationsFr extends AppLocalizations {
       other:
           '$count plongées n\'ont pas de position de site et utilisent les heures par défaut du lever ($sunrise) et du coucher ($sunset) du soleil',
       one:
-          '1 plongée n\'a pas de position de site et utilise les heures par défaut du lever ($sunrise) et du coucher ($sunset) du soleil',
+          '$count plongée n\'a pas de position de site et utilise les heures par défaut du lever ($sunrise) et du coucher ($sunset) du soleil',
     );
     return '$_temp0';
   }

@@ -13574,7 +13574,7 @@
   "insights_timePatterns_surfaceInterval_statLabel": "Intervalle de surface {label} : {value}",
   "insights_timePatterns_timeOfDay_afternoon": "Après-midi",
   "insights_timePatterns_timeOfDay_dawn": "Aube",
-  "insights_timePatterns_timeOfDay_defaultSunTimes": "{count, plural, =1{1 plongée n'a pas de position de site et utilise les heures par défaut du lever ({sunrise}) et du coucher ({sunset}) du soleil} other{{count} plongées n'ont pas de position de site et utilisent les heures par défaut du lever ({sunrise}) et du coucher ({sunset}) du soleil}}",
+  "insights_timePatterns_timeOfDay_defaultSunTimes": "{count, plural, =1{{count} plongée n'a pas de position de site et utilise les heures par défaut du lever ({sunrise}) et du coucher ({sunset}) du soleil} other{{count} plongées n'ont pas de position de site et utilisent les heures par défaut du lever ({sunrise}) et du coucher ({sunset}) du soleil}}",
   "insights_timePatterns_timeOfDay_dusk": "Crépuscule",
   "insights_timePatterns_timeOfDay_morning": "Matin",
   "insights_timePatterns_timeOfDay_night": "Nuit",

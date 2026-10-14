@@ -45566,7 +45566,7 @@ class AppLocalizationsPt extends AppLocalizations {
       other:
           '$count mergulhos não têm localização do ponto de mergulho e usam os horários padrão de nascer ($sunrise) e pôr do sol ($sunset)',
       one:
-          '1 mergulho não tem localização do ponto de mergulho e usa os horários padrão de nascer ($sunrise) e pôr do sol ($sunset)',
+          '$count mergulho não tem localização do ponto de mergulho e usa os horários padrão de nascer ($sunrise) e pôr do sol ($sunset)',
     );
     return '$_temp0';
   }
