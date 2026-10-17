@@ -144,25 +144,33 @@ void main() {
   // Issue #3337: a row leaving the library takes its cached copies with it.
   group('cache purge', () {
     late List<List<String>> purged;
+    late List<bool> undoables;
 
     MediaDeletionCoordinator purging({
-      Future<void> Function(List<MediaItem> items)? onDeleted,
+      Future<void> Function(List<MediaItem> items, {required bool undoable})?
+      onDeleted,
     }) => MediaDeletionCoordinator(
       mediaRepository: repo,
       queue: () => queue,
       onDeleted:
           onDeleted ??
-          (items) async => purged.add([for (final item in items) item.id]),
+          (items, {required undoable}) async {
+            purged.add([for (final item in items) item.id]);
+            undoables.add(undoable);
+          },
     );
 
-    setUp(() => purged = []);
+    setUp(() {
+      purged = [];
+      undoables = [];
+    });
 
     test('hands over the rows it deleted, after they are gone', () async {
       await repo.createMedia(photo('p1', hash: 'aa'));
       await repo.createMedia(photo('p2'));
       var rowsLeftAtPurge = -1;
       final coordinator = purging(
-        onDeleted: (items) async {
+        onDeleted: (items, {required undoable}) async {
           purged.add([for (final item in items) item.id]);
           rowsLeftAtPurge = [
             await repo.getMediaById('p1'),
@@ -187,22 +195,29 @@ void main() {
       ]);
     });
 
-    test('a delete held for undo keeps its caches, so an undo does not have '
-        'to fetch the copies again', () async {
+    test('a delete held for undo is purged as undoable, so the copies an '
+        'undo would have to fetch again can stay', () async {
       await repo.createMedia(photo('p4', hash: 'ff'));
+      await repo.createMedia(photo('p5', hash: 'ab'));
 
       await purging().deleteMediaItems([
         photo('p4', hash: 'ff'),
       ], holdRemoteDelete: true);
+      await purging().deleteMedia('p5');
 
       expect(await repo.getMediaById('p4'), isNull);
-      expect(purged, isEmpty);
+      expect(purged, [
+        ['p4'],
+        ['p5'],
+      ]);
+      expect(undoables, [true, false]);
     });
 
     test('a failing purge never fails the deletion', () async {
       await repo.createMedia(photo('p3'));
       final coordinator = purging(
-        onDeleted: (_) async => throw StateError('cache db not initialized'),
+        onDeleted: (_, {required undoable}) async =>
+            throw StateError('cache db not initialized'),
       );
 
       await coordinator.deleteMedia('p3');

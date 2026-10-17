@@ -21,7 +21,8 @@ class MediaDeletionCoordinator {
     required MediaRepository mediaRepository,
     required MediaTransferQueueRepository Function() queue,
     Future<void> Function()? kickWorker,
-    Future<void> Function(List<MediaItem> items)? onDeleted,
+    Future<void> Function(List<MediaItem> items, {required bool undoable})?
+    onDeleted,
   }) : _mediaRepository = mediaRepository,
        _queue = queue,
        _kickWorker = kickWorker,
@@ -34,7 +35,12 @@ class MediaDeletionCoordinator {
   /// Given the rows once they are gone, to clear them out of this device's
   /// caches: thumbnails on disk, decoded images in memory (issue #3337).
   /// Unlinking goes through here, as does every other user deletion.
-  final Future<void> Function(List<MediaItem> items)? _onDeleted;
+  ///
+  /// `undoable` is true for a delete held for undo: an undo puts the rows
+  /// back, so copies that would have to be fetched again (the media store's)
+  /// should stay, while anything this device remakes itself can go.
+  final Future<void> Function(List<MediaItem> items, {required bool undoable})?
+  _onDeleted;
   final _log = LoggerService.forClass(MediaDeletionCoordinator);
 
   Future<void> deleteMedia(String id) => deleteMultipleMedia([id]);
@@ -147,23 +153,20 @@ class MediaDeletionCoordinator {
     } else {
       await _mediaRepository.deleteMultipleMedia(ids);
     }
-    // A delete held for undo keeps its caches: an undo puts the rows back,
-    // and a purged media-store copy would then have to be fetched again.
-    // What it leaves behind is bounded by the caches' own eviction.
-    if (kick) await _purge(doomed);
+    await _purge(doomed, undoable: !kick);
     if (enqueued && kick) await _kick('media delete');
   }
 
   /// A row [keepIf] spared is purged along with the rest. That costs it
   /// nothing but a thumbnail made again on its next view.
-  Future<void> _purge(List<MediaItem> items) async {
+  Future<void> _purge(List<MediaItem> items, {required bool undoable}) async {
     final onDeleted = _onDeleted;
     if (onDeleted == null || items.isEmpty) return;
     // Untyped catch for the same reason as above: the rows are already
     // gone, and a cache that cannot be cleared must not turn that into an
     // error.
     try {
-      await onDeleted(items);
+      await onDeleted(items, undoable: undoable);
     } catch (e, stackTrace) {
       _log.warning(
         'Could not clear deleted media from the caches',

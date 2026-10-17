@@ -332,6 +332,27 @@ void main() {
       expect(source.existsSync(), isTrue, reason: 'never the original file');
     });
 
+    test('a delete held for undo removes the thumbnail but keeps the store '
+        'copies an undo would need', () async {
+      final hash = 'ef${'3' * 62}';
+      final source = writePng('reef.png');
+      final item = photo('m1', source, hash: hash);
+      await repo.createMedia(item);
+      final scope = container();
+      final thumb = await scope
+          .read(localThumbnailCacheProvider)
+          .generate(item, file: source);
+      final original = await storeCopy(hash);
+
+      await scope.read(mediaDeletionCoordinatorProvider).deleteMediaItems([
+        item,
+      ], holdRemoteDelete: true);
+
+      expect(await repo.getMediaById('m1'), isNull);
+      expect(thumb!.existsSync(), isFalse);
+      expect(original.existsSync(), isTrue);
+    });
+
     test('store copies stay while another photo has the same '
         'content', () async {
       final hash = 'cd${'2' * 62}';

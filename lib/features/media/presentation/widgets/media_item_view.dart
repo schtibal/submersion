@@ -429,12 +429,15 @@ class _MediaItemViewState extends ConsumerState<MediaItemView> {
           // the image it will resolve to may still be decoded in memory.
           // Painting that now skips the placeholder (issue #3337). The
           // resolution carries on behind it and replaces this if the answer
-          // has changed.
-          final remembered = memo.cachedProvider(
-            widget.item,
-            thumbnail: widget.thumbnail,
-            cacheWidth: cacheWidth,
-          );
+          // has changed. Not for an orphaned row, whose answer is most likely
+          // the missing-file placeholder: the picture would only flash.
+          final remembered = widget.item.isOrphaned
+              ? null
+              : memo.cachedProvider(
+                  widget.item,
+                  thumbnail: widget.thumbnail,
+                  cacheWidth: cacheWidth,
+                );
           if (remembered != null) {
             return Image(
               image: remembered,

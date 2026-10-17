@@ -98,6 +98,23 @@ void main() {
     expect(paintsAnImage(tester), isTrue);
   });
 
+  testWidgets('an orphaned row shows the placeholder first, not a picture '
+      'its resolution is likely to take back', (tester) async {
+    final item = testMediaItem();
+    await tester.pumpWidget(await host(tile(item, key: const ValueKey('a'))));
+    await letImageLoad(tester);
+    await tester.pumpWidget(await host(const SizedBox.shrink()));
+
+    await tester.pumpWidget(
+      await host(
+        tile(item.copyWith(isOrphaned: true), key: const ValueKey('b')),
+      ),
+    );
+
+    expect(paintsAnImage(tester), isFalse);
+    await letImageLoad(tester);
+  });
+
   testWidgets('a tile whose image is not in memory still shows the '
       'placeholder first', (tester) async {
     final item = testMediaItem();

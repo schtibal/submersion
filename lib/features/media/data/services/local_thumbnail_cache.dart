@@ -24,6 +24,10 @@ const int kLocalThumbnailConcurrency = 4;
 typedef ThumbnailWriter =
     Future<ImageResizeResult> Function(ImageResizeRequest request);
 
+/// A photo's original as [LocalThumbnailCache.generateFrom]'s loader hands
+/// it over: exactly one of [file] and [bytes].
+typedef ThumbnailSource = ({File? file, Uint8List? bytes});
+
 /// On-disk thumbnails of photos linked from local files (issue #3337).
 ///
 /// Such a photo had no thumbnail anywhere: every gallery tile was decoded
@@ -67,7 +71,10 @@ class LocalThumbnailCache {
   /// Generations in flight by key, so tiles showing the same file share one.
   final Map<String, Future<File?>> _generating = {};
   var _running = 0;
-  final Queue<Completer<void>> _waiting = Queue<Completer<void>>();
+
+  /// Keys waiting for a slot, oldest first, and each one's waiter.
+  final Queue<String> _waiting = Queue<String>();
+  final Map<String, Completer<void>> _waiters = {};
 
   /// The pool key of [item]'s thumbnail: a hash of where its file is.
   ///
@@ -113,24 +120,49 @@ class LocalThumbnailCache {
   /// cache cannot be written.
   Future<File?> generate(MediaItem item, {File? file, Uint8List? bytes}) {
     assert((file == null) != (bytes == null), 'pass exactly one source');
+    return generateFrom(item, () async => (file: file, bytes: bytes));
+  }
+
+  /// [generate] with the original fetched by [load], called only once this
+  /// generation holds a slot. Null from [load] means there is no original
+  /// to be had.
+  ///
+  /// On the bookmark and content URI paths fetching the original means
+  /// reading all of it into memory, so a request must not hold one while it
+  /// waits: a fast scroll queues a request per tile it passes.
+  ///
+  /// A request for a key already in flight joins that generation without
+  /// calling its [load], and moves it to the front of the queue: it is
+  /// being asked for now, so its tile is on screen now.
+  Future<File?> generateFrom(
+    MediaItem item,
+    Future<ThumbnailSource?> Function() load,
+  ) {
     final key = keyFor(item);
+    final inFlight = _generating[key];
+    if (inFlight != null) {
+      _promote(key);
+      return inFlight;
+    }
     // A block body: remove() returns this very future, and whenComplete
     // waits on a future its callback returns.
-    return _generating[key] ??= _generate(item, key, file: file, bytes: bytes)
-        .whenComplete(() {
-          _generating.remove(key);
-        });
+    return _generating[key] = _generate(item, key, load).whenComplete(() {
+      _generating.remove(key);
+    });
   }
 
   Future<File?> _generate(
     MediaItem item,
-    String key, {
-    File? file,
-    Uint8List? bytes,
-  }) async {
-    await _acquire();
+    String key,
+    Future<ThumbnailSource?> Function() load,
+  ) async {
+    await _acquire(key);
     File? staged;
     try {
+      final source = await load();
+      if (source == null) return null;
+      final (:file, :bytes) = source;
+      assert((file == null) != (bytes == null), 'load exactly one source');
       final store = await _store();
       staged = await store.stagingFile();
       final request = file != null
@@ -196,14 +228,23 @@ class LocalThumbnailCache {
     }
   }
 
-  Future<void> _acquire() {
+  Future<void> _acquire(String key) {
     if (_running < _maxConcurrent) {
       _running++;
       return Future<void>.value();
     }
     final waiter = Completer<void>();
-    _waiting.add(waiter);
+    _waiting.add(key);
+    _waiters[key] = waiter;
     return waiter.future;
+  }
+
+  /// Moves [key] to the newest end of the queue, if it is waiting.
+  void _promote(String key) {
+    if (!_waiters.containsKey(key)) return;
+    _waiting
+      ..remove(key)
+      ..addLast(key);
   }
 
   /// Hands the slot straight to the newest waiter, or frees it.
@@ -213,7 +254,7 @@ class LocalThumbnailCache {
   /// the ones asked for last.
   void _release() {
     if (_waiting.isNotEmpty) {
-      _waiting.removeLast().complete();
+      _waiters.remove(_waiting.removeLast())!.complete();
     } else {
       _running--;
     }

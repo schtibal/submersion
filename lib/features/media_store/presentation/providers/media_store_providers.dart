@@ -218,11 +218,15 @@ final mediaDeletionCoordinatorProvider = Provider<MediaDeletionCoordinator>((
     // A row leaving the library takes its cached copies with it: unlinking
     // a photo clears its thumbnail off disk and its decoded images out of
     // memory (issue #3337). Read lazily, like the queue above.
-    onDeleted: (items) => purgeMediaCaches(
+    // A delete the user can still undo keeps the media store copies, which
+    // would otherwise have to be downloaded again after the undo.
+    onDeleted: (items, {required undoable}) => purgeMediaCaches(
       items,
       thumbnails: ref.read(localThumbnailCacheProvider),
       memo: ref.read(mediaTileImageMemoProvider),
-      store: () => openMediaCacheStore(mediaCachePrefsOrNull(ref)),
+      store: undoable
+          ? null
+          : () => openMediaCacheStore(mediaCachePrefsOrNull(ref)),
       hashStillReferenced: (hash) async =>
           await ref.read(mediaRepositoryProvider).countRowsWithHash(hash) > 0,
     ),

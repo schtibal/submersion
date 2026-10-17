@@ -517,11 +517,8 @@ class LocalFileResolver implements MediaSourceResolver, DiagnosticProbe {
     MediaItem item,
     LocalThumbnailCache thumbnails,
   ) async {
-    // An orphaned row goes to its original: a cached hit would skip the
-    // tile's reconciliation, and the once-per-session check has already
-    // run, so a file put back would never clear the flag this session.
-    final hit = item.isOrphaned ? null : await thumbnails.cached(item);
-    if (hit != null) {
+    final hit = await thumbnails.cached(item);
+    if (hit != null && !item.isOrphaned) {
       _checkOriginOnce(item, hit, thumbnails);
       return FileData(
         file: hit,
@@ -530,15 +527,37 @@ class LocalFileResolver implements MediaSourceResolver, DiagnosticProbe {
         servedTier: ServedTier.thumbnail,
       );
     }
-    final original = await resolve(item);
-    final made = switch (original) {
-      FileData(file: final f) => await thumbnails.generate(item, file: f),
-      BytesData(bytes: final b) => await thumbnails.generate(item, bytes: b),
-      NetworkData() || UnavailableData() => null,
-    };
+    if (hit != null) {
+      // An orphaned row: its original decides. A cache hit alone would skip
+      // the tile's reconciliation, and the once-per-session check has
+      // already run, so a file put back would never clear the flag this
+      // session. The thumbnail it already has still serves once the original
+      // answers.
+      final original = await resolve(item);
+      return switch (original) {
+        FileData() || BytesData() => FileData(
+          file: hit,
+          servedFrom: ServedFrom.localDisk,
+          servedTier: ServedTier.thumbnail,
+        ),
+        NetworkData() || UnavailableData() => original,
+      };
+    }
+    // Resolved inside the generation's slot, not before it: on the bookmark
+    // and content URI paths the original is the whole file in memory.
+    MediaSourceData? original;
+    final made = await thumbnails.generateFrom(item, () async {
+      final resolved = original = await resolve(item);
+      return switch (resolved) {
+        FileData(file: final f) => (file: f, bytes: null),
+        BytesData(bytes: final b) => (file: null, bytes: b),
+        NetworkData() || UnavailableData() => null,
+      };
+    });
     // No thumbnail (an undecodable file, a cache that cannot be written):
-    // the original, decoded small by the tile, exactly as before.
-    if (made == null) return original;
+    // the original, decoded small by the tile, exactly as before. Resolved
+    // here when this request joined another's generation.
+    if (made == null) return original ?? await resolve(item);
     return FileData(
       file: made,
       servedFrom: ServedFrom.localDisk,

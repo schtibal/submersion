@@ -250,18 +250,44 @@ void main() {
     });
   });
 
-  test('an orphaned row is resolved from its original, not the cache, so '
-      'a file put back is noticed', () async {
-    final source = writePng('reef.png');
-    await resolver.resolveThumbnail(item(source), target: tile);
+  group('an orphaned row', () {
+    test('is checked against its original, so a file put back is noticed, '
+        'and keeps the thumbnail it has', () async {
+      final source = writePng('reef.png');
+      final first =
+          await resolver.resolveThumbnail(item(source), target: tile)
+              as FileData;
+      final madeAt = DateTime(2026, 1, 1);
+      first.file.setLastModifiedSync(madeAt);
 
-    final served = await resolver.resolveThumbnail(
-      item(source, isOrphaned: true),
-      target: tile,
-    );
+      final served = await resolver.resolveThumbnail(
+        item(source, isOrphaned: true),
+        target: tile,
+      );
 
-    expect(served, isA<FileData>());
-    expect((served as FileData).originUntouched, isFalse);
+      expect(served, isA<FileData>());
+      expect((served as FileData).originUntouched, isFalse);
+      expect(served.file.path, first.file.path);
+      expect(
+        served.file.lastModifiedSync(),
+        madeAt,
+        reason: 'served as it was, not made again',
+      );
+    });
+
+    test('whose file is still gone gets the missing-file answer, not the '
+        'cached picture', () async {
+      final source = writePng('reef.png');
+      await resolver.resolveThumbnail(item(source), target: tile);
+      source.deleteSync();
+
+      final served = await resolver.resolveThumbnail(
+        item(source, isOrphaned: true),
+        target: tile,
+      );
+
+      expect(served, isA<UnavailableData>());
+    });
   });
 
   test('a bookmarked file is read once, then served from the cache', () async {

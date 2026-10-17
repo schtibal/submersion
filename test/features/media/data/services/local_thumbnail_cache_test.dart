@@ -229,6 +229,79 @@ void main() {
     },
   );
 
+  test('a request for a file already waiting moves it to the front, so a '
+      'tile scrolled back into view is not left behind its old place in '
+      'the queue', () async {
+    final order = <String>[];
+    final release = Completer<void>();
+    final single = LocalThumbnailCache(
+      store: () async => store,
+      maxConcurrent: 1,
+      write: (request) async {
+        order.add(p.basenameWithoutExtension(request.sourcePath!));
+        if (order.length == 1) await release.future;
+        return resizeToJpegFileNative(request);
+      },
+    );
+    final sources = [
+      for (var i = 0; i < 4; i++) writePng('p$i.png', width: 40, height: 30),
+    ];
+
+    final all = <Future<File?>>[];
+    for (final s in sources) {
+      all.add(single.generate(photo(s), file: s));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    // p1 is asked for again: its tile is back on screen.
+    all.add(single.generate(photo(sources[1]), file: sources[1]));
+    release.complete();
+    await Future.wait(all);
+
+    expect(order, ['p0', 'p1', 'p3', 'p2']);
+  });
+
+  test('the original is fetched only once a slot is free, so waiting '
+      'requests hold no file in memory', () async {
+    final release = Completer<void>();
+    final single = LocalThumbnailCache(
+      store: () async => store,
+      maxConcurrent: 1,
+      write: (request) async {
+        await release.future;
+        return resizeToJpegFileNative(request);
+      },
+    );
+    final first = writePng('p0.png', width: 40, height: 30);
+    final second = writePng('p1.png', width: 40, height: 30);
+    var loads = 0;
+
+    final a = single.generateFrom(photo(first), () async {
+      loads++;
+      return (file: first, bytes: null);
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    final b = single.generateFrom(photo(second), () async {
+      loads++;
+      return (file: null, bytes: second.readAsBytesSync());
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+
+    expect(loads, 1, reason: 'the second waits for its slot unloaded');
+    release.complete();
+    await Future.wait([a, b]);
+    expect(loads, 2);
+  });
+
+  test('a loader with no original gives null', () async {
+    final made = await cache.generateFrom(
+      photo(File(p.join(photos.path, 'gone.png'))),
+      () async => null,
+    );
+
+    expect(made, isNull);
+    expect(writes, 0);
+  });
+
   test(
     'a source that cannot be decoded gives null and writes nothing',
     () async {
