@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:submersion/features/media/data/media_cache_settings.dart';
@@ -149,4 +151,39 @@ void main() {
       expect(await notifier.emptyDiskCache(), isFalse);
     });
   });
+
+  test('writes reach storage one at a time, in the order they were made, '
+      'so a slow first write cannot land over a later one', () async {
+    final prefs = _SlowFirstWritePrefs();
+    final notifier = MediaCacheSettingsNotifier(prefs, applyMemoryCap: (_) {});
+
+    // Two slider releases in quick succession; the slider awaits neither.
+    final first = notifier.setDiskCacheMb(1024);
+    final second = notifier.setDiskCacheMb(4096);
+    prefs.releaseFirst.complete();
+    await Future.wait([first, second]);
+
+    expect(prefs.landed, [1024, 4096]);
+    expect(prefs.stored[kMediaDiskCacheMbKey], 4096);
+  });
+}
+
+/// Storage whose first write is held until [releaseFirst] completes, as a
+/// whole-file write can be overtaken by a later one.
+class _SlowFirstWritePrefs extends Fake implements SharedPreferences {
+  final stored = <String, int>{};
+  final landed = <int>[];
+  final releaseFirst = Completer<void>();
+  var _writes = 0;
+
+  @override
+  int? getInt(String key) => stored[key];
+
+  @override
+  Future<bool> setInt(String key, int value) async {
+    if (_writes++ == 0) await releaseFirst.future;
+    stored[key] = value;
+    landed.add(value);
+    return true;
+  }
 }

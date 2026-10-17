@@ -345,6 +345,11 @@ void main() {
       expect(counter.statements, 0);
     });
 
+    test('a key too short for the layout is a miss, not an error', () async {
+      expect(await cache.peekThumb('a'), isNull);
+      expect(await cache.peekThumb(''), isNull);
+    });
+
     test('a miss is null and runs no database statement', () async {
       counter.statements = 0;
       expect(await cache.peekThumb('cd${'2' * 62}'), isNull);

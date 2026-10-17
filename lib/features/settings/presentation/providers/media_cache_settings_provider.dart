@@ -44,8 +44,26 @@ class MediaCacheSettingsNotifier extends StateNotifier<MediaCacheSettings> {
   final Future<void> Function()? _onEmptyDiskCache;
   final _log = LoggerService.forClass(MediaCacheSettingsNotifier);
 
+  /// The latest preference write, which the next one waits on.
+  ///
+  /// The slider does not await a change, so two releases can have writes
+  /// out together, and where a write replaces the whole preferences file
+  /// (Windows, Linux) two in flight can land in either order. One at a time
+  /// keeps the stored size the last one chosen.
+  Future<void> _lastWrite = Future<void>.value();
+
   static void _applyToImageCache(int bytes) =>
       applyMediaCacheCaps(memoryBytes: bytes);
+
+  Future<void> _persist(String key, int mb) {
+    final prefs = _prefs;
+    if (prefs == null) return Future<void>.value();
+    final write = _lastWrite.then((_) => prefs.setInt(key, mb));
+    // A failed write must not hold up the ones after it; its caller still
+    // sees the error.
+    _lastWrite = write.then<void>((_) {}, onError: (Object _) {});
+    return write;
+  }
 
   Future<void> setMemoryCacheMb(int mb) async {
     final snapped = snapToCacheStep(
@@ -56,7 +74,7 @@ class MediaCacheSettingsNotifier extends StateNotifier<MediaCacheSettings> {
     if (snapped == state.memoryCacheMb) return;
     state = state.copyWith(memoryCacheMb: snapped);
     _applyMemoryCap(state.memoryCacheBytes);
-    await _prefs?.setInt(kMediaMemoryCacheMbKey, snapped);
+    await _persist(kMediaMemoryCacheMbKey, snapped);
   }
 
   /// Empties the thumbnail disk cache. True when it was emptied; false when
@@ -86,7 +104,7 @@ class MediaCacheSettingsNotifier extends StateNotifier<MediaCacheSettings> {
     );
     if (snapped == state.diskCacheMb) return;
     state = state.copyWith(diskCacheMb: snapped);
-    await _prefs?.setInt(kMediaDiskCacheMbKey, snapped);
+    await _persist(kMediaDiskCacheMbKey, snapped);
     // Eviction is housekeeping. The size is already stored and every cache
     // store reads it when it next evicts, so a failure here (no cache
     // database yet, a locked file) costs a delay, not the setting.

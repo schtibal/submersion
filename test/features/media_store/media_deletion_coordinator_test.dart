@@ -213,6 +213,23 @@ void main() {
       expect(undoables, [true, false]);
     });
 
+    test('a row keepIf spares is not purged: it is still in the '
+        'library', () async {
+      await repo.createMedia(photo('p6', hash: 'c6'));
+      await repo.createMedia(photo('p7', hash: 'c7'));
+
+      await purging().deleteMediaItems([
+        photo('p6', hash: 'c6'),
+        photo('p7', hash: 'c7'),
+      ], keepIf: (row) => row.id == 'p6');
+
+      expect(await repo.getMediaById('p6'), isNotNull);
+      expect(await repo.getMediaById('p7'), isNull);
+      expect(purged, [
+        ['p7'],
+      ]);
+    });
+
     test('a failing purge never fails the deletion', () async {
       await repo.createMedia(photo('p3'));
       final coordinator = purging(

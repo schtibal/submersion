@@ -146,19 +146,27 @@ class MediaDeletionCoordinator {
         );
       }
     }
+    var purged = doomed;
     if (keepIf != null) {
-      await _mediaRepository.deleteMultipleMedia(ids, keepIf: keepIf);
+      // Only what the transaction removed: a row [keepIf] kept is still in
+      // the library, and keeps its cached copies.
+      final deleted = (await _mediaRepository.deleteMultipleMedia(
+        ids,
+        keepIf: keepIf,
+      )).toSet();
+      purged = [
+        for (final item in doomed)
+          if (deleted.contains(item.id)) item,
+      ];
     } else if (ids.length == 1) {
       await _mediaRepository.deleteMedia(ids.single);
     } else {
       await _mediaRepository.deleteMultipleMedia(ids);
     }
-    await _purge(doomed, undoable: !kick);
+    await _purge(purged, undoable: !kick);
     if (enqueued && kick) await _kick('media delete');
   }
 
-  /// A row [keepIf] spared is purged along with the rest. That costs it
-  /// nothing but a thumbnail made again on its next view.
   Future<void> _purge(List<MediaItem> items, {required bool undoable}) async {
     final onDeleted = _onDeleted;
     if (onDeleted == null || items.isEmpty) return;

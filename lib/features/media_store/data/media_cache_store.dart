@@ -96,6 +96,8 @@ class MediaCacheStore {
   /// Finds only thumbnails stored with [thumbExtension]. Entries from before
   /// that was universal have no extension; [get] still finds those.
   Future<File?> peekThumb(String key) async {
+    // The layout shards on the first two characters; [get] answers the rest.
+    if (key.length < 2) return null;
     final file = File(
       p.join(
         _root.path,

@@ -292,6 +292,47 @@ void main() {
       expect(p.isWithin(thumbsDir(), (served! as FileData).file.path), isTrue);
     });
 
+    test('answers a store thumbnail already cached without touching the '
+        'index', () async {
+      final hash = 'fa${'4' * 62}';
+      final store = InMemoryMediaObjectStore();
+      final staged = File(p.join(photos.path, 'thumb.jpg'))
+        ..writeAsBytesSync([0xFF, 0xD8, 1, 2, 3]);
+      await store.putFile(
+        StoreKeys.thumbKey(hash),
+        staged,
+        contentType: 'image/jpeg',
+      );
+      final scope = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          attachedMediaObjectStoreProvider.overrideWith((ref) async => store),
+        ],
+      );
+      addTearDown(scope.dispose);
+      final resolver = await scope.read(mediaStoreProbeResolverProvider.future);
+      final item = photo(
+        'm1',
+        writePng('reef.png'),
+        hash: hash,
+      ).copyWith(remoteThumbUploadedAt: DateTime(2026, 2));
+      await resolver!.tryResolveRemote(item, thumbnail: true);
+      Future<int> lastAccessed() async =>
+          (await cacheDb.select(cacheDb.mediaCacheEntries).getSingle())
+              .lastAccessedAt;
+      final before = await lastAccessed();
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+
+      final served = await resolver.tryResolveRemote(item, thumbnail: true);
+
+      expect((served! as FileData).servedFrom, ServedFrom.storeCache);
+      expect(
+        await lastAccessed(),
+        before,
+        reason: 'the hit is noted in memory and written at eviction',
+      );
+    });
+
     test('is null with no store attached', () async {
       final scope = ProviderContainer(
         overrides: [
