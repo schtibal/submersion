@@ -72,11 +72,13 @@ class LocalFileResolver implements MediaSourceResolver, DiagnosticProbe {
     LocalThumbnailCache? thumbnails,
     Future<void> Function(MediaItem item, VerifyResult verdict)?
     onOriginChecked,
+    Future<void> Function(MediaItem item)? onThumbnailDropped,
   }) : _bookmarkStorage = bookmarkStorage,
        _platform = platform,
        _videoThumbnails = videoThumbnails,
        _thumbnails = thumbnails,
        _onOriginChecked = onOriginChecked,
+       _onThumbnailDropped = onThumbnailDropped,
        _localDeviceId = localDeviceId,
        _deviceLabel = deviceLabel,
        _readsContentUris = readsContentUris ?? (() => Platform.isAndroid),
@@ -102,6 +104,12 @@ class LocalFileResolver implements MediaSourceResolver, DiagnosticProbe {
   /// what flagged it; this is how that finding still reaches the row.
   final Future<void> Function(MediaItem item, VerifyResult verdict)?
   _onOriginChecked;
+
+  /// Told when [_checkOriginOnce] drops a thumbnail made before its file
+  /// changed. The next one is written to the same path, and the decoded
+  /// image cache is keyed by path, so the old picture must leave memory too
+  /// or it goes on being drawn for the new file.
+  final Future<void> Function(MediaItem item)? _onThumbnailDropped;
 
   /// Rows whose original has been checked behind a cached thumbnail since
   /// this resolver was built. Once is enough: the point is to notice a file
@@ -509,7 +517,10 @@ class LocalFileResolver implements MediaSourceResolver, DiagnosticProbe {
     MediaItem item,
     LocalThumbnailCache thumbnails,
   ) async {
-    final hit = await thumbnails.cached(item);
+    // An orphaned row goes to its original: a cached hit would skip the
+    // tile's reconciliation, and the once-per-session check has already
+    // run, so a file put back would never clear the flag this session.
+    final hit = item.isOrphaned ? null : await thumbnails.cached(item);
     if (hit != null) {
       _checkOriginOnce(item, hit, thumbnails);
       return FileData(
@@ -562,6 +573,7 @@ class LocalFileResolver implements MediaSourceResolver, DiagnosticProbe {
           await _changedSince(item, thumbnail)) {
         // Edited or replaced in place. The next request makes a new one.
         await thumbnails.remove(item);
+        await _onThumbnailDropped?.call(item);
       }
     } on Object catch (e) {
       _log.debug('Origin check failed for item ${item.id}', error: e);

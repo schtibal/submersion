@@ -142,6 +142,13 @@ void main() {
     Slider slider(WidgetTester tester, String key) =>
         tester.widget<Slider>(find.byKey(ValueKey(key)));
 
+    /// Drags [key]'s slider to the stop for [mb] and lets go.
+    void release(WidgetTester tester, String key, List<int> steps, int mb) {
+      final value = steps.indexOf(mb).toDouble();
+      slider(tester, key).onChanged!(value);
+      slider(tester, key).onChangeEnd!(value);
+    }
+
     Future<void> pumpHub(WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -170,9 +177,7 @@ void main() {
     ) async {
       await pumpHub(tester);
 
-      slider(tester, 'media_memory_cache_slider').onChanged!(
-        kMemoryCacheStepsMb.indexOf(1024).toDouble(),
-      );
+      release(tester, 'media_memory_cache_slider', kMemoryCacheStepsMb, 1024);
       await tester.pump();
 
       expect(prefs.getInt(kMediaMemoryCacheMbKey), 1024);
@@ -183,13 +188,31 @@ void main() {
     testWidgets('moving the disk slider stores the size', (tester) async {
       await pumpHub(tester);
 
-      slider(tester, 'media_disk_cache_slider').onChanged!(
-        kDiskCacheStepsMb.indexOf(16384).toDouble(),
-      );
+      release(tester, 'media_disk_cache_slider', kDiskCacheStepsMb, 16384);
       await tester.pump();
 
       expect(prefs.getInt(kMediaDiskCacheMbKey), 16384);
       expect(find.text('16 GB'), findsOneWidget);
+    });
+
+    testWidgets('a stop passed mid-drag is shown but not stored', (
+      tester,
+    ) async {
+      await pumpHub(tester);
+
+      slider(tester, 'media_disk_cache_slider').onChanged!(
+        kDiskCacheStepsMb.indexOf(256).toDouble(),
+      );
+      await tester.pump();
+
+      expect(find.text('256 MB'), findsOneWidget);
+      expect(prefs.getInt(kMediaDiskCacheMbKey), isNull);
+
+      release(tester, 'media_disk_cache_slider', kDiskCacheStepsMb, 2048);
+      await tester.pump();
+
+      expect(prefs.getInt(kMediaDiskCacheMbKey), 2048);
+      expect(find.text('2 GB'), findsOneWidget);
     });
   });
 

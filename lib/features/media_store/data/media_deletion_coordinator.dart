@@ -147,7 +147,10 @@ class MediaDeletionCoordinator {
     } else {
       await _mediaRepository.deleteMultipleMedia(ids);
     }
-    await _purge(doomed);
+    // A delete held for undo keeps its caches: an undo puts the rows back,
+    // and a purged media-store copy would then have to be fetched again.
+    // What it leaves behind is bounded by the caches' own eviction.
+    if (kick) await _purge(doomed);
     if (enqueued && kick) await _kick('media delete');
   }
 

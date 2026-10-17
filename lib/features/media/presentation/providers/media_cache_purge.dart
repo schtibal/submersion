@@ -4,7 +4,7 @@ import 'package:submersion/features/media/domain/entities/media_item.dart';
 import 'package:submersion/features/media/presentation/providers/media_tile_image_memo.dart';
 import 'package:submersion/features/media_store/data/media_cache_store.dart';
 
-final _log = LoggerService.forClass(MediaTileImageMemo);
+const _log = LoggerService('purgeMediaCaches');
 
 /// Clears [items] out of this device's caches once their rows have left the
 /// library (issue #3337): unlinking a photo removes its thumbnail from disk

@@ -55,6 +55,7 @@ void main() {
   late LocalThumbnailCache thumbnails;
   late List<(String, VerifyResult)> verdicts;
   late Completer<void> verdictArrived;
+  late List<String> dropped;
   late LocalFileResolver resolver;
 
   const tile = Size(200, 200);
@@ -74,6 +75,7 @@ void main() {
         verdicts.add((item.id, verdict));
         if (!verdictArrived.isCompleted) verdictArrived.complete();
       },
+      onThumbnailDropped: (item) async => dropped.add(item.id),
     );
     addTearDown(built.dispose);
     return built;
@@ -88,6 +90,7 @@ void main() {
     final store = MediaCacheStore(database: db, root: root);
     thumbnails = LocalThumbnailCache(store: () async => store);
     verdicts = [];
+    dropped = [];
     verdictArrived = Completer<void>();
     resolver = build(cache: thumbnails);
   });
@@ -231,7 +234,34 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(await thumbnails.cached(media), isNull);
+      // So the stale decode of the old thumbnail leaves memory with it.
+      expect(dropped, ['m1']);
     });
+
+    test('does not report a drop for an unchanged file', () async {
+      final source = writePng('reef.png');
+      await resolver.resolveThumbnail(item(source), target: tile);
+
+      await resolver.resolveThumbnail(item(source), target: tile);
+      await waitForVerdict();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(dropped, isEmpty);
+    });
+  });
+
+  test('an orphaned row is resolved from its original, not the cache, so '
+      'a file put back is noticed', () async {
+    final source = writePng('reef.png');
+    await resolver.resolveThumbnail(item(source), target: tile);
+
+    final served = await resolver.resolveThumbnail(
+      item(source, isOrphaned: true),
+      target: tile,
+    );
+
+    expect(served, isA<FileData>());
+    expect((served as FileData).originUntouched, isFalse);
   });
 
   test('a bookmarked file is read once, then served from the cache', () async {

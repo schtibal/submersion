@@ -32,6 +32,7 @@ import 'package:submersion/features/media/data/services/video_thumbnail_service.
 import 'package:submersion/features/media/domain/entities/media_source_type.dart';
 import 'package:submersion/features/media/domain/services/media_orphan_reconciler.dart';
 import 'package:submersion/features/media/domain/value_objects/media_source_data.dart';
+import 'package:submersion/features/media/presentation/providers/media_tile_image_memo.dart';
 import 'package:submersion/features/media/data/resolvers/media_store_source_resolver.dart';
 import 'package:submersion/features/media/data/services/gallery_asset_reader.dart';
 import 'package:submersion/features/media/presentation/providers/lightroom_providers.dart';
@@ -152,6 +153,10 @@ final localFileResolverProvider = Provider<LocalFileResolver>((ref) {
             verifiedAt: DateTime.now(),
           );
     },
+    // The replacement thumbnail lands at the same path, which is the image
+    // cache's key, so the stale decode has to go with the file.
+    onThumbnailDropped: (item) =>
+        ref.read(mediaTileImageMemoProvider).evictItems([item.id]),
     // Fetched lazily, only when a read fails on a row that names an origin,
     // and memoized by the resolver; the provider itself never touches the
     // database.

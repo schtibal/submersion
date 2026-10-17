@@ -206,10 +206,14 @@ class LocalThumbnailCache {
     return waiter.future;
   }
 
-  /// Hands the slot straight to the next waiter, or frees it.
+  /// Hands the slot straight to the newest waiter, or frees it.
+  ///
+  /// Newest first: nothing cancels a wait, so after a fast scroll the queue
+  /// is mostly tiles already scrolled past, and the ones on screen now are
+  /// the ones asked for last.
   void _release() {
     if (_waiting.isNotEmpty) {
-      _waiting.removeFirst().complete();
+      _waiting.removeLast().complete();
     } else {
       _running--;
     }

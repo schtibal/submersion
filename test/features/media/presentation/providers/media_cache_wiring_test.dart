@@ -222,7 +222,8 @@ void main() {
       );
     });
 
-    test('a photo whose file is back is no longer marked missing', () async {
+    test('a photo marked missing is resolved from its file every time, so '
+        'the tile can clear the flag once the file is back', () async {
       final source = writePng('reef.png');
       await repo.createMedia(photo('m1', source));
       await repo.markVerified(
@@ -235,11 +236,11 @@ void main() {
       final resolver = container().read(localFileResolverProvider);
       await resolver.resolveThumbnail(item, target: tile);
 
-      await resolver.resolveThumbnail(item, target: tile);
+      final again = await resolver.resolveThumbnail(item, target: tile);
 
-      await eventually(
-        () async => !((await repo.getMediaById('m1'))?.isOrphaned ?? true),
-      );
+      // Not a cache hit: the resolution read the original, which is what
+      // lets MediaItemView reconcile the flag on it.
+      expect((again as FileData).originUntouched, isFalse);
     });
 
     test('a photo that is where it was writes nothing', () async {

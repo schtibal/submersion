@@ -187,6 +187,18 @@ void main() {
       ]);
     });
 
+    test('a delete held for undo keeps its caches, so an undo does not have '
+        'to fetch the copies again', () async {
+      await repo.createMedia(photo('p4', hash: 'ff'));
+
+      await purging().deleteMediaItems([
+        photo('p4', hash: 'ff'),
+      ], holdRemoteDelete: true);
+
+      expect(await repo.getMediaById('p4'), isNull);
+      expect(purged, isEmpty);
+    });
+
     test('a failing purge never fails the deletion', () async {
       await repo.createMedia(photo('p3'));
       final coordinator = purging(

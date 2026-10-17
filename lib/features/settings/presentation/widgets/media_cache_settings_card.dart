@@ -91,7 +91,7 @@ class MediaCacheSettingsCard extends ConsumerWidget {
   }
 }
 
-class _CacheSizeSlider extends StatelessWidget {
+class _CacheSizeSlider extends StatefulWidget {
   const _CacheSizeSlider({
     required this.sliderKey,
     required this.icon,
@@ -115,12 +115,27 @@ class _CacheSizeSlider extends StatelessWidget {
   final Widget? trailing;
 
   @override
+  State<_CacheSizeSlider> createState() => _CacheSizeSliderState();
+}
+
+class _CacheSizeSliderState extends State<_CacheSizeSlider> {
+  /// The stop under the thumb while it is being dragged, null otherwise.
+  ///
+  /// The size is committed on release only. Every stop passed on the way
+  /// would otherwise be stored and, for the disk cache, evicted to at once:
+  /// dragging past 256 MB and back would already have deleted the
+  /// thumbnails above it.
+  int? _draggingMb;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = formatMediaCacheSize(valueMb);
+    final steps = widget.steps;
+    final shownMb = _draggingMb ?? widget.valueMb;
+    final size = formatMediaCacheSize(shownMb);
     // The slider runs over stop indices, not megabytes: the stops double,
     // so equal megabytes would crowd the small sizes into one end.
-    final index = steps.indexOf(valueMb).clamp(0, steps.length - 1);
+    final index = steps.indexOf(shownMb).clamp(0, steps.length - 1);
 
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 8),
@@ -128,9 +143,9 @@ class _CacheSizeSlider extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            leading: Icon(icon),
-            title: Text(title),
-            subtitle: Text(subtitle),
+            leading: Icon(widget.icon),
+            title: Text(widget.title),
+            subtitle: Text(widget.subtitle),
             trailing: Text(size, style: theme.textTheme.titleMedium),
           ),
           Padding(
@@ -139,7 +154,7 @@ class _CacheSizeSlider extends StatelessWidget {
               children: [
                 Expanded(
                   child: Slider(
-                    key: sliderKey,
+                    key: widget.sliderKey,
                     min: 0,
                     max: (steps.length - 1).toDouble(),
                     divisions: steps.length - 1,
@@ -147,10 +162,15 @@ class _CacheSizeSlider extends StatelessWidget {
                     label: size,
                     semanticFormatterCallback: (value) =>
                         formatMediaCacheSize(steps[value.round()]),
-                    onChanged: (value) => onChanged(steps[value.round()]),
+                    onChanged: (value) =>
+                        setState(() => _draggingMb = steps[value.round()]),
+                    onChangeEnd: (value) {
+                      setState(() => _draggingMb = null);
+                      widget.onChanged(steps[value.round()]);
+                    },
                   ),
                 ),
-                if (trailing != null)
+                if (widget.trailing case final trailing?)
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: trailing,

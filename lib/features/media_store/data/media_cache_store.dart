@@ -65,16 +65,19 @@ class MediaCacheStore {
     MediaCacheKind.rendition => 'rendition',
   };
 
+  /// The directory under [_root] that holds [kind]'s pool.
+  String _poolDirName(MediaCacheKind kind) => switch (kind) {
+    MediaCacheKind.original => 'originals',
+    MediaCacheKind.thumb => 'thumbs',
+    MediaCacheKind.rendition => 'renditions',
+  };
+
   String _relativePath(
     String contentHash,
     MediaCacheKind kind, {
     String? extension,
   }) => p.join(
-    switch (kind) {
-      MediaCacheKind.original => 'originals',
-      MediaCacheKind.thumb => 'thumbs',
-      MediaCacheKind.rendition => 'renditions',
-    },
+    _poolDirName(kind),
     contentHash.substring(0, 2),
     extension == null || extension.isEmpty
         ? contentHash
@@ -351,7 +354,7 @@ class MediaCacheStore {
     )..where((t) => t.kind.equals(_kindName(kind)))).go();
     // The directory rather than the indexed paths: a file can be on disk
     // with no row (written, then the app closed before it was indexed).
-    final pool = Directory(p.dirname(p.dirname(_absolutePoolProbe(kind))));
+    final pool = Directory(p.join(_root.path, _poolDirName(kind)));
     try {
       if (await pool.exists()) await pool.delete(recursive: true);
     } on FileSystemException {
@@ -359,11 +362,6 @@ class MediaCacheStore {
       // no longer points at it.
     }
   }
-
-  /// A path inside [kind]'s pool, for finding the pool's own directory from
-  /// the one definition of the layout.
-  String _absolutePoolProbe(MediaCacheKind kind) =>
-      p.join(_root.path, _relativePath('00', kind));
 
   Future<void> evictIfNeeded() async {
     await flushTouches();

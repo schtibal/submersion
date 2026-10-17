@@ -198,6 +198,38 @@ void main() {
   });
 
   test(
+    'a waiting request asked for last goes first, so the tiles on screen '
+    'after a fast scroll are not stuck behind the ones scrolled past',
+    () async {
+      final order = <String>[];
+      final release = Completer<void>();
+      final single = LocalThumbnailCache(
+        store: () async => store,
+        maxConcurrent: 1,
+        write: (request) async {
+          order.add(p.basenameWithoutExtension(request.sourcePath!));
+          if (order.length == 1) await release.future;
+          return resizeToJpegFileNative(request);
+        },
+      );
+      final sources = [
+        for (var i = 0; i < 4; i++) writePng('p$i.png', width: 40, height: 30),
+      ];
+
+      final all = <Future<File?>>[];
+      for (final s in sources) {
+        all.add(single.generate(photo(s), file: s));
+        // Each request reaches the queue before the next is made.
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      release.complete();
+      await Future.wait(all);
+
+      expect(order, ['p0', 'p3', 'p2', 'p1']);
+    },
+  );
+
+  test(
     'a source that cannot be decoded gives null and writes nothing',
     () async {
       final junk = File(p.join(photos.path, 'junk.png'))
