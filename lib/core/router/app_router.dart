@@ -111,6 +111,7 @@ import 'package:submersion/features/settings/presentation/pages/manage_currency_
 import 'package:submersion/features/settings/presentation/pages/hidden_items_page.dart';
 import 'package:submersion/features/settings/presentation/pages/cloud_sync_page.dart';
 import 'package:submersion/features/shared_library/presentation/pages/connect_shared_library_page.dart';
+import 'package:submersion/features/shared_library/presentation/pages/library_backups_page.dart';
 import 'package:submersion/features/shared_library/presentation/pages/shared_libraries_page.dart';
 import 'package:submersion/features/shared_library/presentation/pages/shared_library_members_page.dart';
 import 'package:submersion/features/shared_library/presentation/pages/shared_library_page.dart';
@@ -1517,37 +1518,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   ),
                 ],
               ),
-              // Club libraries (issue #2567).
+              // Shared site libraries (issue #2567).
               GoRoute(
-                path: 'club-libraries',
-                name: 'clubLibraries',
+                path: 'shared-libraries',
+                name: 'sharedLibraries',
                 builder: (context, state) => const SharedLibrariesPage(),
                 routes: [
                   GoRoute(
                     path: 'connect',
-                    name: 'clubLibraryConnect',
+                    name: 'sharedLibraryConnect',
                     builder: (context, state) => ConnectSharedLibraryPage(
                       initialPrefix: state.uri.queryParameters['prefix'],
                     ),
                   ),
                   GoRoute(
                     path: ':libraryId',
-                    name: 'clubLibrary',
+                    name: 'sharedLibrary',
                     builder: (context, state) => SharedLibraryPage(
                       libraryId: state.pathParameters['libraryId']!,
                     ),
                     routes: [
                       GoRoute(
                         path: 'members',
-                        name: 'clubLibraryMembers',
+                        name: 'sharedLibraryMembers',
                         builder: (context, state) => SharedLibraryMembersPage(
                           libraryId: state.pathParameters['libraryId']!,
                         ),
                       ),
                       GoRoute(
                         path: 'suggestions',
-                        name: 'clubLibrarySuggestions',
+                        name: 'sharedLibrarySuggestions',
                         builder: (context, state) => SuggestionInboxPage(
+                          libraryId: state.pathParameters['libraryId']!,
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'backups',
+                        name: 'sharedLibraryBackups',
+                        builder: (context, state) => LibraryBackupsPage(
                           libraryId: state.pathParameters['libraryId']!,
                         ),
                       ),

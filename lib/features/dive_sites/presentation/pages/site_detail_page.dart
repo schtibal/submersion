@@ -337,8 +337,15 @@ class _SiteDetailContentState extends ConsumerState<_SiteDetailContent> {
       SiteDetailSectionId.features: () => site.hasCoordinates
           ? (_) => SiteFeaturesSection(
               siteId: site.id,
-              onAddFeature: () =>
-                  _showFullscreenMap(context, ref, site, startPlacing: true),
+              // A library site this profile only reads offers no edits.
+              onAddFeature: _canEditSite(ref, site)
+                  ? () => _showFullscreenMap(
+                      context,
+                      ref,
+                      site,
+                      startPlacing: true,
+                    )
+                  : null,
             )
           : null,
       // A quarry or lake has no tides, and a nearby ocean station must not
@@ -354,6 +361,7 @@ class _SiteDetailContentState extends ConsumerState<_SiteDetailContent> {
       SiteDetailSectionId.marineLife: () =>
           (_) => SiteMarineLifeSection(
             siteId: site.id,
+            readOnly: !_canEditSite(ref, site),
             location: site.location,
             waterType: site.waterType,
           ),
@@ -557,7 +565,7 @@ class _SiteDetailContentState extends ConsumerState<_SiteDetailContent> {
     );
   }
 
-  /// Role and connection state of a club library site (issue #2567). A
+  /// Role and connection state of a shared site library site (issue #2567). A
   /// personal site is editable by the usual rules.
   ({bool isLibrary, bool connected, SharedLibraryRole role}) _libraryAccess(
     WidgetRef ref,
@@ -690,7 +698,7 @@ class _SiteDetailContentState extends ConsumerState<_SiteDetailContent> {
     final prefix = membership?.prefixHint ?? '';
     if (!context.mounted) return;
     context.push(
-      '/settings/club-libraries/connect?prefix=${Uri.encodeQueryComponent(prefix)}',
+      '/settings/shared-libraries/connect?prefix=${Uri.encodeQueryComponent(prefix)}',
     );
   }
 
@@ -748,14 +756,19 @@ class _SiteDetailContentState extends ConsumerState<_SiteDetailContent> {
     WidgetRef ref,
     DiveSite site,
   ) async {
-    final libraryId = await showLibraryPickerDialog(context, ref);
-    if (libraryId == null) return;
+    final library = await pickLibraryToAddTo(
+      context,
+      ref,
+      siteCount: 1,
+      siteName: site.name,
+    );
+    if (library == null) return;
     final diverId = await ref.read(validatedCurrentDiverIdProvider.future);
     if (diverId == null) return;
     try {
       await ref
           .read(sharedSitePublisherProvider)
-          .push(siteId: site.id, libraryId: libraryId, diverId: diverId);
+          .push(siteId: site.id, libraryId: library.id, diverId: diverId);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -768,14 +781,10 @@ class _SiteDetailContentState extends ConsumerState<_SiteDetailContent> {
     ref.invalidate(sitesProvider);
     ref.invalidate(sitesWithCountsProvider);
     if (!context.mounted) return;
-    final libraries = await ref.read(sharedLibrariesProvider.future);
-    var name = '';
-    for (final l in libraries) {
-      if (l.id == libraryId) name = l.name;
-    }
-    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.sharedLibrary_site_added(name))),
+      SnackBar(
+        content: Text(context.l10n.sharedLibrary_site_added(library.name)),
+      ),
     );
   }
 
@@ -2270,9 +2279,11 @@ class _FullscreenSiteScapePageState
       initialDepthMeters: sampled,
     );
     if (result is! SiteFeatureSheetSave) return;
+    final diverId = await ref.read(validatedCurrentDiverIdProvider.future);
     await ref
         .read(siteFeatureRepositoryProvider)
         .addFeature(
+          actingDiverId: diverId,
           siteId: site.id,
           typeName: result.typeName,
           latitude: latLng.latitude,

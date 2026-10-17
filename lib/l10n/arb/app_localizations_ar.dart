@@ -17007,13 +17007,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gasCalculators_icd_suggestionsTitle => 'لتحقيق الامتثال';
 
   @override
-  String gasCalculators_icd_suggestionKeepA(String he) {
-    return 'احتفظ بالغاز الحالي، واضبط نسبة الهليوم في الغاز المنتقل إليه على $he%';
+  String gasCalculators_icd_suggestionSetHe(String he) {
+    return 'اضبط نسبة الهليوم على $he%';
   }
 
   @override
-  String gasCalculators_icd_suggestionKeepB(String he) {
-    return 'احتفظ بالغاز المنتقل إليه، واضبط نسبة الهليوم في الغاز الحالي على $he%';
+  String gasCalculators_icd_suggestionSetO2(String o2) {
+    return 'اضبط نسبة الأكسجين على $o2%';
   }
 
   @override
@@ -21235,6 +21235,334 @@ class AppLocalizationsAr extends AppLocalizations {
       'مجلد داخل submersion-sites في أعلى الحاوية أو الخادم، مثل site-sync.';
 
   @override
+  String get sharedLibrary_connect_reservedFolder =>
+      'لا يمكن أن يبدأ مجلد المكتبة بـ sites أو members أو suggestions أو backups.';
+
+  @override
+  String get sharedLibrary_connect_folderChars =>
+      'لا يمكن أن يحتوي مجلد المكتبة على * أو ? أو علامات الدولار.';
+
+  @override
+  String get sharedLibrary_setup_title => 'كيفية إعداد التخزين';
+
+  @override
+  String sharedLibrary_setup_where(String folder) {
+    return 'توجد هذه المكتبة في $folder في أعلى الحاوية أو الخادم، بجانب submersion-sync وsubmersion-media.';
+  }
+
+  @override
+  String get sharedLibrary_setup_keys =>
+      'امنح المالكين والمحررين مفاتيح تقرأ مجلد المكتبة وتكتب فيه. وامنح الآخرين مفاتيح تقرؤه ولا تكتب إلا في members/ وsuggestions/. التخزين، لا التطبيق، هو ما يمنع المفتاح من الكتابة.';
+
+  @override
+  String get sharedLibrary_setup_s3Full => 'سياسة S3 للمالكين والمحررين';
+
+  @override
+  String get sharedLibrary_setup_s3Reader => 'سياسة S3 للقراء';
+
+  @override
+  String get sharedLibrary_setup_webdav =>
+      'WebDAV: شارك المجلد للقراءة فقط مع القراء، واجعل members/ وsuggestions/ قابلين للكتابة حيث يسمح خادمك بذلك (مثل أذونات المشاركة في Nextcloud).';
+
+  @override
+  String get sharedLibrary_setup_copy => 'نسخ';
+
+  @override
+  String get sharedLibrary_setup_copied => 'تم نسخ السياسة';
+
+  @override
+  String get sharedLibrary_recovery_title => 'احتفظ برمز الاسترداد هذا';
+
+  @override
+  String get sharedLibrary_recovery_body =>
+      'من يملك هذا الرمز يمكنه أن يجعل نفسه مالكًا للمكتبة، وأن يفتحها إن كانت مشفرة. احفظه في مكان آمن بعيدًا عن مفاتيح التخزين. لن يظهر إلا الآن.';
+
+  @override
+  String get sharedLibrary_recovery_stored => 'لقد حفظته';
+
+  @override
+  String get sharedLibrary_roles_rejected =>
+      'غيّر شخص ليس مالكًا ملف الأدوار. يحتفظ هذا الجهاز بآخر أدوار وقّعها مالك.';
+
+  @override
+  String get sharedLibrary_members_pending => 'بانتظار الموافقة';
+
+  @override
+  String get sharedLibrary_members_approve => 'موافقة';
+
+  @override
+  String get sharedLibrary_members_reject => 'رفض';
+
+  @override
+  String sharedLibrary_members_fingerprint(String fingerprint) {
+    return 'المفتاح $fingerprint';
+  }
+
+  @override
+  String get sharedLibrary_members_unsignedCard =>
+      'البطاقة غير موقعة من صاحبها';
+
+  @override
+  String sharedLibrary_members_rejectTitle(String name) {
+    return 'رفض $name؟';
+  }
+
+  @override
+  String get sharedLibrary_members_rejectBody =>
+      'تُزال بطاقته ولا يُعتدّ بأي شيء يكتبه. وحدها مفاتيح تخزين جديدة تمنعه من كتابة الملفات تمامًا.';
+
+  @override
+  String get sharedLibrary_members_left => 'غادروا المكتبة';
+
+  @override
+  String get sharedLibrary_members_removeRole => 'إزالة الدور';
+
+  @override
+  String get sharedLibrary_owner_onlyOne =>
+      'مالك واحد فقط. إن فقد الوصول، فلا يعيده إلا رمز الاسترداد.';
+
+  @override
+  String get sharedLibrary_owner_addOwner => 'اختر مالكًا آخر';
+
+  @override
+  String get sharedLibrary_owner_newCode => 'رمز استرداد جديد';
+
+  @override
+  String get sharedLibrary_owner_newCodeHelp =>
+      'يحل محل الرمز القديم، مثلًا إن كان قد تسرب.';
+
+  @override
+  String get sharedLibrary_owner_recover => 'استعادة الملكية';
+
+  @override
+  String get sharedLibrary_owner_recoverHelp =>
+      'كن مالكًا باستخدام رمز استرداد المكتبة.';
+
+  @override
+  String get sharedLibrary_owner_recoverPrompt => 'رمز الاسترداد';
+
+  @override
+  String get sharedLibrary_owner_wrongCode =>
+      'هذا ليس رمز استرداد هذه المكتبة.';
+
+  @override
+  String get sharedLibrary_owner_recovered => 'أصبحت مالكًا الآن.';
+
+  @override
+  String get sharedLibrary_owner_reset => 'إعادة تعيين الملكية';
+
+  @override
+  String get sharedLibrary_owner_resetHelp =>
+      'فقط إن لم يبقَ مالك ولا رمز استرداد. يجب أن يقبله كل الأعضاء.';
+
+  @override
+  String get sharedLibrary_owner_resetConfirm =>
+      'هل تجعل نفسك المالك الوحيد؟ سيطلب جهاز كل عضو آخر منه قبول ذلك، ويتوقف عن الكتابة في المكتبة حتى يقبل.';
+
+  @override
+  String sharedLibrary_owner_resetPrompt(
+    String library,
+    String name,
+    String fingerprint,
+  ) {
+    return 'أعاد $name تعيين ملكية $library (المفتاح $fingerprint). حتى تقبل، يكتفي هذا الجهاز بقراءة المكتبة.';
+  }
+
+  @override
+  String get sharedLibrary_owner_resetAccept => 'قبول';
+
+  @override
+  String get sharedLibrary_connect_untrusted =>
+      'أدوار هذه المكتبة غير موقعة من أحد مالكيها. اطلب من مالك التحقق منها.';
+
+  @override
+  String get sharedLibrary_retired =>
+      'أُنشئت هذه المكتبة بإصدار تجريبي من Submersion. أنشئها من جديد.';
+
+  @override
+  String get sharedLibrary_encrypted_probe =>
+      'مكتبة مشفرة. أدخل عبارة المرور أو رمز الاسترداد.';
+
+  @override
+  String get sharedLibrary_encrypted_passphrase =>
+      'عبارة المرور أو رمز الاسترداد';
+
+  @override
+  String get sharedLibrary_encrypted_unlock => 'فتح';
+
+  @override
+  String get sharedLibrary_encrypted_wrong =>
+      'عبارة المرور هذه لا تفتح هذه المكتبة.';
+
+  @override
+  String get sharedLibrary_backups_title => 'النسخ الاحتياطية';
+
+  @override
+  String get sharedLibrary_backups_subtitle =>
+      'انسخ المكتبة احتياطيًا واستعدها';
+
+  @override
+  String get sharedLibrary_backups_backUpNow => 'نسخ احتياطي الآن';
+
+  @override
+  String get sharedLibrary_backups_import => 'استيراد نسخة احتياطية';
+
+  @override
+  String get sharedLibrary_backups_note => 'ملاحظة (اختيارية)';
+
+  @override
+  String get sharedLibrary_backups_automatic => 'تلقائية';
+
+  @override
+  String get sharedLibrary_backups_beforeRestore => 'قبل الاستعادة';
+
+  @override
+  String get sharedLibrary_backups_onDevice => 'على هذا الجهاز';
+
+  @override
+  String get sharedLibrary_backups_inStorage => 'في التخزين';
+
+  @override
+  String get sharedLibrary_backups_both => 'على هذا الجهاز وفي التخزين';
+
+  @override
+  String sharedLibrary_backups_summary(int sites, String size) {
+    return 'المواقع: $sites · $size';
+  }
+
+  @override
+  String get sharedLibrary_backups_pin => 'تثبيت';
+
+  @override
+  String get sharedLibrary_backups_unpin => 'إلغاء التثبيت';
+
+  @override
+  String get sharedLibrary_backups_delete => 'حذف';
+
+  @override
+  String get sharedLibrary_backups_deleteConfirm =>
+      'هل تريد حذف هذه النسخة الاحتياطية؟';
+
+  @override
+  String get sharedLibrary_backups_deleteWhere =>
+      'من أين تريد حذف هذه النسخة الاحتياطية؟';
+
+  @override
+  String get sharedLibrary_backups_export => 'تصدير';
+
+  @override
+  String get sharedLibrary_backups_restore => 'استعادة';
+
+  @override
+  String sharedLibrary_backups_restoreConfirm(String date) {
+    return 'هل تريد إعادة المكتبة إلى حالتها في $date؟ يحصل كل عضو على هذه النسخة في مزامنته التالية. تُنشأ أولًا نسخة احتياطية مثبتة من المكتبة بحالتها الحالية.';
+  }
+
+  @override
+  String get sharedLibrary_backups_restoreDone => 'تمت استعادة المكتبة';
+
+  @override
+  String get sharedLibrary_backups_oldKey =>
+      'خُتمت هذه النسخة الاحتياطية بعبارة مرور سابقة. أدخل تلك العبارة أو رمز الاسترداد من ذلك الوقت.';
+
+  @override
+  String get sharedLibrary_backups_empty =>
+      'لا توجد نسخ احتياطية بعد. تنشئ أجهزة المالكين نسخة كل يوم، وينشئ زر نسخ احتياطي الآن نسخة فورًا.';
+
+  @override
+  String get sharedLibrary_backups_importRefused =>
+      'هذا الملف ليس نسخة احتياطية من هذه المكتبة.';
+
+  @override
+  String get sharedLibrary_backups_ownersOnly =>
+      'يدير المالكون وحدهم النسخ الاحتياطية.';
+
+  @override
+  String get sharedLibrary_backups_done => 'تم إنشاء النسخة الاحتياطية';
+
+  @override
+  String sharedLibrary_library_myKey(String fingerprint) {
+    return 'مفتاحك $fingerprint';
+  }
+
+  @override
+  String sharedLibrary_suggest_held(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count اقتراح ينتظر موافقتك على كتّابه',
+      many: '$count اقتراحًا ينتظر موافقتك على كتّابه',
+      few: '$count اقتراحات تنتظر موافقتك على كتّابها',
+      two: 'اقتراحان ينتظران موافقتك على كاتبيهما',
+      one: 'اقتراح واحد ينتظر موافقتك على كاتبه',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedLibrary_restoreInto_action =>
+      'الاستعادة من ملف نسخة احتياطية';
+
+  @override
+  String get sharedLibrary_restoreInto_needsKey =>
+      'هذه النسخة الاحتياطية مشفرة. أدخل عبارة المرور أو رمز الاسترداد الخاص بها.';
+
+  @override
+  String get sharedLibrary_restoreInto_refused =>
+      'هذا الملف ليس نسخة احتياطية لمكتبة أنشأها مالك.';
+
+  @override
+  String get sharedLibrary_restoreInto_oldStillThere =>
+      'لا تزال المكتبة في مجلدها القديم أيضًا. يواصل الأعضاء هناك استخدام تلك النسخة حتى يتصلوا بهذا المجلد.';
+
+  @override
+  String sharedLibrary_encrypted_locked(String library) {
+    return 'أدخل عبارة المرور لـ $library.';
+  }
+
+  @override
+  String sharedLibrary_encrypted_changed(String library) {
+    return 'تغيرت عبارة مرور $library. أدخل العبارة الجديدة.';
+  }
+
+  @override
+  String get sharedLibrary_encryption_title => 'التشفير';
+
+  @override
+  String get sharedLibrary_encryption_statusOn => 'مشفرة بعبارة مرور';
+
+  @override
+  String get sharedLibrary_encryption_statusOff =>
+      'غير مشفرة: يمكن لأي شخص لديه وصول إلى التخزين قراءتها';
+
+  @override
+  String get sharedLibrary_encryption_on => 'تشغيل التشفير';
+
+  @override
+  String get sharedLibrary_encryption_onHelp =>
+      'يدخل الأعضاء عبارة المرور مرة واحدة لكل ملف شخصي. وحدها عبارة المرور أو رمز الاسترداد تفتح المكتبة. يحل رمز الاسترداد الجديد محل القديم لدى جميع المالكين.';
+
+  @override
+  String get sharedLibrary_encryption_off => 'إيقاف التشفير';
+
+  @override
+  String get sharedLibrary_encryption_offConfirm =>
+      'ستُعاد كتابة كل الملفات بحيث يقرؤها أي شخص لديه وصول إلى التخزين. هل توقف التشفير؟';
+
+  @override
+  String get sharedLibrary_encryption_change => 'تغيير عبارة المرور';
+
+  @override
+  String get sharedLibrary_encryption_changeHelp =>
+      'ينشئ مفتاحًا جديدًا ورمز استرداد جديدًا. يحل رمز الاسترداد الجديد محل القديم لدى جميع المالكين. شارك عبارة المرور الجديدة مع الأعضاء الباقين فقط.';
+
+  @override
+  String get sharedLibrary_encryption_passphrase => 'عبارة المرور';
+
+  @override
+  String get sharedLibrary_encryption_confirm => 'عبارة المرور مرة أخرى';
+
+  @override
   String get sharedLibrary_connect_probe_action => 'تحقق';
 
   @override
@@ -21337,6 +21665,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يمكن تخفيض رتبة المالك الأخير.';
 
   @override
+  String get sharedLibrary_members_keyChanged =>
+      'تغيّر مفتاح هذا العضو. قارن المفتاح الجديد شخصيًا ثم وافق عليه.';
+
+  @override
+  String get sharedLibrary_members_rolesOutOfDate =>
+      'تغيّرت الأدوار منذ آخر مرة وثق بها هذا الجهاز. غادر المكتبة وانضم إليها مرة أخرى لاعتماد التغيير، ثم حاول مجددًا.';
+
+  @override
   String get sharedLibrary_picker_none =>
       'لا توجد مكتبة مواقع مشتركة هنا تتيح لك إضافة مواقع.';
 
@@ -21367,6 +21703,36 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get sharedLibrary_site_addToLibrary =>
       'إضافة إلى مكتبة المواقع المشتركة';
+
+  @override
+  String sharedLibrary_add_confirm_title(String name, String library) {
+    return 'إضافة $name إلى $library؟';
+  }
+
+  @override
+  String sharedLibrary_add_confirm_titleMany(int count, String library) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'إضافة $count موقع إلى $library؟',
+      many: 'إضافة $count موقعًا إلى $library؟',
+      few: 'إضافة $count مواقع إلى $library؟',
+      two: 'إضافة موقعين إلى $library؟',
+      one: 'إضافة موقع واحد إلى $library؟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedLibrary_add_confirm_shared =>
+      'سيرى كل الأعضاء: الاسم والموقع والأعماق والوصف والمخاطر والوصول والدخول والخروج والرسو ومواقف السيارات وأنواع المواقع والوسوم والأنواع البحرية والمعالم.';
+
+  @override
+  String get sharedLibrary_add_confirm_private =>
+      'يبقى لك: ملاحظاتك وتقييمك. لا تغادر الغطسات والصور مكتبتك الشخصية أبدًا.';
+
+  @override
+  String get sharedLibrary_add_confirm_action => 'إضافة';
 
   @override
   String get sharedLibrary_site_chooseLibrary => 'اختر مكتبة';
@@ -21410,6 +21776,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sharedLibrary_suggest_nothingChanged => 'لم يتغير شيء.';
+
+  @override
+  String get sharedLibrary_suggest_savedPrivate => 'تم حفظ ملاحظاتك وتقييمك.';
 
   @override
   String sharedLibrary_suggest_pending(int count) {
@@ -23087,6 +23456,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_conflict_field_sharedLibraryLocation => 'موقع المكتبة';
 
   @override
+  String get settings_conflict_field_sharedLibrarySigningKey => 'مفتاح التوقيع';
+
+  @override
+  String get settings_conflict_field_sharedLibraryKey => 'مفتاح المكتبة';
+
+  @override
   String get settings_conflict_field_isTravelGas => 'غاز العبور';
 
   @override
@@ -24320,6 +24695,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get documents_detail_owner => 'مُصنّف ضمن';
+
+  @override
+  String get documents_owner_pickerTitle => 'تصنيف ضمن';
+
+  @override
+  String get documents_owner_search => 'بحث';
+
+  @override
+  String get documents_owner_none => 'لا يوجد ما يُصنَّف ضمنه بعد';
+
+  @override
+  String get documents_owner_locked => 'تبقى البطاقة مع شهادتها';
 
   @override
   String get documents_profileHub_documents => 'المستندات';
@@ -46179,17 +46566,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get common_action_remove => 'إزالة';
 
   @override
-  String get equipment_documents_title => 'المستندات';
+  String get equipment_documents_linkedTitle => 'ملفات مرتبطة';
 
   @override
-  String get equipment_documents_subtitle =>
-      'الفواتير والإيصالات وأوراق الضمان';
-
-  @override
-  String get equipment_documents_attachButton => 'إرفاق';
-
-  @override
-  String get equipment_documents_empty => 'لا توجد مستندات مرفقة بعد';
+  String get equipment_documents_linkedSubtitle =>
+      'كبيرة جدًا، أو بتنسيق لا يمكن للمستندات حفظه';
 
   @override
   String get equipment_documents_removeTitle => 'إزالة المستند؟';
@@ -48218,6 +48599,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String startup_migrating_progress(Object currentStep, Object totalSteps) {
     return 'جارٍ ترقية قاعدة البيانات... الخطوة $currentStep من $totalSteps';
   }
+
+  @override
+  String get startup_compacting => 'جارٍ تحسين التخزين...';
 
   @override
   String get startup_error_title => 'تعذّر بدء تشغيل Submersion';
@@ -50375,6 +50759,27 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settings_storageUsage_category_database =>
       'قاعدة بيانات سجل الغوص';
+
+  @override
+  String settings_storageUsage_reclaimable(String size) {
+    return '$size قابلة للاسترداد';
+  }
+
+  @override
+  String get settings_storageUsage_compact => 'ضغط';
+
+  @override
+  String get settings_storageUsage_compactTitle => 'ضغط قاعدة البيانات؟';
+
+  @override
+  String get settings_storageUsage_compactBody =>
+      'يتم التنفيذ عند التشغيل التالي لـ Submersion. قد يستغرق السجل الكبير دقيقة ويحتاج إلى مساحة خالية بحجم قاعدة البيانات تقريبًا.';
+
+  @override
+  String get settings_storageUsage_compactScheduled => 'مجدول للتشغيل التالي';
+
+  @override
+  String get settings_storageUsage_quitNow => 'إنهاء الآن';
 
   @override
   String get settings_storageUsage_category_localCache =>

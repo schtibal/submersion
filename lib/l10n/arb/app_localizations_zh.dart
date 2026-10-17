@@ -16011,13 +16011,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gasCalculators_icd_suggestionsTitle => '使其符合规则';
 
   @override
-  String gasCalculators_icd_suggestionKeepA(String he) {
-    return '保留当前气体,将切换后气体的He设为$he%';
+  String gasCalculators_icd_suggestionSetHe(String he) {
+    return '将He设为$he%';
   }
 
   @override
-  String gasCalculators_icd_suggestionKeepB(String he) {
-    return '保留切换后气体,将当前气体的He设为$he%';
+  String gasCalculators_icd_suggestionSetO2(String o2) {
+    return '将O2设为$o2%';
   }
 
   @override
@@ -19928,6 +19928,306 @@ class AppLocalizationsZh extends AppLocalizations {
       '存储桶或服务器顶层 submersion-sites 中的文件夹，例如 site-sync。';
 
   @override
+  String get sharedLibrary_connect_reservedFolder =>
+      '资料库文件夹不能以 sites、members、suggestions 或 backups 开头。';
+
+  @override
+  String get sharedLibrary_connect_folderChars => '资料库文件夹不能包含 *、? 或美元符号。';
+
+  @override
+  String get sharedLibrary_setup_title => '如何设置存储';
+
+  @override
+  String sharedLibrary_setup_where(String folder) {
+    return '此资料库位于存储桶或服务器顶层的 $folder，与 submersion-sync 和 submersion-media 并列。';
+  }
+
+  @override
+  String get sharedLibrary_setup_keys =>
+      '给所有者和编辑者可读写资料库文件夹的密钥。给其他人只能读取该文件夹、且只能写入 members/ 和 suggestions/ 的密钥。阻止密钥写入的是存储，而不是应用。';
+
+  @override
+  String get sharedLibrary_setup_s3Full => '所有者和编辑者的 S3 策略';
+
+  @override
+  String get sharedLibrary_setup_s3Reader => '读者的 S3 策略';
+
+  @override
+  String get sharedLibrary_setup_webdav =>
+      'WebDAV：以只读方式向读者共享该文件夹，并在服务器允许的情况下让 members/ 和 suggestions/ 可写（例如 Nextcloud 的共享权限）。';
+
+  @override
+  String get sharedLibrary_setup_copy => '复制';
+
+  @override
+  String get sharedLibrary_setup_copied => '策略已复制';
+
+  @override
+  String get sharedLibrary_recovery_title => '请保存此恢复码';
+
+  @override
+  String get sharedLibrary_recovery_body =>
+      '持有此代码的人可以让自己成为资料库的所有者，并在资料库加密时打开它。请将其保存在安全的地方，与存储密钥分开。它只会在此时显示。';
+
+  @override
+  String get sharedLibrary_recovery_stored => '我已保存';
+
+  @override
+  String get sharedLibrary_roles_rejected => '角色文件被非所有者修改。此设备保留由所有者最后签名的角色。';
+
+  @override
+  String get sharedLibrary_members_pending => '等待批准';
+
+  @override
+  String get sharedLibrary_members_approve => '批准';
+
+  @override
+  String get sharedLibrary_members_reject => '拒绝';
+
+  @override
+  String sharedLibrary_members_fingerprint(String fingerprint) {
+    return '密钥 $fingerprint';
+  }
+
+  @override
+  String get sharedLibrary_members_unsignedCard => '名片未由成员本人签名';
+
+  @override
+  String sharedLibrary_members_rejectTitle(String name) {
+    return '拒绝 $name？';
+  }
+
+  @override
+  String get sharedLibrary_members_rejectBody =>
+      '其名片将被移除，其写入的内容都不会生效。只有更换存储密钥才能完全阻止其写入文件。';
+
+  @override
+  String get sharedLibrary_members_left => '已离开资料库';
+
+  @override
+  String get sharedLibrary_members_removeRole => '移除角色';
+
+  @override
+  String get sharedLibrary_owner_onlyOne => '只有一位所有者。若其失去访问权限，只有恢复码能够恢复。';
+
+  @override
+  String get sharedLibrary_owner_addOwner => '选择另一位所有者';
+
+  @override
+  String get sharedLibrary_owner_newCode => '新的恢复码';
+
+  @override
+  String get sharedLibrary_owner_newCodeHelp => '替换旧代码，例如旧代码可能已泄露时。';
+
+  @override
+  String get sharedLibrary_owner_recover => '恢复所有权';
+
+  @override
+  String get sharedLibrary_owner_recoverHelp => '使用资料库的恢复码成为所有者。';
+
+  @override
+  String get sharedLibrary_owner_recoverPrompt => '恢复码';
+
+  @override
+  String get sharedLibrary_owner_wrongCode => '这不是此资料库的恢复码。';
+
+  @override
+  String get sharedLibrary_owner_recovered => '你现在是所有者。';
+
+  @override
+  String get sharedLibrary_owner_reset => '重置所有权';
+
+  @override
+  String get sharedLibrary_owner_resetHelp => '仅在既没有所有者也没有恢复码时使用。每位成员都必须接受。';
+
+  @override
+  String get sharedLibrary_owner_resetConfirm =>
+      '让自己成为唯一的所有者？其他每位成员的设备都会请其接受，在接受之前不会写入资料库。';
+
+  @override
+  String sharedLibrary_owner_resetPrompt(
+    String library,
+    String name,
+    String fingerprint,
+  ) {
+    return '$name 重置了 $library 的所有权（密钥 $fingerprint）。在你接受之前，此设备只读取该资料库。';
+  }
+
+  @override
+  String get sharedLibrary_owner_resetAccept => '接受';
+
+  @override
+  String get sharedLibrary_connect_untrusted => '此资料库的角色未由其所有者签名。请让所有者检查。';
+
+  @override
+  String get sharedLibrary_retired => '此资料库由 Submersion 的测试版本创建。请重新创建。';
+
+  @override
+  String get sharedLibrary_encrypted_probe => '加密资料库。请输入口令或恢复码。';
+
+  @override
+  String get sharedLibrary_encrypted_passphrase => '口令或恢复码';
+
+  @override
+  String get sharedLibrary_encrypted_unlock => '解锁';
+
+  @override
+  String get sharedLibrary_encrypted_wrong => '该口令无法打开此资料库。';
+
+  @override
+  String get sharedLibrary_backups_title => '备份';
+
+  @override
+  String get sharedLibrary_backups_subtitle => '备份并恢复资料库';
+
+  @override
+  String get sharedLibrary_backups_backUpNow => '立即备份';
+
+  @override
+  String get sharedLibrary_backups_import => '导入备份';
+
+  @override
+  String get sharedLibrary_backups_note => '备注（可选）';
+
+  @override
+  String get sharedLibrary_backups_automatic => '自动';
+
+  @override
+  String get sharedLibrary_backups_beforeRestore => '恢复之前';
+
+  @override
+  String get sharedLibrary_backups_onDevice => '在此设备上';
+
+  @override
+  String get sharedLibrary_backups_inStorage => '在存储中';
+
+  @override
+  String get sharedLibrary_backups_both => '在此设备上和存储中';
+
+  @override
+  String sharedLibrary_backups_summary(int sites, String size) {
+    return '潜点：$sites · $size';
+  }
+
+  @override
+  String get sharedLibrary_backups_pin => '置顶';
+
+  @override
+  String get sharedLibrary_backups_unpin => '取消置顶';
+
+  @override
+  String get sharedLibrary_backups_delete => '删除';
+
+  @override
+  String get sharedLibrary_backups_deleteConfirm => '删除此备份？';
+
+  @override
+  String get sharedLibrary_backups_deleteWhere => '从哪里删除此备份？';
+
+  @override
+  String get sharedLibrary_backups_export => '导出';
+
+  @override
+  String get sharedLibrary_backups_restore => '恢复';
+
+  @override
+  String sharedLibrary_backups_restoreConfirm(String date) {
+    return '将资料库恢复到 $date 的状态？每位成员会在下次同步时获得此版本。恢复前会先为资料库的当前状态创建一个置顶备份。';
+  }
+
+  @override
+  String get sharedLibrary_backups_restoreDone => '资料库已恢复';
+
+  @override
+  String get sharedLibrary_backups_oldKey => '此备份使用之前的口令加密。请输入那个口令或当时的恢复码。';
+
+  @override
+  String get sharedLibrary_backups_empty => '尚无备份。所有者的设备每天创建一个，“立即备份”会马上创建一个。';
+
+  @override
+  String get sharedLibrary_backups_importRefused => '该文件不是此资料库的备份。';
+
+  @override
+  String get sharedLibrary_backups_ownersOnly => '只有所有者可以管理备份。';
+
+  @override
+  String get sharedLibrary_backups_done => '备份已创建';
+
+  @override
+  String sharedLibrary_library_myKey(String fingerprint) {
+    return '你的密钥 $fingerprint';
+  }
+
+  @override
+  String sharedLibrary_suggest_held(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 条建议将在其作者获批准后显示',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedLibrary_restoreInto_action => '从备份文件恢复';
+
+  @override
+  String get sharedLibrary_restoreInto_needsKey => '此备份已加密。请输入它的口令或恢复码。';
+
+  @override
+  String get sharedLibrary_restoreInto_refused => '该文件不是所有者创建的资料库备份。';
+
+  @override
+  String get sharedLibrary_restoreInto_oldStillThere =>
+      '资料库仍在其旧文件夹中。那里的成员会继续使用该副本，直到他们连接到此文件夹。';
+
+  @override
+  String sharedLibrary_encrypted_locked(String library) {
+    return '请输入 $library 的口令。';
+  }
+
+  @override
+  String sharedLibrary_encrypted_changed(String library) {
+    return '$library 的口令已更改。请输入新口令。';
+  }
+
+  @override
+  String get sharedLibrary_encryption_title => '加密';
+
+  @override
+  String get sharedLibrary_encryption_statusOn => '已使用口令加密';
+
+  @override
+  String get sharedLibrary_encryption_statusOff => '未加密：任何能访问存储的人都可以读取';
+
+  @override
+  String get sharedLibrary_encryption_on => '开启加密';
+
+  @override
+  String get sharedLibrary_encryption_onHelp =>
+      '成员每个档案只需输入一次口令。只有口令或恢复码能打开资料库。新恢复码会替换所有所有者手中的旧恢复码。';
+
+  @override
+  String get sharedLibrary_encryption_off => '关闭加密';
+
+  @override
+  String get sharedLibrary_encryption_offConfirm =>
+      '所有文件都将重写为能访问存储的任何人可读。要关闭加密吗？';
+
+  @override
+  String get sharedLibrary_encryption_change => '更改口令';
+
+  @override
+  String get sharedLibrary_encryption_changeHelp =>
+      '生成新密钥和新恢复码。新恢复码会替换所有所有者手中的旧恢复码。仅将新口令告知留下的成员。';
+
+  @override
+  String get sharedLibrary_encryption_passphrase => '口令';
+
+  @override
+  String get sharedLibrary_encryption_confirm => '再次输入口令';
+
+  @override
   String get sharedLibrary_connect_probe_action => '检查';
 
   @override
@@ -20023,6 +20323,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sharedLibrary_members_lastOwner => '无法降级最后一位所有者。';
 
   @override
+  String get sharedLibrary_members_keyChanged => '该成员的密钥已更改。请当面核对新密钥，然后再批准。';
+
+  @override
+  String get sharedLibrary_members_rolesOutOfDate =>
+      '自此设备上次信任这些角色以来，角色已发生更改。请退出资料库并重新加入以采用此更改，然后重试。';
+
+  @override
   String get sharedLibrary_picker_none => '这里没有允许你添加潜点的共享潜点库。';
 
   @override
@@ -20049,6 +20356,32 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sharedLibrary_site_addToLibrary => '添加到共享潜点库';
+
+  @override
+  String sharedLibrary_add_confirm_title(String name, String library) {
+    return '将 $name 添加到 $library？';
+  }
+
+  @override
+  String sharedLibrary_add_confirm_titleMany(int count, String library) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '将 $count 个潜点添加到 $library？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedLibrary_add_confirm_shared =>
+      '所有成员都会看到：名称、位置、深度、描述、危险、通行、入水和出水、系泊、停车、潜点类型、标签、物种和地形特征。';
+
+  @override
+  String get sharedLibrary_add_confirm_private =>
+      '仍归你所有：你的笔记和评分。潜水记录和照片永远不会离开你的个人资料库。';
+
+  @override
+  String get sharedLibrary_add_confirm_action => '添加';
 
   @override
   String get sharedLibrary_site_chooseLibrary => '选择库';
@@ -20089,6 +20422,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sharedLibrary_suggest_nothingChanged => '没有任何更改。';
+
+  @override
+  String get sharedLibrary_suggest_savedPrivate => '你的笔记和评分已保存。';
 
   @override
   String sharedLibrary_suggest_pending(int count) {
@@ -21635,6 +21971,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_conflict_field_sharedLibraryLocation => '库位置';
 
   @override
+  String get settings_conflict_field_sharedLibrarySigningKey => '签名密钥';
+
+  @override
+  String get settings_conflict_field_sharedLibraryKey => '资料库密钥';
+
+  @override
   String get settings_conflict_field_isTravelGas => '过渡气';
 
   @override
@@ -22798,6 +23140,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get documents_detail_owner => '归档于';
+
+  @override
+  String get documents_owner_pickerTitle => '归档到';
+
+  @override
+  String get documents_owner_search => '搜索';
+
+  @override
+  String get documents_owner_none => '暂无可归档的位置';
+
+  @override
+  String get documents_owner_locked => '证书卡始终归属于其证书';
 
   @override
   String get documents_profileHub_documents => '文档';
@@ -42901,16 +43255,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_action_remove => '移除';
 
   @override
-  String get equipment_documents_title => '文档';
+  String get equipment_documents_linkedTitle => '已链接的文件';
 
   @override
-  String get equipment_documents_subtitle => '发票、收据和保修文件';
-
-  @override
-  String get equipment_documents_attachButton => '附加';
-
-  @override
-  String get equipment_documents_empty => '尚未附加任何文档';
+  String get equipment_documents_linkedSubtitle => '文件过大，或文档无法保存该格式';
 
   @override
   String get equipment_documents_removeTitle => '移除文档？';
@@ -44687,6 +45035,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String startup_migrating_progress(Object currentStep, Object totalSteps) {
     return '正在升级数据库... 第 $currentStep 步，共 $totalSteps 步';
   }
+
+  @override
+  String get startup_compacting => '正在优化存储...';
 
   @override
   String get startup_error_title => 'Submersion 无法启动';
@@ -46687,6 +47038,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_storageUsage_category_database => '潜水日志数据库';
+
+  @override
+  String settings_storageUsage_reclaimable(String size) {
+    return '可回收 $size';
+  }
+
+  @override
+  String get settings_storageUsage_compact => '压缩';
+
+  @override
+  String get settings_storageUsage_compactTitle => '压缩数据库？';
+
+  @override
+  String get settings_storageUsage_compactBody =>
+      '将在下次启动 Submersion 时执行。较大的日志可能需要一分钟，并需要与数据库大小相当的可用空间。';
+
+  @override
+  String get settings_storageUsage_compactScheduled => '已安排在下次启动时执行';
+
+  @override
+  String get settings_storageUsage_quitNow => '立即退出';
 
   @override
   String get settings_storageUsage_category_localCache => '本地缓存数据库';

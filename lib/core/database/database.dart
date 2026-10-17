@@ -263,6 +263,8 @@ String legacyDataSourceId(String diveId) => '$kLegacyDataSourceIdPrefix$diveId';
     SharedLibraryMemberships,
     SharedSiteStates,
     SharedSiteSuggestions,
+    SharedLibraryBackups,
+    LibrarySiteNotes,
   ],
 )
 class AppDatabase extends _$AppDatabase {

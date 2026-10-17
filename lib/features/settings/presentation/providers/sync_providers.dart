@@ -52,6 +52,7 @@ import 'package:submersion/core/services/sync/sync_service.dart';
 import 'package:submersion/features/dive_log/data/services/derived_metrics_scheduler.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_repository_provider.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
+import 'package:submersion/features/documents/presentation/providers/equipment_file_conversion_provider.dart';
 import 'package:submersion/features/gps_log/presentation/providers/gps_log_providers.dart';
 import 'package:submersion/features/media/presentation/providers/gallery_cloud_id_backfill_provider.dart';
 import 'package:submersion/features/media/presentation/providers/gallery_origin_backfill_provider.dart';
@@ -1373,7 +1374,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
       var runAuto = auto;
       var followUpAllowed = true;
       while (true) {
-        // One merge into the database at a time, shared with the club
+        // One merge into the database at a time, shared with the library
         // library sync (issue #2567).
         final succeeded = await SyncCoordinator.run(
           () => _runSyncOnce(auto: runAuto),
@@ -1629,6 +1630,11 @@ class SyncNotifier extends StateNotifier<SyncState> {
         // are stamped. At most once a day, and contains its own failures.
         await _ref.read(galleryCloudIdBackfillProvider)();
         if (!mounted) return false;
+        // Gear files a peer linked, or that only became readable here once
+        // this sync fetched their store copy, move into Documents (#3333).
+        // Outside the flight: it may download and copy files, and nothing
+        // in this sync waits on it. Contains its own failures.
+        unawaited(_ref.read(equipmentFileConversionProvider)());
       } else {
         state = state.copyWith(
           status: SyncStatus.error,

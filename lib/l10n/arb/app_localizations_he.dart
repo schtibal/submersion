@@ -16438,13 +16438,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get gasCalculators_icd_suggestionsTitle => 'כך שהכלל יתקיים';
 
   @override
-  String gasCalculators_icd_suggestionKeepA(String he) {
-    return 'השאר את הגז הנוכחי, קבע את ההליום של הגז שהוחלף אליו ל-$he%';
+  String gasCalculators_icd_suggestionSetHe(String he) {
+    return 'קבע את ההליום ל-$he%';
   }
 
   @override
-  String gasCalculators_icd_suggestionKeepB(String he) {
-    return 'השאר את הגז שהוחלף אליו, קבע את ההליום של הגז הנוכחי ל-$he%';
+  String gasCalculators_icd_suggestionSetO2(String o2) {
+    return 'קבע את החמצן ל-$o2%';
   }
 
   @override
@@ -20498,6 +20498,324 @@ class AppLocalizationsHe extends AppLocalizations {
       'תיקייה בתוך submersion-sites, בראש ה-bucket או השרת, למשל site-sync.';
 
   @override
+  String get sharedLibrary_connect_reservedFolder =>
+      'תיקיית ספרייה אינה יכולה להתחיל ב-sites, ‏members, ‏suggestions או backups.';
+
+  @override
+  String get sharedLibrary_connect_folderChars =>
+      'תיקיית ספרייה אינה יכולה להכיל *, ? או סימני דולר.';
+
+  @override
+  String get sharedLibrary_setup_title => 'איך להגדיר את האחסון';
+
+  @override
+  String sharedLibrary_setup_where(String folder) {
+    return 'הספרייה הזו נמצאת ב-$folder בראש ה-bucket או השרת, לצד submersion-sync ו-submersion-media.';
+  }
+
+  @override
+  String get sharedLibrary_setup_keys =>
+      'תנו לבעלים ולעורכים מפתחות שקוראים וכותבים בתיקיית הספרייה. תנו לכל השאר מפתחות שקוראים אותה וכותבים רק ב-members/ וב-suggestions/. האחסון, ולא האפליקציה, הוא שמונע ממפתח לכתוב.';
+
+  @override
+  String get sharedLibrary_setup_s3Full => 'מדיניות S3 לבעלים ולעורכים';
+
+  @override
+  String get sharedLibrary_setup_s3Reader => 'מדיניות S3 לקוראים';
+
+  @override
+  String get sharedLibrary_setup_webdav =>
+      'WebDAV: שתפו את התיקייה לקריאה בלבד עם הקוראים, ואת members/ ו-suggestions/ לכתיבה היכן שהשרת מאפשר זאת (למשל הרשאות שיתוף ב-Nextcloud).';
+
+  @override
+  String get sharedLibrary_setup_copy => 'העתקה';
+
+  @override
+  String get sharedLibrary_setup_copied => 'המדיניות הועתקה';
+
+  @override
+  String get sharedLibrary_recovery_title => 'שמרו את קוד השחזור הזה';
+
+  @override
+  String get sharedLibrary_recovery_body =>
+      'מי שיש לו את הקוד הזה יכול להפוך את עצמו לבעלים של הספרייה ולפתוח אותה אם היא מוצפנת. שמרו אותו במקום בטוח, בנפרד ממפתחות האחסון. הוא מוצג רק עכשיו.';
+
+  @override
+  String get sharedLibrary_recovery_stored => 'שמרתי אותו';
+
+  @override
+  String get sharedLibrary_roles_rejected =>
+      'קובץ התפקידים שונה על ידי מי שאינו בעלים. המכשיר הזה שומר את התפקידים האחרונים שבעלים חתם עליהם.';
+
+  @override
+  String get sharedLibrary_members_pending => 'ממתינים לאישור';
+
+  @override
+  String get sharedLibrary_members_approve => 'אישור';
+
+  @override
+  String get sharedLibrary_members_reject => 'דחייה';
+
+  @override
+  String sharedLibrary_members_fingerprint(String fingerprint) {
+    return 'מפתח $fingerprint';
+  }
+
+  @override
+  String get sharedLibrary_members_unsignedCard => 'הכרטיס לא נחתם על ידי החבר';
+
+  @override
+  String sharedLibrary_members_rejectTitle(String name) {
+    return 'לדחות את $name?';
+  }
+
+  @override
+  String get sharedLibrary_members_rejectBody =>
+      'הכרטיס מוסר ושום דבר שייכתב לא ייחשב. רק מפתחות אחסון חדשים ימנעו כתיבת קבצים לגמרי.';
+
+  @override
+  String get sharedLibrary_members_left => 'עזבו את הספרייה';
+
+  @override
+  String get sharedLibrary_members_removeRole => 'הסרת תפקיד';
+
+  @override
+  String get sharedLibrary_owner_onlyOne =>
+      'יש רק בעלים אחד. אם הגישה תאבד, רק קוד השחזור יוכל להחזיר אותה.';
+
+  @override
+  String get sharedLibrary_owner_addOwner => 'בחירת בעלים נוסף';
+
+  @override
+  String get sharedLibrary_owner_newCode => 'קוד שחזור חדש';
+
+  @override
+  String get sharedLibrary_owner_newCodeHelp =>
+      'מחליף את הקוד הישן, למשל אם ייתכן שדלף.';
+
+  @override
+  String get sharedLibrary_owner_recover => 'שחזור בעלות';
+
+  @override
+  String get sharedLibrary_owner_recoverHelp =>
+      'הפכו לבעלים באמצעות קוד השחזור של הספרייה.';
+
+  @override
+  String get sharedLibrary_owner_recoverPrompt => 'קוד שחזור';
+
+  @override
+  String get sharedLibrary_owner_wrongCode =>
+      'זה אינו קוד השחזור של הספרייה הזו.';
+
+  @override
+  String get sharedLibrary_owner_recovered => 'עכשיו אתם בעלים.';
+
+  @override
+  String get sharedLibrary_owner_reset => 'איפוס בעלות';
+
+  @override
+  String get sharedLibrary_owner_resetHelp =>
+      'רק אם לא נותרו בעלים וגם לא קוד שחזור. כל החברים חייבים לאשר זאת.';
+
+  @override
+  String get sharedLibrary_owner_resetConfirm =>
+      'להפוך לבעלים היחידים? המכשיר של כל חבר אחר יבקש ממנו לאשר זאת, ויפסיק לכתוב לספרייה עד שיאשר.';
+
+  @override
+  String sharedLibrary_owner_resetPrompt(
+    String library,
+    String name,
+    String fingerprint,
+  ) {
+    return 'הבעלות על $library אופסה על ידי $name (מפתח $fingerprint). עד שתאשרו, המכשיר הזה רק קורא את הספרייה.';
+  }
+
+  @override
+  String get sharedLibrary_owner_resetAccept => 'אישור';
+
+  @override
+  String get sharedLibrary_connect_untrusted =>
+      'התפקידים של הספרייה הזו אינם חתומים על ידי אחד מבעליה. בקשו מבעלים לבדוק זאת.';
+
+  @override
+  String get sharedLibrary_retired =>
+      'הספרייה הזו נוצרה בגרסת ניסיון של Submersion. צרו אותה מחדש.';
+
+  @override
+  String get sharedLibrary_encrypted_probe =>
+      'ספרייה מוצפנת. הזינו את משפט הסיסמה או את קוד השחזור.';
+
+  @override
+  String get sharedLibrary_encrypted_passphrase => 'משפט סיסמה או קוד שחזור';
+
+  @override
+  String get sharedLibrary_encrypted_unlock => 'שחרור נעילה';
+
+  @override
+  String get sharedLibrary_encrypted_wrong =>
+      'משפט הסיסמה הזה לא פותח את הספרייה.';
+
+  @override
+  String get sharedLibrary_backups_title => 'גיבויים';
+
+  @override
+  String get sharedLibrary_backups_subtitle => 'גיבוי הספרייה ושחזורה';
+
+  @override
+  String get sharedLibrary_backups_backUpNow => 'גיבוי עכשיו';
+
+  @override
+  String get sharedLibrary_backups_import => 'ייבוא גיבוי';
+
+  @override
+  String get sharedLibrary_backups_note => 'הערה (רשות)';
+
+  @override
+  String get sharedLibrary_backups_automatic => 'אוטומטי';
+
+  @override
+  String get sharedLibrary_backups_beforeRestore => 'לפני שחזור';
+
+  @override
+  String get sharedLibrary_backups_onDevice => 'במכשיר הזה';
+
+  @override
+  String get sharedLibrary_backups_inStorage => 'באחסון';
+
+  @override
+  String get sharedLibrary_backups_both => 'במכשיר הזה ובאחסון';
+
+  @override
+  String sharedLibrary_backups_summary(int sites, String size) {
+    return 'אתרים: $sites · $size';
+  }
+
+  @override
+  String get sharedLibrary_backups_pin => 'הצמדה';
+
+  @override
+  String get sharedLibrary_backups_unpin => 'ביטול הצמדה';
+
+  @override
+  String get sharedLibrary_backups_delete => 'מחיקה';
+
+  @override
+  String get sharedLibrary_backups_deleteConfirm => 'למחוק את הגיבוי הזה?';
+
+  @override
+  String get sharedLibrary_backups_deleteWhere => 'מאיפה למחוק את הגיבוי הזה?';
+
+  @override
+  String get sharedLibrary_backups_export => 'ייצוא';
+
+  @override
+  String get sharedLibrary_backups_restore => 'שחזור';
+
+  @override
+  String sharedLibrary_backups_restoreConfirm(String date) {
+    return 'לשחזר את הספרייה למצבה ב-$date? כל חבר יקבל גרסה זו בסנכרון הבא שלו. קודם נוצר גיבוי מוצמד של הספרייה במצבה הנוכחי.';
+  }
+
+  @override
+  String get sharedLibrary_backups_restoreDone => 'הספרייה שוחזרה';
+
+  @override
+  String get sharedLibrary_backups_oldKey =>
+      'הגיבוי הזה נחתם במשפט סיסמה קודם. הזינו את משפט הסיסמה ההוא או את קוד השחזור מאותה עת.';
+
+  @override
+  String get sharedLibrary_backups_empty =>
+      'אין עדיין גיבויים. מכשירי הבעלים יוצרים גיבוי בכל יום, ו״גיבוי עכשיו״ יוצר אחד מיד.';
+
+  @override
+  String get sharedLibrary_backups_importRefused =>
+      'הקובץ הזה אינו גיבוי של הספרייה הזו.';
+
+  @override
+  String get sharedLibrary_backups_ownersOnly => 'רק בעלים מנהלים גיבויים.';
+
+  @override
+  String get sharedLibrary_backups_done => 'הגיבוי נוצר';
+
+  @override
+  String sharedLibrary_library_myKey(String fingerprint) {
+    return 'המפתח שלכם $fingerprint';
+  }
+
+  @override
+  String sharedLibrary_suggest_held(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count הצעות ממתינות עד שתאשרו את הכותבים שלהן',
+      one: 'הצעה אחת ממתינה עד שתאשרו את הכותב שלה',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedLibrary_restoreInto_action => 'שחזור מקובץ גיבוי';
+
+  @override
+  String get sharedLibrary_restoreInto_needsKey =>
+      'הגיבוי הזה מוצפן. הזינו את משפט הסיסמה או את קוד השחזור שלו.';
+
+  @override
+  String get sharedLibrary_restoreInto_refused =>
+      'הקובץ הזה אינו גיבוי ספרייה שנוצר על ידי בעלים.';
+
+  @override
+  String get sharedLibrary_restoreInto_oldStillThere =>
+      'הספרייה עדיין נמצאת גם בתיקייה הישנה. החברים שם ממשיכים להשתמש בעותק הזה עד שיתחברו לתיקייה הזו.';
+
+  @override
+  String sharedLibrary_encrypted_locked(String library) {
+    return 'הזינו את משפט הסיסמה של $library.';
+  }
+
+  @override
+  String sharedLibrary_encrypted_changed(String library) {
+    return 'משפט הסיסמה של $library השתנה. הזינו את החדש.';
+  }
+
+  @override
+  String get sharedLibrary_encryption_title => 'הצפנה';
+
+  @override
+  String get sharedLibrary_encryption_statusOn => 'מוצפנת במשפט סיסמה';
+
+  @override
+  String get sharedLibrary_encryption_statusOff =>
+      'לא מוצפנת: כל מי שיש לו גישה לאחסון יכול לקרוא אותה';
+
+  @override
+  String get sharedLibrary_encryption_on => 'הפעלת הצפנה';
+
+  @override
+  String get sharedLibrary_encryption_onHelp =>
+      'החברים מזינים את משפט הסיסמה פעם אחת לכל פרופיל. רק משפט הסיסמה או קוד השחזור פותחים את הספרייה. קוד שחזור חדש מחליף את הישן אצל כל הבעלים.';
+
+  @override
+  String get sharedLibrary_encryption_off => 'כיבוי הצפנה';
+
+  @override
+  String get sharedLibrary_encryption_offConfirm =>
+      'כל קובץ ייכתב מחדש כך שכל מי שיש לו גישה לאחסון יוכל לקרוא אותו. לכבות את ההצפנה?';
+
+  @override
+  String get sharedLibrary_encryption_change => 'שינוי משפט סיסמה';
+
+  @override
+  String get sharedLibrary_encryption_changeHelp =>
+      'יוצר מפתח חדש וקוד שחזור חדש. קוד שחזור חדש מחליף את הישן אצל כל הבעלים. שתפו את משפט הסיסמה החדש רק עם החברים שנשארים.';
+
+  @override
+  String get sharedLibrary_encryption_passphrase => 'משפט סיסמה';
+
+  @override
+  String get sharedLibrary_encryption_confirm => 'משפט הסיסמה שוב';
+
+  @override
   String get sharedLibrary_connect_probe_action => 'בדיקה';
 
   @override
@@ -20597,6 +20915,14 @@ class AppLocalizationsHe extends AppLocalizations {
       'אי אפשר להוריד בדרגה את הבעלים האחרון.';
 
   @override
+  String get sharedLibrary_members_keyChanged =>
+      'המפתח של החבר הזה השתנה. יש להשוות את המפתח החדש פנים אל פנים ואז לאשר אותו.';
+
+  @override
+  String get sharedLibrary_members_rolesOutOfDate =>
+      'התפקידים השתנו מאז שהמכשיר הזה סמך עליהם לאחרונה. יש לעזוב את הספרייה ולהצטרף אליה שוב כדי לקבל את השינוי, ואז לנסות שוב.';
+
+  @override
   String get sharedLibrary_picker_none =>
       'אין כאן ספריית אתרים משותפת שמאפשרת לך להוסיף אתרים.';
 
@@ -20626,6 +20952,33 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get sharedLibrary_site_addToLibrary => 'הוספה לספריית האתרים המשותפת';
+
+  @override
+  String sharedLibrary_add_confirm_title(String name, String library) {
+    return 'להוסיף את $name אל $library?';
+  }
+
+  @override
+  String sharedLibrary_add_confirm_titleMany(int count, String library) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'להוסיף $count אתרים אל $library?',
+      one: 'להוסיף $count אתר אל $library?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedLibrary_add_confirm_shared =>
+      'כל החברים יראו: שם, מיקום, עומקים, תיאור, סכנות, גישה, כניסה ויציאה, עגינה, חניה, סוגי אתר, תגיות, מינים ומאפיינים.';
+
+  @override
+  String get sharedLibrary_add_confirm_private =>
+      'נשאר שלך: ההערות והדירוג שלך. צלילות ותמונות אף פעם לא יוצאות מהספרייה האישית שלך.';
+
+  @override
+  String get sharedLibrary_add_confirm_action => 'הוספה';
 
   @override
   String get sharedLibrary_site_chooseLibrary => 'בחירת ספרייה';
@@ -20669,6 +21022,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get sharedLibrary_suggest_nothingChanged => 'שום דבר לא השתנה.';
+
+  @override
+  String get sharedLibrary_suggest_savedPrivate => 'ההערות והדירוג שלך נשמרו.';
 
   @override
   String sharedLibrary_suggest_pending(int count) {
@@ -22302,6 +22658,12 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_conflict_field_sharedLibraryLocation => 'מיקום הספרייה';
 
   @override
+  String get settings_conflict_field_sharedLibrarySigningKey => 'מפתח חתימה';
+
+  @override
+  String get settings_conflict_field_sharedLibraryKey => 'מפתח הספרייה';
+
+  @override
   String get settings_conflict_field_isTravelGas => 'גז מעבר';
 
   @override
@@ -23515,6 +23877,18 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get documents_detail_owner => 'מתויק תחת';
+
+  @override
+  String get documents_owner_pickerTitle => 'תיוק תחת';
+
+  @override
+  String get documents_owner_search => 'חיפוש';
+
+  @override
+  String get documents_owner_none => 'עדיין אין במה לתייק';
+
+  @override
+  String get documents_owner_locked => 'כרטיס נשאר עם ההסמכה שלו';
 
   @override
   String get documents_profileHub_documents => 'מסמכים';
@@ -44636,16 +45010,11 @@ class AppLocalizationsHe extends AppLocalizations {
   String get common_action_remove => 'הסר';
 
   @override
-  String get equipment_documents_title => 'מסמכים';
+  String get equipment_documents_linkedTitle => 'קבצים מקושרים';
 
   @override
-  String get equipment_documents_subtitle => 'חשבוניות, קבלות ומסמכי אחריות';
-
-  @override
-  String get equipment_documents_attachButton => 'צירוף';
-
-  @override
-  String get equipment_documents_empty => 'עדיין לא צורפו מסמכים';
+  String get equipment_documents_linkedSubtitle =>
+      'גדולים מדי, או בפורמט שמסמכים לא יכולים לשמור';
 
   @override
   String get equipment_documents_removeTitle => 'להסיר את המסמך?';
@@ -46585,6 +46954,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String startup_migrating_progress(Object currentStep, Object totalSteps) {
     return 'משדרג את מסד הנתונים... שלב $currentStep מתוך $totalSteps';
   }
+
+  @override
+  String get startup_compacting => 'מייעל את האחסון...';
 
   @override
   String get startup_error_title => 'Submersion לא הצליחה להיפתח';
@@ -48688,6 +49060,27 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get settings_storageUsage_category_database =>
       'מסד נתונים של יומן הצלילה';
+
+  @override
+  String settings_storageUsage_reclaimable(String size) {
+    return '$size ניתנים לפינוי';
+  }
+
+  @override
+  String get settings_storageUsage_compact => 'דחיסה';
+
+  @override
+  String get settings_storageUsage_compactTitle => 'לדחוס את מסד הנתונים?';
+
+  @override
+  String get settings_storageUsage_compactBody =>
+      'יתבצע בהפעלה הבאה של Submersion. יומן גדול עשוי להימשך דקה ודורש שטח פנוי בערך בגודל מסד הנתונים.';
+
+  @override
+  String get settings_storageUsage_compactScheduled => 'מתוזמן להפעלה הבאה';
+
+  @override
+  String get settings_storageUsage_quitNow => 'יציאה עכשיו';
 
   @override
   String get settings_storageUsage_category_localCache =>

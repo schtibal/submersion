@@ -16691,13 +16691,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get gasCalculators_icd_suggestionsTitle => 'Conform maken';
 
   @override
-  String gasCalculators_icd_suggestionKeepA(String he) {
-    return 'Huidig gas behouden, He van het overgeschakelde gas instellen op $he%';
+  String gasCalculators_icd_suggestionSetHe(String he) {
+    return 'He instellen op $he%';
   }
 
   @override
-  String gasCalculators_icd_suggestionKeepB(String he) {
-    return 'Overgeschakeld gas behouden, He van het huidige gas instellen op $he%';
+  String gasCalculators_icd_suggestionSetO2(String o2) {
+    return 'O2 instellen op $o2%';
   }
 
   @override
@@ -20831,6 +20831,332 @@ class AppLocalizationsNl extends AppLocalizations {
       'Een map in submersion-sites, bovenaan de bucket of server, bijvoorbeeld site-sync.';
 
   @override
+  String get sharedLibrary_connect_reservedFolder =>
+      'Een bibliotheekmap kan niet beginnen met sites, members, suggestions of backups.';
+
+  @override
+  String get sharedLibrary_connect_folderChars =>
+      'Een bibliotheekmap mag geen *, ? of dollartekens bevatten.';
+
+  @override
+  String get sharedLibrary_setup_title => 'Opslag instellen';
+
+  @override
+  String sharedLibrary_setup_where(String folder) {
+    return 'Deze bibliotheek staat in $folder bovenaan de bucket of server, naast submersion-sync en submersion-media.';
+  }
+
+  @override
+  String get sharedLibrary_setup_keys =>
+      'Geef eigenaars en redacteuren sleutels die de bibliotheekmap lezen en schrijven. Geef alle anderen sleutels die haar lezen en alleen in members/ en suggestions/ schrijven. De opslag, niet de app, houdt een sleutel tegen bij het schrijven.';
+
+  @override
+  String get sharedLibrary_setup_s3Full =>
+      'S3-beleid voor eigenaars en redacteuren';
+
+  @override
+  String get sharedLibrary_setup_s3Reader => 'S3-beleid voor lezers';
+
+  @override
+  String get sharedLibrary_setup_webdav =>
+      'WebDAV: deel de map alleen-lezen met lezers, en members/ en suggestions/ schrijfbaar waar je server dat toestaat (bijvoorbeeld deelrechten in Nextcloud).';
+
+  @override
+  String get sharedLibrary_setup_copy => 'Kopiëren';
+
+  @override
+  String get sharedLibrary_setup_copied => 'Beleid gekopieerd';
+
+  @override
+  String get sharedLibrary_recovery_title => 'Bewaar deze herstelcode';
+
+  @override
+  String get sharedLibrary_recovery_body =>
+      'Wie deze code heeft, kan zichzelf eigenaar van de bibliotheek maken en haar openen als ze versleuteld is. Bewaar hem op een veilige plek, los van de opslagsleutels. Hij wordt alleen nu getoond.';
+
+  @override
+  String get sharedLibrary_recovery_stored => 'Ik heb hem bewaard';
+
+  @override
+  String get sharedLibrary_roles_rejected =>
+      'Het rollenbestand is gewijzigd door iemand die geen eigenaar is. Dit apparaat houdt de laatste rollen aan die een eigenaar ondertekende.';
+
+  @override
+  String get sharedLibrary_members_pending => 'Wacht op goedkeuring';
+
+  @override
+  String get sharedLibrary_members_approve => 'Goedkeuren';
+
+  @override
+  String get sharedLibrary_members_reject => 'Weigeren';
+
+  @override
+  String sharedLibrary_members_fingerprint(String fingerprint) {
+    return 'Sleutel $fingerprint';
+  }
+
+  @override
+  String get sharedLibrary_members_unsignedCard =>
+      'Kaart niet ondertekend door het lid';
+
+  @override
+  String sharedLibrary_members_rejectTitle(String name) {
+    return '$name weigeren?';
+  }
+
+  @override
+  String get sharedLibrary_members_rejectBody =>
+      'De kaart wordt verwijderd en niets wat diegene schrijft telt mee. Alleen nieuwe opslagsleutels houden diegene helemaal tegen bij het schrijven van bestanden.';
+
+  @override
+  String get sharedLibrary_members_left => 'Hebben de bibliotheek verlaten';
+
+  @override
+  String get sharedLibrary_members_removeRole => 'Rol verwijderen';
+
+  @override
+  String get sharedLibrary_owner_onlyOne =>
+      'Er is maar één eigenaar. Verliest die de toegang, dan kan alleen de herstelcode die terugbrengen.';
+
+  @override
+  String get sharedLibrary_owner_addOwner => 'Nog een eigenaar kiezen';
+
+  @override
+  String get sharedLibrary_owner_newCode => 'Nieuwe herstelcode';
+
+  @override
+  String get sharedLibrary_owner_newCodeHelp =>
+      'Vervangt de oude code, bijvoorbeeld als die uitgelekt kan zijn.';
+
+  @override
+  String get sharedLibrary_owner_recover => 'Eigenaarschap herstellen';
+
+  @override
+  String get sharedLibrary_owner_recoverHelp =>
+      'Word eigenaar met de herstelcode van de bibliotheek.';
+
+  @override
+  String get sharedLibrary_owner_recoverPrompt => 'Herstelcode';
+
+  @override
+  String get sharedLibrary_owner_wrongCode =>
+      'Dat is niet de herstelcode van deze bibliotheek.';
+
+  @override
+  String get sharedLibrary_owner_recovered => 'Je bent nu eigenaar.';
+
+  @override
+  String get sharedLibrary_owner_reset => 'Eigenaarschap opnieuw instellen';
+
+  @override
+  String get sharedLibrary_owner_resetHelp =>
+      'Alleen als er geen eigenaar en geen herstelcode meer is. Elk lid moet het accepteren.';
+
+  @override
+  String get sharedLibrary_owner_resetConfirm =>
+      'Jezelf de enige eigenaar maken? Het apparaat van elk ander lid vraagt om dit te accepteren en schrijft tot dan niet naar de bibliotheek.';
+
+  @override
+  String sharedLibrary_owner_resetPrompt(
+    String library,
+    String name,
+    String fingerprint,
+  ) {
+    return '$name heeft het eigenaarschap van $library opnieuw ingesteld (sleutel $fingerprint). Tot je accepteert, leest dit apparaat de bibliotheek alleen.';
+  }
+
+  @override
+  String get sharedLibrary_owner_resetAccept => 'Accepteren';
+
+  @override
+  String get sharedLibrary_connect_untrusted =>
+      'De rollen van deze bibliotheek zijn niet ondertekend door een van haar eigenaars. Vraag een eigenaar dit na te kijken.';
+
+  @override
+  String get sharedLibrary_retired =>
+      'Deze bibliotheek is gemaakt met een testversie van Submersion. Maak haar opnieuw.';
+
+  @override
+  String get sharedLibrary_encrypted_probe =>
+      'Versleutelde bibliotheek. Voer de wachtwoordzin of de herstelcode in.';
+
+  @override
+  String get sharedLibrary_encrypted_passphrase =>
+      'Wachtwoordzin of herstelcode';
+
+  @override
+  String get sharedLibrary_encrypted_unlock => 'Ontgrendelen';
+
+  @override
+  String get sharedLibrary_encrypted_wrong =>
+      'Deze wachtwoordzin opent deze bibliotheek niet.';
+
+  @override
+  String get sharedLibrary_backups_title => 'Back-ups';
+
+  @override
+  String get sharedLibrary_backups_subtitle =>
+      'Maak back-ups van de bibliotheek en zet ze terug';
+
+  @override
+  String get sharedLibrary_backups_backUpNow => 'Nu back-up maken';
+
+  @override
+  String get sharedLibrary_backups_import => 'Back-up importeren';
+
+  @override
+  String get sharedLibrary_backups_note => 'Notitie (optioneel)';
+
+  @override
+  String get sharedLibrary_backups_automatic => 'Automatisch';
+
+  @override
+  String get sharedLibrary_backups_beforeRestore => 'Vóór een herstel';
+
+  @override
+  String get sharedLibrary_backups_onDevice => 'Op dit apparaat';
+
+  @override
+  String get sharedLibrary_backups_inStorage => 'In de opslag';
+
+  @override
+  String get sharedLibrary_backups_both => 'Op dit apparaat en in de opslag';
+
+  @override
+  String sharedLibrary_backups_summary(int sites, String size) {
+    return 'Duiklocaties: $sites · $size';
+  }
+
+  @override
+  String get sharedLibrary_backups_pin => 'Vastmaken';
+
+  @override
+  String get sharedLibrary_backups_unpin => 'Losmaken';
+
+  @override
+  String get sharedLibrary_backups_delete => 'Verwijderen';
+
+  @override
+  String get sharedLibrary_backups_deleteConfirm => 'Deze back-up verwijderen?';
+
+  @override
+  String get sharedLibrary_backups_deleteWhere =>
+      'Waar moet deze back-up worden verwijderd?';
+
+  @override
+  String get sharedLibrary_backups_export => 'Exporteren';
+
+  @override
+  String get sharedLibrary_backups_restore => 'Herstellen';
+
+  @override
+  String sharedLibrary_backups_restoreConfirm(String date) {
+    return 'De bibliotheek herstellen naar hoe die was op $date? Elk lid krijgt deze versie bij de volgende synchronisatie. Eerst wordt een vastgemaakte back-up van de huidige bibliotheek gemaakt.';
+  }
+
+  @override
+  String get sharedLibrary_backups_restoreDone => 'Bibliotheek hersteld';
+
+  @override
+  String get sharedLibrary_backups_oldKey =>
+      'Deze back-up is verzegeld met een eerdere wachtwoordzin. Voer die wachtwoordzin of de herstelcode van toen in.';
+
+  @override
+  String get sharedLibrary_backups_empty =>
+      'Nog geen back-ups. De apparaten van eigenaars maken er elke dag een, en Nu back-up maken maakt er meteen een.';
+
+  @override
+  String get sharedLibrary_backups_importRefused =>
+      'Dat bestand is geen back-up van deze bibliotheek.';
+
+  @override
+  String get sharedLibrary_backups_ownersOnly =>
+      'Alleen eigenaars beheren back-ups.';
+
+  @override
+  String get sharedLibrary_backups_done => 'Back-up gemaakt';
+
+  @override
+  String sharedLibrary_library_myKey(String fingerprint) {
+    return 'Jouw sleutel $fingerprint';
+  }
+
+  @override
+  String sharedLibrary_suggest_held(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count suggesties wachten tot je hun auteurs goedkeurt',
+      one: '1 suggestie wacht tot je de auteur goedkeurt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedLibrary_restoreInto_action =>
+      'Herstellen uit een back-upbestand';
+
+  @override
+  String get sharedLibrary_restoreInto_needsKey =>
+      'Deze back-up is versleuteld. Voer de wachtwoordzin of herstelcode in.';
+
+  @override
+  String get sharedLibrary_restoreInto_refused =>
+      'Dat bestand is geen bibliotheekback-up die door een eigenaar is gemaakt.';
+
+  @override
+  String get sharedLibrary_restoreInto_oldStillThere =>
+      'De bibliotheek staat ook nog in de oude map. Leden daar blijven die kopie gebruiken tot ze verbinding maken met deze map.';
+
+  @override
+  String sharedLibrary_encrypted_locked(String library) {
+    return 'Voer de wachtwoordzin voor $library in.';
+  }
+
+  @override
+  String sharedLibrary_encrypted_changed(String library) {
+    return 'De wachtwoordzin van $library is gewijzigd. Voer de nieuwe in.';
+  }
+
+  @override
+  String get sharedLibrary_encryption_title => 'Versleuteling';
+
+  @override
+  String get sharedLibrary_encryption_statusOn =>
+      'Versleuteld met een wachtwoordzin';
+
+  @override
+  String get sharedLibrary_encryption_statusOff =>
+      'Niet versleuteld: iedereen met toegang tot de opslag kan haar lezen';
+
+  @override
+  String get sharedLibrary_encryption_on => 'Versleuteling inschakelen';
+
+  @override
+  String get sharedLibrary_encryption_onHelp =>
+      'Leden voeren de wachtwoordzin één keer per profiel in. Alleen de wachtwoordzin of de herstelcode opent de bibliotheek. Een nieuwe herstelcode vervangt de oude voor alle eigenaren.';
+
+  @override
+  String get sharedLibrary_encryption_off => 'Versleuteling uitschakelen';
+
+  @override
+  String get sharedLibrary_encryption_offConfirm =>
+      'Elk bestand wordt opnieuw geschreven, leesbaar voor iedereen met toegang tot de opslag. Versleuteling uitschakelen?';
+
+  @override
+  String get sharedLibrary_encryption_change => 'Wachtwoordzin wijzigen';
+
+  @override
+  String get sharedLibrary_encryption_changeHelp =>
+      'Maakt een nieuwe sleutel en een nieuwe herstelcode. Een nieuwe herstelcode vervangt de oude voor alle eigenaren. Deel de nieuwe wachtwoordzin alleen met de leden die blijven.';
+
+  @override
+  String get sharedLibrary_encryption_passphrase => 'Wachtwoordzin';
+
+  @override
+  String get sharedLibrary_encryption_confirm => 'Wachtwoordzin opnieuw';
+
+  @override
   String get sharedLibrary_connect_probe_action => 'Controleren';
 
   @override
@@ -20933,6 +21259,14 @@ class AppLocalizationsNl extends AppLocalizations {
       'De laatste eigenaar kan niet worden gedegradeerd.';
 
   @override
+  String get sharedLibrary_members_keyChanged =>
+      'De sleutel van dit lid is gewijzigd. Vergelijk de nieuwe sleutel persoonlijk en keur hem daarna goed.';
+
+  @override
+  String get sharedLibrary_members_rolesOutOfDate =>
+      'De rollen zijn gewijzigd sinds dit apparaat ze voor het laatst vertrouwde. Verlaat de bibliotheek en word opnieuw lid om de wijziging over te nemen, en probeer het dan opnieuw.';
+
+  @override
   String get sharedLibrary_picker_none =>
       'Geen gedeelde duikstekbibliotheek hier laat je duikplekken toevoegen.';
 
@@ -20964,6 +21298,33 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get sharedLibrary_site_addToLibrary =>
       'Toevoegen aan gedeelde duikstekbibliotheek';
+
+  @override
+  String sharedLibrary_add_confirm_title(String name, String library) {
+    return '$name toevoegen aan $library?';
+  }
+
+  @override
+  String sharedLibrary_add_confirm_titleMany(int count, String library) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count duikstekken toevoegen aan $library?',
+      one: '$count duikstek toevoegen aan $library?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedLibrary_add_confirm_shared =>
+      'Elk lid ziet: naam, locatie, dieptes, beschrijving, gevaren, toegang, in- en uitstap, afmeren, parkeren, stektypes, tags, soorten en kenmerken.';
+
+  @override
+  String get sharedLibrary_add_confirm_private =>
+      'Blijft van jou: je notities en beoordeling. Duiken en foto\'s verlaten je persoonlijke bibliotheek nooit.';
+
+  @override
+  String get sharedLibrary_add_confirm_action => 'Toevoegen';
 
   @override
   String get sharedLibrary_site_chooseLibrary => 'Kies een bibliotheek';
@@ -21007,6 +21368,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get sharedLibrary_suggest_nothingChanged => 'Niets gewijzigd.';
+
+  @override
+  String get sharedLibrary_suggest_savedPrivate =>
+      'Je notities en beoordeling zijn opgeslagen.';
 
   @override
   String sharedLibrary_suggest_pending(int count) {
@@ -22719,6 +23084,13 @@ class AppLocalizationsNl extends AppLocalizations {
       'Locatie van de bibliotheek';
 
   @override
+  String get settings_conflict_field_sharedLibrarySigningKey =>
+      'Ondertekeningssleutel';
+
+  @override
+  String get settings_conflict_field_sharedLibraryKey => 'Bibliotheeksleutel';
+
+  @override
   String get settings_conflict_field_isTravelGas => 'Travelgas';
 
   @override
@@ -23974,6 +24346,18 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get documents_detail_owner => 'Opgeslagen bij';
+
+  @override
+  String get documents_owner_pickerTitle => 'Opslaan bij';
+
+  @override
+  String get documents_owner_search => 'Zoeken';
+
+  @override
+  String get documents_owner_none => 'Nog niets om bij op te slaan';
+
+  @override
+  String get documents_owner_locked => 'Een kaart blijft bij zijn brevet';
 
   @override
   String get documents_profileHub_documents => 'Documenten';
@@ -45316,17 +45700,11 @@ class AppLocalizationsNl extends AppLocalizations {
   String get common_action_remove => 'Verwijderen';
 
   @override
-  String get equipment_documents_title => 'Documenten';
+  String get equipment_documents_linkedTitle => 'Gekoppelde bestanden';
 
   @override
-  String get equipment_documents_subtitle =>
-      'Facturen, bonnen en garantiepapieren';
-
-  @override
-  String get equipment_documents_attachButton => 'Bijvoegen';
-
-  @override
-  String get equipment_documents_empty => 'Nog geen documenten bijgevoegd';
+  String get equipment_documents_linkedSubtitle =>
+      'Te groot, of een formaat dat Documenten niet kan bewaren';
 
   @override
   String get equipment_documents_removeTitle => 'Document verwijderen?';
@@ -47262,6 +47640,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String startup_migrating_progress(Object currentStep, Object totalSteps) {
     return 'Database upgraden... stap $currentStep van $totalSteps';
   }
+
+  @override
+  String get startup_compacting => 'Opslag optimaliseren...';
 
   @override
   String get startup_error_title => 'Submersion kon niet starten';
@@ -49417,6 +49798,28 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get settings_storageUsage_category_database => 'Duiklogboekdatabase';
+
+  @override
+  String settings_storageUsage_reclaimable(String size) {
+    return '$size terug te winnen';
+  }
+
+  @override
+  String get settings_storageUsage_compact => 'Comprimeren';
+
+  @override
+  String get settings_storageUsage_compactTitle => 'Database comprimeren?';
+
+  @override
+  String get settings_storageUsage_compactBody =>
+      'Wordt uitgevoerd bij de volgende start van Submersion. Een groot logboek kan een minuut duren en heeft ongeveer evenveel vrije ruimte nodig als de database groot is.';
+
+  @override
+  String get settings_storageUsage_compactScheduled =>
+      'Gepland voor de volgende start';
+
+  @override
+  String get settings_storageUsage_quitNow => 'Nu afsluiten';
 
   @override
   String get settings_storageUsage_category_localCache =>
