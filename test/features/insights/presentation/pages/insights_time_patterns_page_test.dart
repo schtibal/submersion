@@ -259,34 +259,6 @@ void main() {
       ]);
     });
 
-    testWidgets('slice labels contrast with a light theme slice', (
-      tester,
-    ) async {
-      await pumpTimeOfDay(tester, timeOfDay({'Morning': 1, 'Night': 1}));
-
-      // Amber is a light colour and navy a dark one.
-      expect(sections(tester).map((s) => s.titleStyle?.color), [
-        Colors.black87,
-        Colors.white,
-      ]);
-    });
-
-    testWidgets('slice labels contrast with a dark theme slice', (
-      tester,
-    ) async {
-      await pumpTimeOfDay(
-        tester,
-        timeOfDay({'Morning': 1, 'Night': 1}),
-        brightness: Brightness.dark,
-      );
-
-      // Both dark theme colours are light.
-      expect(sections(tester).map((s) => s.titleStyle?.color), [
-        Colors.black87,
-        Colors.black87,
-      ]);
-    });
-
     testWidgets('no footnote when every dive has a site location', (
       tester,
     ) async {

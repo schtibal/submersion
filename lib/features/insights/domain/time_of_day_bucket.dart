@@ -111,11 +111,6 @@ class TimeOfDayClassifier {
         : TimeOfDayBucket.afternoon;
   }
 
-  /// The bucket on the fallback clock times, for a dive known only by its
-  /// entry.
-  static TimeOfDayBucket fallbackBucket(DateTime entry) =>
-      _fallback(entry, null);
-
   /// Buckets a dive at the site at [latitude], [longitude].
   ///
   /// Falls back to [fallbackSunriseHour] and [fallbackSunsetHour] when the

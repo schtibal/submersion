@@ -159,17 +159,13 @@ void main() {
       }
     });
 
-    test('fallbackBucket is the same rule on the entry alone', () {
-      expect(TimeOfDayClassifier.fallbackBucket(at(5)), TimeOfDayBucket.night);
-      expect(
-        TimeOfDayClassifier.fallbackBucket(at(6)),
-        TimeOfDayBucket.morning,
-      );
-      expect(
-        TimeOfDayClassifier.fallbackBucket(at(12)),
-        TimeOfDayBucket.afternoon,
-      );
-      expect(TimeOfDayClassifier.fallbackBucket(at(18)), TimeOfDayBucket.night);
+    test('the fallback is the same rule on the entry alone', () {
+      TimeOfDayBucket bucket(int hour) =>
+          classifier.classify(entry: at(hour)).bucket;
+      expect(bucket(5), TimeOfDayBucket.night);
+      expect(bucket(6), TimeOfDayBucket.morning);
+      expect(bucket(12), TimeOfDayBucket.afternoon);
+      expect(bucket(18), TimeOfDayBucket.night);
     });
   });
 
@@ -229,6 +225,20 @@ void main() {
         london(DateTime.utc(2025, 6, 21, 4), DateTime.utc(2025, 6, 21, 5)),
         TimeOfDayBucket.dawn,
       );
+    });
+
+    test('a late daylight dive at high latitude is Afternoon', () {
+      // Reykjavik, 1 June: sunset near 23:39 on a UTC clock with no daylight
+      // saving. A 22:30 dive is still in daylight, so the rules make it
+      // Afternoon; accepted deliberately on PR #3345 review.
+      final result = classifier.classify(
+        entry: DateTime.utc(2025, 6, 1, 22, 30),
+        exit: DateTime.utc(2025, 6, 1, 23, 15),
+        latitude: 64.1466,
+        longitude: -21.9426,
+      );
+      expect(result.basis, SunTimesBasis.site);
+      expect(result.bucket, TimeOfDayBucket.afternoon);
     });
 
     test('polar night falls back to the clock and says so', () {

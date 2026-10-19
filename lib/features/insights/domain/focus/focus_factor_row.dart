@@ -11,7 +11,7 @@ class FocusFactorRow {
     required this.diveId,
     required this.dateTime,
     this.entryTime,
-    this.timeOfDay,
+    required this.timeOfDay,
     this.maxDepth,
     this.avgDepth,
     this.durationMinutes,
@@ -39,9 +39,9 @@ class FocusFactorRow {
   final DateTime? entryTime;
 
   /// The Time patterns bucket, from sunrise and sunset at the dive site
-  /// (issue #3340). Null on a row built without one; the analyzer then
-  /// buckets the entry on the fallback clock times.
-  final TimeOfDayBucket? timeOfDay;
+  /// (issue #3340). Required so every row builder goes through
+  /// `TimeOfDayClassifier`, the one classification path.
+  final TimeOfDayBucket timeOfDay;
   final double? maxDepth;
   final double? avgDepth;
 

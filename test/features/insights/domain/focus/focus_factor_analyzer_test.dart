@@ -16,6 +16,7 @@ FocusFactorRow row(
 }) => FocusFactorRow(
   diveId: id,
   dateTime: DateTime.utc(2025, month, 1, hour),
+  timeOfDay: TimeOfDayBucket.morning,
   maxDepth: maxDepth,
   entryMethod: entry,
   siteId: siteId,
@@ -132,7 +133,7 @@ void main() {
     expect(ids(FocusMetric.rmv), hasLength(FocusFactorId.values.length));
   });
 
-  test('months and time of day come from the date', () {
+  test('months come from the date', () {
     final group = [
       row('a', month: 7, hour: 5),
       row('b', month: 7, hour: 7),
@@ -146,14 +147,6 @@ void main() {
     expect(
       factor<CategoricalFactor>(report, FocusFactorId.month).top.single.key,
       '7',
-    );
-    expect(
-      factor<CategoricalFactor>(
-        report,
-        FocusFactorId.timeOfDay,
-      ).top.map((s) => s.key),
-      // With no bucket on the row, the clock rule decides on the entry.
-      containsAll(['Night', 'Morning']),
     );
   });
 
@@ -202,6 +195,7 @@ void main() {
     FocusFactorRow typed(String id, List<String> types) => FocusFactorRow(
       diveId: id,
       dateTime: DateTime.utc(2025, 3, 1),
+      timeOfDay: TimeOfDayBucket.morning,
       diveTypes: types,
     );
     final group = [
