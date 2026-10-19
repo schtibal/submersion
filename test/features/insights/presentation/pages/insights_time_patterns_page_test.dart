@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:submersion/core/constants/units.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/insights/data/repositories/insights_repository.dart';
@@ -190,16 +191,24 @@ void main() {
       TimeOfDayDistribution distribution, {
       Brightness brightness = Brightness.light,
       TimeFormat? timeFormat,
-    }) => pumpPage(
-      tester,
-      days: () async => const [],
-      timesOfDay: () async => distribution,
-      months: () async => const [],
-      surfaceInterval: () async =>
-          (avgMinutes: null, minMinutes: null, maxMinutes: null),
-      brightness: brightness,
-      timeFormat: timeFormat,
-    );
+    }) {
+      // The footnote formats its clock times with DateFormat, which reads
+      // the process-wide Intl.defaultLocale, not MaterialApp.locale. Pin it
+      // so the AM/PM text cannot depend on an earlier test, and restore it.
+      final previousLocale = Intl.defaultLocale;
+      Intl.defaultLocale = 'en';
+      addTearDown(() => Intl.defaultLocale = previousLocale);
+      return pumpPage(
+        tester,
+        days: () async => const [],
+        timesOfDay: () async => distribution,
+        months: () async => const [],
+        surfaceInterval: () async =>
+            (avgMinutes: null, minMinutes: null, maxMinutes: null),
+        brightness: brightness,
+        timeFormat: timeFormat,
+      );
+    }
 
     List<PieChartSectionData> sections(WidgetTester tester) =>
         tester.widget<PieChart>(find.byType(PieChart)).data.sections;

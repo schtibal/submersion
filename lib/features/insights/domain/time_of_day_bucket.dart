@@ -171,7 +171,17 @@ class TimeOfDayClassifier {
         exit: exit,
         sunrise: sun.sunrise,
         sunset: sun.sunset,
-        nextSunrise: nextDay?.sunrise,
+        // The sun may not rise the next day (polar day or night begins);
+        // that date then takes the fallback sunrise, as any such day does.
+        nextSunrise: runsPastMidnight
+            ? nextDay?.sunrise ??
+                  DateTime.utc(
+                    entry.year,
+                    entry.month,
+                    entry.day + 1,
+                    fallbackSunriseHour,
+                  )
+            : null,
       ),
       basis: SunTimesBasis.site,
     );

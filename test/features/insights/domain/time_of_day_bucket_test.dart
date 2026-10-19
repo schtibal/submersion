@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:submersion/core/util/sun_times.dart';
 import 'package:submersion/features/insights/domain/time_of_day_bucket.dart';
 
 /// A wall clock on 1 March 2025; [day] moves it to a later date.
@@ -256,6 +257,33 @@ void main() {
       );
       expect(result.basis, SunTimesBasis.site);
       expect(result.bucket, TimeOfDayBucket.afternoon);
+    });
+
+    test('a next day with no sunrise takes the fallback sunrise', () {
+      // Tromso: find the last day with a sunrise before polar night.
+      const latitude = 69.65;
+      const longitude = 18.96;
+      var day = DateTime.utc(2025, 11, 1);
+      while (SunCalculator.utcFor(
+            day.year,
+            day.month,
+            day.day + 1,
+            latitude,
+            longitude,
+          ) !=
+          null) {
+        day = DateTime.utc(day.year, day.month, day.day + 1);
+      }
+      // In after dark, out at 06:30 the next day: past the 06:00 fallback
+      // sunrise, though long before the last real sunrise plus a day.
+      final result = classifier.classify(
+        entry: DateTime.utc(day.year, day.month, day.day, 23),
+        exit: DateTime.utc(day.year, day.month, day.day + 1, 6, 30),
+        latitude: latitude,
+        longitude: longitude,
+      );
+      expect(result.basis, SunTimesBasis.site);
+      expect(result.bucket, TimeOfDayBucket.dawn);
     });
 
     test('polar night falls back to the clock and says so', () {
