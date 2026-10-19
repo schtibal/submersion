@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/trips/domain/services/day_rhythm_layout.dart';
 
 void main() {
@@ -37,5 +38,49 @@ void main() {
       blocks.single.startFraction + blocks.single.widthFraction,
       lessThanOrEqualTo(1.0),
     );
+  });
+
+  group('night follows the Time patterns classifier', () {
+    // Bonaire on 1 March 2025: sunrise near 06:49, sunset near 18:42.
+    const bonaire = DiveSite(
+      id: 'bonaire',
+      name: 'Bonaire',
+      location: GeoPoint(12.15, -68.27),
+    );
+    Dive atSite(DateTime entry, DateTime exit) => Dive(
+      id: entry.toIso8601String(),
+      dateTime: entry,
+      entryTime: entry,
+      exitTime: exit,
+      site: bonaire,
+    );
+
+    test('a dive that crosses sunset is Dusk, not night', () {
+      final blocks = computeRhythmBlocks([
+        atSite(DateTime.utc(2025, 3, 1, 18, 10), DateTime.utc(2025, 3, 1, 19)),
+      ]);
+      expect(blocks.single.isNight, isFalse);
+    });
+
+    test('a dive wholly before the site sunrise is night', () {
+      final blocks = computeRhythmBlocks([
+        atSite(DateTime.utc(2025, 3, 1, 6, 5), DateTime.utc(2025, 3, 1, 6, 35)),
+      ]);
+      expect(blocks.single.isNight, isTrue);
+    });
+
+    test('a dive with no site uses the 06:00 and 18:00 fallback', () {
+      final blocks = computeRhythmBlocks([
+        dive(
+          DateTime.utc(2025, 3, 1, 6, 5),
+          bottomTime: const Duration(minutes: 30),
+        ),
+        dive(
+          DateTime.utc(2025, 3, 1, 18),
+          bottomTime: const Duration(minutes: 30),
+        ),
+      ]);
+      expect(blocks.map((b) => b.isNight), [isFalse, isTrue]);
+    });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/insights/domain/time_of_day_bucket.dart';
 
 /// Assumed duration when a dive has neither runtime nor bottom time.
 const Duration _fallbackDuration = Duration(minutes: 45);
@@ -12,6 +13,9 @@ const double _minWidthFraction = 0.02;
 class RhythmBlock extends Equatable {
   final double startFraction;
   final double widthFraction;
+
+  /// The whole dive was in darkness: the Night bucket of the Time patterns
+  /// classifier, so the trip story and Insights agree on what night is.
   final bool isNight;
 
   const RhythmBlock({
@@ -32,8 +36,13 @@ class RhythmBlock extends Equatable {
 /// are wall-clock-as-UTC in this codebase, so the components are the truth.
 /// This is why the day's date isn't needed — dives are already grouped into
 /// their calendar day upstream, and only the time-of-day matters here.
+///
+/// Night is decided by [TimeOfDayClassifier] against sunrise and sunset at
+/// the dive site, with the same exit time and fallback clock times as the
+/// Time patterns chart.
 List<RhythmBlock> computeRhythmBlocks(List<Dive> dives) {
   const daySeconds = 24 * 3600;
+  final classifier = TimeOfDayClassifier();
 
   return dives.map((dive) {
     final entry = dive.entryTime ?? dive.dateTime;
@@ -50,11 +59,20 @@ List<RhythmBlock> computeRhythmBlocks(List<Dive> dives) {
       }
     }
 
-    final hour = entry.hour;
+    final runtime = dive.effectiveRuntime;
+    final location = dive.site?.location;
+    final bucket = classifier
+        .classify(
+          entry: entry,
+          exit: dive.exitTime ?? (runtime == null ? null : entry.add(runtime)),
+          latitude: location?.latitude,
+          longitude: location?.longitude,
+        )
+        .bucket;
     return RhythmBlock(
       startFraction: start,
       widthFraction: width,
-      isNight: hour >= 18 || hour < 6,
+      isNight: bucket == TimeOfDayBucket.night,
     );
   }).toList();
 }
