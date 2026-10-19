@@ -22,6 +22,15 @@ class BackupPreferences {
   static const String _backupLocationLabelKey = 'backup_location_label';
   static const String _historyKey = 'backup_history';
   static const String _backupEncryptionEnabledKey = 'backup_encryption_enabled';
+  static const String _lastScheduledFailureAtKey =
+      'backup_last_scheduled_failure_at';
+  static const String _lastScheduledFailureMessageKey =
+      'backup_last_scheduled_failure_message';
+  static const String _lastCloudCopyMissingKey =
+      'backup_last_cloud_copy_missing';
+  static const String _lastBackupDestinationKey = 'backup_last_destination';
+  static const String _lastBackupCloudAccountIdKey =
+      'backup_last_cloud_account_id';
 
   final SharedPreferences _prefs;
 
@@ -33,6 +42,7 @@ class BackupPreferences {
 
   BackupSettings getSettings() {
     final lastBackupMs = _prefs.getInt(_lastBackupTimeKey);
+    final failedMs = _prefs.getInt(_lastScheduledFailureAtKey);
     return BackupSettings(
       enabled: _prefs.getBool(_enabledKey) ?? false,
       frequency: _parseFrequency(_prefs.getString(_frequencyKey)),
@@ -44,6 +54,16 @@ class BackupPreferences {
       backupLocation: _prefs.getString(_backupLocationKey),
       backupEncryptionEnabled:
           _prefs.getBool(_backupEncryptionEnabledKey) ?? false,
+      lastScheduledFailureAt: failedMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(failedMs)
+          : null,
+      lastScheduledFailureMessage: _prefs.getString(
+        _lastScheduledFailureMessageKey,
+      ),
+      lastCloudCopyMissing: _prefs.getBool(_lastCloudCopyMissingKey) ?? false,
+      lastBackupDestination: LastBackupDestination.values
+          .asNameMap()[_prefs.getString(_lastBackupDestinationKey)],
+      lastBackupCloudAccountId: _prefs.getString(_lastBackupCloudAccountIdKey),
     );
   }
 
@@ -65,6 +85,35 @@ class BackupPreferences {
 
   Future<void> setLastBackupTime(DateTime time) async {
     await _prefs.setInt(_lastBackupTimeKey, time.millisecondsSinceEpoch);
+  }
+
+  /// Re-reads values another isolate (the WorkManager backup job) wrote.
+  Future<void> reload() => _prefs.reload();
+
+  /// Records a failed scheduled backup (Settings > Data health, #3394).
+  Future<void> setLastScheduledFailure(DateTime at, String message) async {
+    await _prefs.setInt(_lastScheduledFailureAtKey, at.millisecondsSinceEpoch);
+    await _prefs.setString(_lastScheduledFailureMessageKey, message);
+  }
+
+  /// Whether the most recent backup's requested cloud copy is missing.
+  Future<void> setLastCloudCopyMissing(bool value) async {
+    await _prefs.setBool(_lastCloudCopyMissingKey, value);
+  }
+
+  /// Where the most recent backup went (Settings > Data, #3482), and for a
+  /// cloud copy the sync account it went to. Any other destination drops the
+  /// account, so an old cloud account is never named for a local backup.
+  Future<void> setLastBackupDestination(
+    LastBackupDestination value, {
+    String? cloudAccountId,
+  }) async {
+    await _prefs.setString(_lastBackupDestinationKey, value.name);
+    if (value == LastBackupDestination.cloud && cloudAccountId != null) {
+      await _prefs.setString(_lastBackupCloudAccountIdKey, cloudAccountId);
+    } else {
+      await _prefs.remove(_lastBackupCloudAccountIdKey);
+    }
   }
 
   Future<void> setCloudBackupEnabled(bool value) async {

@@ -221,14 +221,23 @@ class _FakeRepo implements AppSettingsRepository {
   @override
   Future<void> setRawSetting(String key, String value) async {}
 
-  /// Always-hide-labels setting (#1424), defaulting to today's behavior.
-  bool alwaysHideLabels = false;
+  /// Always-hide-labels settings (#1424), split by surface (#3222),
+  /// defaulting to today's behavior.
+  bool alwaysHideLabelsPhone = false;
+  bool alwaysHideLabelsDesktop = false;
 
   @override
-  Future<bool> getNavAlwaysHideLabels() async => alwaysHideLabels;
+  Future<bool> getNavAlwaysHideLabelsPhone() async => alwaysHideLabelsPhone;
   @override
-  Future<void> setNavAlwaysHideLabels(bool value) async {
-    alwaysHideLabels = value;
+  Future<void> setNavAlwaysHideLabelsPhone(bool value) async {
+    alwaysHideLabelsPhone = value;
+  }
+
+  @override
+  Future<bool> getNavAlwaysHideLabelsDesktop() async => alwaysHideLabelsDesktop;
+  @override
+  Future<void> setNavAlwaysHideLabelsDesktop(bool value) async {
+    alwaysHideLabelsDesktop = value;
   }
 
   @override
@@ -310,10 +319,10 @@ void main() {
       await tester.pumpWidget(await _buildTestApp());
       await tester.pumpAndSettle();
 
-      // Tracks is rail index 15 (after Transfer, before Settings; Documents,
-      // issue #2613, sits after Certifications, earlier in the rail).
+      // Tracks is rail index 14 (after Transfer, before Settings; Documents,
+      // issue #2613, sits after Training, earlier in the rail).
       final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      rail.onDestinationSelected!(15);
+      rail.onDestinationSelected!(14);
       await tester.pumpAndSettle();
 
       expect(find.text('Tracks Page'), findsOneWidget);
@@ -321,7 +330,7 @@ void main() {
       final selected = tester
           .widget<NavigationRail>(find.byType(NavigationRail))
           .selectedIndex;
-      expect(selected, 15);
+      expect(selected, 14);
     });
 
     testWidgets('the Tracks destination stays selected on a nested tracks '
@@ -341,7 +350,7 @@ void main() {
         tester
             .widget<NavigationRail>(find.byType(NavigationRail))
             .selectedIndex,
-        15,
+        14,
       );
     });
 
@@ -558,7 +567,7 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.reset);
 
-        final repo = _FakeRepo()..alwaysHideLabels = true;
+        final repo = _FakeRepo()..alwaysHideLabelsPhone = true;
         await tester.pumpWidget(await buildHarness(repo: repo));
         await tester.pumpAndSettle();
 
@@ -591,13 +600,50 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.reset);
 
-        final repo = _FakeRepo()..alwaysHideLabels = true;
+        final repo = _FakeRepo()..alwaysHideLabelsDesktop = true;
         await tester.pumpWidget(await buildHarness(repo: repo));
         await tester.pumpAndSettle();
 
         final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
         expect(rail.extended, isFalse);
       });
+
+      testWidgets(
+        'a phone-only setting does not collapse the desktop rail (#3222)',
+        (tester) async {
+          tester.view.physicalSize = const Size(1400, 900);
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.reset);
+
+          final repo = _FakeRepo()..alwaysHideLabelsPhone = true;
+          await tester.pumpWidget(await buildHarness(repo: repo));
+          await tester.pumpAndSettle();
+
+          final rail = tester.widget<NavigationRail>(
+            find.byType(NavigationRail),
+          );
+          expect(rail.extended, isTrue);
+        },
+      );
+
+      testWidgets(
+        'a desktop-only setting does not hide the phone bar labels (#3222)',
+        (tester) async {
+          tester.view.physicalSize = const Size(400, 800);
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.reset);
+
+          final repo = _FakeRepo()..alwaysHideLabelsDesktop = true;
+          await tester.pumpWidget(await buildHarness(repo: repo));
+          await tester.pumpAndSettle();
+
+          final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+          expect(
+            bar.labelBehavior,
+            NavigationDestinationLabelBehavior.alwaysShow,
+          );
+        },
+      );
 
       testWidgets(
         'the manual collapse arrow still overrides the setting for the session',
@@ -679,7 +725,7 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.reset);
 
-        final repo = _FakeRepo()..alwaysHideLabels = true;
+        final repo = _FakeRepo()..alwaysHideLabelsDesktop = true;
         await tester.pumpWidget(await buildHarness(repo: repo));
         await tester.pumpAndSettle();
 
@@ -728,7 +774,7 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.reset);
 
-        final repo = _FakeRepo()..alwaysHideLabels = true;
+        final repo = _FakeRepo()..alwaysHideLabelsDesktop = true;
         await tester.pumpWidget(
           await buildHarness(repo: repo, locale: const Locale('ar')),
         );
@@ -799,7 +845,7 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.reset);
 
-        final repo = _FakeRepo()..alwaysHideLabels = true;
+        final repo = _FakeRepo()..alwaysHideLabelsPhone = true;
         await tester.pumpWidget(await buildHarness(repo: repo));
         await tester.pumpAndSettle();
 
@@ -878,7 +924,7 @@ void main() {
       expect(find.widgetWithText(NavigationDestination, 'Trips'), findsNothing);
     });
 
-    testWidgets('wide-screen rail still shows all 17 default destinations', (
+    testWidgets('wide-screen rail still shows all 16 default destinations', (
       tester,
     ) async {
       // Wide viewport (desktop-extended so rail labels are rendered as Text).
@@ -892,12 +938,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // The rail reads its own storage key, which this repo leaves unset, so
-      // it keeps the default 17-entry order no matter how the phone bottom
+      // it keeps the default 16-entry order no matter how the phone bottom
       // bar was customized. That independence is the point of the two keys.
       // NavigationRailDestination is a descriptor (not a Widget), so inspect
       // the NavigationRail.destinations list directly.
       final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.destinations, hasLength(17));
+      expect(rail.destinations, hasLength(16));
 
       String labelOf(NavigationRailDestination d) {
         final label = d.label;
@@ -911,13 +957,12 @@ void main() {
         'Dives',
         'Sites',
         'Trips',
-        'Media',
         'Equipment',
         'Buddies',
         'Dive Centers',
-        'Certifications',
+        'Training',
+        'Media',
         'Documents',
-        'Courses',
         'Species',
         'Insights',
         'Planning',
@@ -970,7 +1015,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.destinations, hasLength(17));
+      expect(rail.destinations, hasLength(16));
 
       String labelOf(NavigationRailDestination d) {
         final label = d.label;
@@ -987,7 +1032,7 @@ void main() {
         'Dives',
       ]);
       // Nothing is lost: every destination still has a rail row.
-      expect(labels.toSet(), hasLength(17));
+      expect(labels.toSet(), hasLength(16));
     });
 
     testWidgets('rail customization leaves the phone bottom bar alone', (
@@ -1141,8 +1186,7 @@ void main() {
         'Sites',
         'Trips',
         'Dive Centers',
-        'Certifications',
-        'Courses',
+        'Training',
         'Planning',
         'Transfer',
         'Settings',

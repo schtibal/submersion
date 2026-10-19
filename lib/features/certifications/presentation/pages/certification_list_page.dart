@@ -3,18 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:submersion/core/constants/list_view_mode.dart';
-import 'package:submersion/core/constants/sort_options.dart';
-import 'package:submersion/core/constants/sort_options_display.dart';
-import 'package:submersion/core/models/sort_state.dart';
 import 'package:submersion/features/certifications/domain/constants/certification_field.dart';
 import 'package:submersion/features/certifications/presentation/providers/certification_providers.dart';
+import 'package:submersion/features/certifications/presentation/widgets/certification_sort_sheet.dart';
+import 'package:submersion/features/certifications/presentation/widgets/certification_view_switch_selector.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/selection/table_selection_owner.dart';
 import 'package:submersion/shared/widgets/entity_table/entity_table_column_picker.dart';
 import 'package:submersion/shared/widgets/list_view_mode_toggle.dart';
 import 'package:submersion/shared/widgets/master_detail/master_detail_scaffold.dart';
 import 'package:submersion/shared/widgets/master_detail/responsive_breakpoints.dart';
-import 'package:submersion/shared/widgets/sort_bottom_sheet.dart';
 import 'package:submersion/shared/widgets/table_mode_layout/table_mode_layout.dart';
 import 'package:submersion/features/certifications/presentation/widgets/certification_list_content.dart';
 import 'package:submersion/features/certifications/presentation/widgets/certification_summary_widget.dart';
@@ -28,9 +26,14 @@ import 'package:submersion/features/certifications/presentation/widgets/certific
 import 'package:submersion/features/certifications/presentation/providers/certification_list_count_provider.dart';
 import 'package:submersion/features/certification_agencies/presentation/providers/certification_catalog_context.dart';
 import 'package:submersion/features/certification_agencies/presentation/providers/certification_catalog_providers.dart';
+import 'package:submersion/shared/widgets/section_header_title.dart';
 
 class CertificationListPage extends ConsumerStatefulWidget {
-  const CertificationListPage({super.key});
+  const CertificationListPage({super.key, this.headerTitle});
+
+  /// Replaces every layout's header title, as Training's tab switch does
+  /// (#3437).
+  final SectionHeaderTitle? headerTitle;
 
   @override
   ConsumerState<CertificationListPage> createState() =>
@@ -65,11 +68,22 @@ class _CertificationListPageState extends ConsumerState<CertificationListPage>
     // optional detail pane.
     final viewMode = ref.watch(certificationListViewModeProvider);
     if (viewMode == ListViewMode.table) {
+      final countLabel = certificationListCountLabel(context, ref);
       return FocusTraversalGroup(
         child: TableModeLayout(
           sectionKey: 'certifications',
           appBarTitle: context.l10n.nav_certifications,
-          appBarSubtitle: certificationListCountLabel(context, ref),
+          appBarSubtitle: countLabel,
+          appBarTitleWidget: widget.headerTitle?.build(
+            context,
+            SectionHeaderSlot.table,
+            countLabel,
+          ),
+          appBarToolbarHeight: widget.headerTitle?.appBarHeight(
+            context,
+            countLabel,
+          ),
+          phoneAppBarPin: widget.headerTitle?.pinAppBar,
           tableContent: CertificationListContent(
             showAppBar: false,
             selectionController: tableSelection,
@@ -135,23 +149,15 @@ class _CertificationListPageState extends ConsumerState<CertificationListPage>
             IconButton(
               icon: const Icon(Icons.sort, size: 20),
               tooltip: context.l10n.certifications_list_tooltip_sort,
-              onPressed: () {
-                final sort = ref.read(certificationSortProvider);
-                showSortBottomSheet<CertificationSortField>(
-                  context: context,
-                  title: context.l10n.certifications_list_sort_title,
-                  currentField: sort.field,
-                  currentDirection: sort.direction,
-                  fields: CertificationSortField.values,
-                  getFieldDisplayName: (field) =>
-                      field.localizedName(context.l10n),
-                  getFieldIcon: (field) => field.icon,
-                  onSortChanged: (field, direction) {
-                    ref.read(certificationSortProvider.notifier).state =
-                        SortState(field: field, direction: direction);
-                  },
-                );
-              },
+              // Table mode stays flat -- no grouping control here (#3359) --
+              // but still offers the List/Wallet switch the sort sheet
+              // carries everywhere else.
+              onPressed: () => showCertificationSortSheet(
+                context,
+                ref,
+                currentView: CertificationView.list,
+                includeGroupBySelector: false,
+              ),
             ),
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert, size: 20),
@@ -191,6 +197,7 @@ class _CertificationListPageState extends ConsumerState<CertificationListPage>
               onItemSelected: onItemSelected,
               selectedId: selectedId,
               showAppBar: false,
+              headerTitle: widget.headerTitle,
             ),
         detailBuilder: (context, certificationId) => CertificationDetailPage(
           certificationId: certificationId,
@@ -221,6 +228,7 @@ class _CertificationListPageState extends ConsumerState<CertificationListPage>
     return FocusTraversalGroup(
       child: CertificationListContent(
         showAppBar: true,
+        headerTitle: widget.headerTitle,
         floatingActionButton: fab,
       ),
     );

@@ -27,7 +27,9 @@ void main() {
   });
 
   test('every shortcut borrows the accent of a real nav destination', () {
-    final builtIns = kNavDestinations.map((d) => d.id).toSet();
+    // Matched against each destination's accent, not its id: Training wears
+    // the Certifications accent, which the card wallet shortcut borrows.
+    final builtIns = kNavDestinations.map((d) => d.accentId).toSet();
     for (final s in kNavShortcuts) {
       expect(builtIns, contains(s.accent), reason: s.id);
     }
@@ -83,6 +85,11 @@ void main() {
     test('a page name that already fits is the nav label', () {
       final records = navShortcutById('records')!;
       expect(navShortcutDestination(records).label(l10n), 'Records');
+    });
+
+    test('the backup shortcut uses the Backups page name (#3482)', () {
+      final backup = navShortcutById('backup')!;
+      expect(backup.label(l10n), 'Backups');
     });
 
     test('the long names all have a short nav label', () {

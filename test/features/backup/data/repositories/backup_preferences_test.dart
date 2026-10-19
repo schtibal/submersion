@@ -38,6 +38,59 @@ void main() {
       expect(backupPreferences.getSettings().backupEncryptionEnabled, isTrue);
     });
 
+    test('scheduled failure defaults empty and round-trips', () async {
+      expect(backupPreferences.getSettings().lastScheduledFailureAt, isNull);
+      final at = DateTime(2026, 10, 17, 9, 30);
+      await backupPreferences.setLastScheduledFailure(at, 'disk full');
+      final settings = backupPreferences.getSettings();
+      expect(settings.lastScheduledFailureAt, at);
+      expect(settings.lastScheduledFailureMessage, 'disk full');
+    });
+
+    test('lastCloudCopyMissing defaults false and round-trips', () async {
+      expect(backupPreferences.getSettings().lastCloudCopyMissing, isFalse);
+      await backupPreferences.setLastCloudCopyMissing(true);
+      expect(backupPreferences.getSettings().lastCloudCopyMissing, isTrue);
+    });
+
+    test('lastBackupDestination defaults null and round-trips', () async {
+      expect(backupPreferences.getSettings().lastBackupDestination, isNull);
+      await backupPreferences.setLastBackupDestination(
+        LastBackupDestination.cloud,
+      );
+      expect(
+        backupPreferences.getSettings().lastBackupDestination,
+        LastBackupDestination.cloud,
+      );
+    });
+
+    test('a cloud destination keeps its account, any other drops it', () async {
+      await backupPreferences.setLastBackupDestination(
+        LastBackupDestination.cloud,
+        cloudAccountId: 'acct-drive',
+      );
+      expect(
+        backupPreferences.getSettings().lastBackupCloudAccountId,
+        'acct-drive',
+      );
+
+      await backupPreferences.setLastBackupDestination(
+        LastBackupDestination.device,
+      );
+      expect(backupPreferences.getSettings().lastBackupCloudAccountId, isNull);
+    });
+
+    test('an unknown stored destination reads as null', () async {
+      SharedPreferences.setMockInitialValues({
+        'backup_last_destination': 'moon',
+      });
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        BackupPreferences(prefs).getSettings().lastBackupDestination,
+        isNull,
+      );
+    });
+
     test('setFrequency persists value', () async {
       await backupPreferences.setFrequency(BackupFrequency.daily);
 

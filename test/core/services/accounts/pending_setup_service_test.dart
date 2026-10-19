@@ -164,6 +164,36 @@ void main() {
     },
   );
 
+  // Issue #3522: prompts name accounts and stores by their short names.
+  group('names', () {
+    const r2 =
+        'sync @ 149b84f66d5479265f3e4d4ad4740926.r2.cloudflarestorage.com';
+
+    test('a sign-in item uses the nickname, else the short label', () async {
+      final named = await accounts.create(kind: AccountKind.s3, label: r2);
+      await accounts.setNickname(named.id, 'Club bucket');
+      await accounts.create(
+        kind: AccountKind.s3,
+        label: 'photos @ s3.eu-west-1.amazonaws.com',
+      );
+      final items = await service().compute();
+      expect(items.map((i) => i.label).toSet(), {
+        'Club bucket',
+        'photos @ Amazon S3',
+      });
+    });
+
+    test('a store item uses the short label', () async {
+      await stores.upsertActive(
+        storeId: 'store-1',
+        providerType: 's3',
+        displayHint: r2,
+      );
+      final items = await service().compute();
+      expect(items.single.label, 'sync @ Cloudflare R2');
+    });
+  });
+
   test('signed-in accounts yield no items', () async {
     await accounts.create(kind: AccountKind.s3, label: 'MinIO');
     final items = await service(s3Status: AccountStatus.signedIn).compute();
@@ -211,16 +241,57 @@ void main() {
     expect(routes['account_${syncAccount.id}'], '/settings/cloud-sync');
   });
 
+  // Issue #3388: routing reads the same usage map as the Connected Accounts
+  // page, so the account this device is attached through goes to Media
+  // Storage even when the announced store has since moved to another kind.
+  test('the attached media account routes to media storage', () async {
+    final mediaAccount = await accounts.create(
+      kind: AccountKind.s3,
+      label: 'S3 media storage',
+    );
+    await stores.upsertActive(
+      storeId: 'store-2',
+      providerType: 'dropbox',
+      displayHint: 'hint',
+    );
+    await MediaStoreAttachState(prefs: prefs).setAttached(
+      'store-1',
+      providerType: CloudProviderType.s3,
+      accountId: mediaAccount.id,
+    );
+    await service().dismiss('store_store-2');
+
+    final items = await service().compute();
+
+    expect(items.single.key, 'account_${mediaAccount.id}');
+    expect(items.single.route, '/settings/media-storage');
+  });
+
   test('dismissal is per key and sticks', () async {
     final account = await accounts.create(kind: AccountKind.s3, label: 'M');
     final svc = service();
     expect(await svc.compute(), hasLength(1));
 
     await svc.dismiss('account_${account.id}');
-    expect(await svc.compute(), isEmpty);
+    expect((await svc.compute()).where((i) => !i.dismissed), isEmpty);
 
     // A different object (new key) still surfaces.
     await accounts.create(kind: AccountKind.s3, label: 'Other');
-    expect(await svc.compute(), hasLength(1));
+    expect((await svc.compute()).where((i) => !i.dismissed), hasLength(1));
+  });
+
+  // Issue #3482 review: dismissing the prompt hides the card entry, but the
+  // account still needs a sign-in, and the Settings > Data accounts row must
+  // keep saying so instead of listing it as fine.
+  test('a dismissed sign-in stays listed, flagged as dismissed', () async {
+    final account = await accounts.create(kind: AccountKind.s3, label: 'M');
+    final svc = service();
+    expect((await svc.compute()).single.dismissed, isFalse);
+
+    await svc.dismiss('account_${account.id}');
+
+    final item = (await svc.compute()).single;
+    expect(item.kind, SetupItemKind.accountSignIn);
+    expect(item.dismissed, isTrue);
   });
 }

@@ -384,8 +384,10 @@ extension RungsFromV231 on AppDatabase {
     }
     if (from < 288) await reportProgress();
     // v289: shared dive-site library tables and dive_sites.shared_library_id
-    // (issue #2567). Idempotent; re-asserted in beforeOpen. Renumbered from
-    // 288 after #2515 shipped 288.
+    // (issue #2567), plus the key, trust and backup columns added before it
+    // shipped. Idempotent; re-asserted in beforeOpen, which is how a database
+    // already past 289 gains the later columns. Renumbered from 288 after
+    // #2515 shipped 288.
     if (from < 289) {
       await _assertSharedLibrarySchema();
     }
@@ -398,5 +400,33 @@ extension RungsFromV231 on AppDatabase {
       await _assertSegmentSplitAtRateColumn();
     }
     if (from < 290) await reportProgress();
+    // v291: shared_libraries.description (issue #3389). Column only, read
+    // from each library's info.json at the next sync; re-asserted in
+    // beforeOpen through _assertSharedLibrarySchema.
+    if (from < 291) {
+      await _assertSharedLibrarySchema();
+    }
+    if (from < 291) await reportProgress();
+    // v292: shared_libraries.removals_json (issue #3481). Column only, filled
+    // from the library's removal records at the next sync; re-asserted in
+    // beforeOpen through _assertSharedLibrarySchema.
+    if (from < 292) {
+      await _assertSharedLibrarySchema();
+    }
+    if (from < 292) await reportProgress();
+    // v294: clears certifications.photo_front / photo_back wherever the
+    // v277 copy put the card in the documents store (issue #3502). Data
+    // step, rung only. 293 is claimed by the accounts work (#3482).
+    if (from < 294) {
+      await _clearCopiedCardPhotoColumns();
+    }
+    if (from < 294) await reportProgress();
+    // v295: connected_accounts.nickname (issue #3522). Column only, written
+    // when the diver renames an account; re-asserted in beforeOpen through
+    // _assertConnectedAccountsSchema.
+    if (from < 295) {
+      await _assertConnectedAccountsSchema();
+    }
+    if (from < 295) await reportProgress();
   }
 }
