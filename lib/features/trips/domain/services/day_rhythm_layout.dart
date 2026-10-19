@@ -59,12 +59,18 @@ List<RhythmBlock> computeRhythmBlocks(List<Dive> dives) {
       }
     }
 
+    // The exit as `diveExitMillisSql` reads it for the Time patterns chart:
+    // the stored exit when it is after the entry, else entry plus runtime.
+    final storedExit = dive.exitTime;
     final runtime = dive.effectiveRuntime;
+    final exit = storedExit != null && storedExit.isAfter(entry)
+        ? storedExit
+        : (runtime == null ? null : entry.add(runtime));
     final location = dive.site?.location;
     final bucket = classifier
         .classify(
           entry: entry,
-          exit: dive.exitTime ?? (runtime == null ? null : entry.add(runtime)),
+          exit: exit,
           latitude: location?.latitude,
           longitude: location?.longitude,
         )

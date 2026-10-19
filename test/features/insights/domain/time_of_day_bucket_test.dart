@@ -227,6 +227,23 @@ void main() {
       );
     });
 
+    test('a dive across sunset and the next sunrise is Dusk', () {
+      // Sunset was crossed first; reaching the next sunrise does not make an
+      // afternoon entry a dawn dive.
+      expect(classify(at(17), at(7, 30, 2)).bucket, TimeOfDayBucket.dusk);
+    });
+
+    test('0,0 coordinates are no location', () {
+      final result = classifier.classify(
+        entry: at(17, 40),
+        exit: at(18, 30),
+        latitude: 0,
+        longitude: 0,
+      );
+      expect(result.basis, SunTimesBasis.noLocation);
+      expect(result.bucket, TimeOfDayBucket.dusk);
+    });
+
     test('a late daylight dive at high latitude is Afternoon', () {
       // Reykjavik, 1 June: sunset near 23:39 on a UTC clock with no daylight
       // saving. A 22:30 dive is still in daylight, so the rules make it

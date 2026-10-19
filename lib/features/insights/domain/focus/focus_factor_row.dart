@@ -10,7 +10,6 @@ class FocusFactorRow {
   const FocusFactorRow({
     required this.diveId,
     required this.dateTime,
-    this.entryTime,
     required this.timeOfDay,
     this.maxDepth,
     this.avgDepth,
@@ -34,9 +33,6 @@ class FocusFactorRow {
 
   /// `dive_date_time`, a wall-clock value stored as UTC.
   final DateTime dateTime;
-
-  /// `entry_time` when recorded; preferred for time of day.
-  final DateTime? entryTime;
 
   /// The Time patterns bucket, from sunrise and sunset at the dive site
   /// (issue #3340). Required so every row builder goes through

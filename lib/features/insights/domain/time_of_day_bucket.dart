@@ -96,9 +96,12 @@ class TimeOfDayClassifier {
     final end = exit != null && exit.isAfter(entry) ? exit : entry;
     final laterSunrise = nextSunrise ?? sunrise.add(const Duration(days: 1));
 
+    // A dive crossing both sunset and the next sunrise takes the first one
+    // it crossed, so only an entry already past sunset reaches the next
+    // sunrise here; a daylight entry falls through to Dusk.
     final crossesSunrise =
         (entry.isBefore(sunrise) && end.isAfter(sunrise)) ||
-        (!entry.isBefore(sunrise) && end.isAfter(laterSunrise));
+        (!entry.isBefore(sunset) && end.isAfter(laterSunrise));
     if (crossesSunrise) return TimeOfDayBucket.dawn;
     if (entry.isBefore(sunset) && end.isAfter(sunset)) {
       return TimeOfDayBucket.dusk;
@@ -114,7 +117,7 @@ class TimeOfDayClassifier {
   /// Buckets a dive at the site at [latitude], [longitude].
   ///
   /// Falls back to [fallbackSunriseHour] and [fallbackSunsetHour] when the
-  /// coordinates are missing or unusable, or the sun does not rise or set
+  /// coordinates are missing, unusable or 0,0, or the sun does not rise or set
   /// there on the entry date; [SunTimesBasis] says which.
   TimeOfDayClassification classify({
     required DateTime entry,
@@ -122,8 +125,11 @@ class TimeOfDayClassifier {
     double? latitude,
     double? longitude,
   }) {
+    // 0,0 is the stand-in devices and logbooks write for "no fix" (see
+    // `ImportSiteLocation.fix`), not a dive site in the Gulf of Guinea.
     if (latitude == null ||
         longitude == null ||
+        (latitude == 0 && longitude == 0) ||
         !SunCalculator.isValidCoordinate(latitude, longitude)) {
       return (bucket: _fallback(entry, exit), basis: SunTimesBasis.noLocation);
     }

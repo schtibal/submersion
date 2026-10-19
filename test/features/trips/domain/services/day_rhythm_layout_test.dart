@@ -69,6 +69,23 @@ void main() {
       expect(blocks.single.isNight, isTrue);
     });
 
+    test('an exit not after the entry falls back to entry plus runtime', () {
+      // The Time patterns chart reads this dive as 06:05 plus 60 minutes,
+      // across the 06:49 sunrise, so Dawn; the entry alone would say Night.
+      final entry = DateTime.utc(2025, 3, 1, 6, 5);
+      final blocks = computeRhythmBlocks([
+        Dive(
+          id: 'bad-exit',
+          dateTime: entry,
+          entryTime: entry,
+          exitTime: entry,
+          runtime: const Duration(minutes: 60),
+          site: bonaire,
+        ),
+      ]);
+      expect(blocks.single.isNight, isFalse);
+    });
+
     test('a dive with no site uses the 06:00 and 18:00 fallback', () {
       final blocks = computeRhythmBlocks([
         dive(

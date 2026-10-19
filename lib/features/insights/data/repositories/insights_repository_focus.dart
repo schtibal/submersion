@@ -29,7 +29,7 @@ extension InsightsRepositoryFocus on InsightsRepository {
         SELECT
           d.id,
           d.dive_date_time,
-          d.entry_time,
+          ${diveStartMillisSql('d')} AS start_ms,
           ${diveExitMillisSql('d')} AS exit_ms,
           s.latitude AS site_latitude,
           s.longitude AS site_longitude,
@@ -99,13 +99,9 @@ extension InsightsRepositoryFocus on InsightsRepository {
           FocusFactorRow(
             diveId: row.read<String>('id'),
             dateTime: wallClock(row.read<int>('dive_date_time'))!,
-            entryTime: wallClock(row.read<int?>('entry_time')),
             timeOfDay: classifier
                 .classify(
-                  entry: wallClock(
-                    row.read<int?>('entry_time') ??
-                        row.read<int>('dive_date_time'),
-                  )!,
+                  entry: wallClock(row.read<int>('start_ms'))!,
                   exit: wallClock(row.read<int?>('exit_ms')),
                   latitude: row.read<double?>('site_latitude'),
                   longitude: row.read<double?>('site_longitude'),
