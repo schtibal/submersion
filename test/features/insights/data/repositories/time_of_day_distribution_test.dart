@@ -268,4 +268,20 @@ void main() {
     expect({for (final s in result.segments) s.label: s.count}, {'Morning': 1});
     expect(result.divesWithoutLocation, 1);
   });
+
+  test('a site at 0,0 counts as having no location', () async {
+    // 0,0 is the stand-in devices write for no fix, so the dive uses the
+    // default times and is named in the footnote.
+    await site('null-island', latitude: 0, longitude: 0);
+    await dive(
+      'placeholder',
+      start: clock(17, 40),
+      exit: clock(18, 30),
+      siteId: 'null-island',
+    );
+
+    final result = await repository.getDivesByTimeOfDay();
+    expect({for (final s in result.segments) s.label: s.count}, {'Dusk': 1});
+    expect(result.divesWithoutLocation, 1);
+  });
 }

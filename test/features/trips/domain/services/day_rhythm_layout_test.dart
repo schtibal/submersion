@@ -30,6 +30,21 @@ void main() {
     expect(blocks.single.widthFraction, 0.02); // clamped up
   });
 
+  test('draws the block to the recorded exit', () {
+    // No runtime or bottom time: the block ends at the exit the night
+    // decision used, not after the 45 minute stand-in.
+    final entry = DateTime.utc(2026, 3, 8, 12);
+    final blocks = computeRhythmBlocks([
+      Dive(
+        id: 'exit-only',
+        dateTime: entry,
+        entryTime: entry,
+        exitTime: entry.add(const Duration(hours: 2, minutes: 24)),
+      ),
+    ]);
+    expect(blocks.single.widthFraction, closeTo(0.1, 0.001)); // 2.4h/24h
+  });
+
   test('clamps blocks that run past midnight', () {
     final blocks = computeRhythmBlocks([
       dive(DateTime(2026, 3, 8, 23, 30)), // default 45min crosses midnight

@@ -46,7 +46,15 @@ List<RhythmBlock> computeRhythmBlocks(List<Dive> dives) {
 
   return dives.map((dive) {
     final entry = dive.entryTime ?? dive.dateTime;
-    final duration = dive.runtime ?? dive.bottomTime ?? _fallbackDuration;
+    // The exit as `diveExitMillisSql` reads it for the Time patterns chart:
+    // the stored exit when it is after the entry, else entry plus runtime.
+    // The block is drawn to the same exit that decides night.
+    final storedExit = dive.exitTime;
+    final runtime = dive.effectiveRuntime;
+    final exit = storedExit != null && storedExit.isAfter(entry)
+        ? storedExit
+        : (runtime == null ? null : entry.add(runtime));
+    final duration = exit?.difference(entry) ?? _fallbackDuration;
 
     final startSeconds = entry.hour * 3600 + entry.minute * 60 + entry.second;
     var start = (startSeconds / daySeconds).clamp(0.0, 1.0);
@@ -59,13 +67,6 @@ List<RhythmBlock> computeRhythmBlocks(List<Dive> dives) {
       }
     }
 
-    // The exit as `diveExitMillisSql` reads it for the Time patterns chart:
-    // the stored exit when it is after the entry, else entry plus runtime.
-    final storedExit = dive.exitTime;
-    final runtime = dive.effectiveRuntime;
-    final exit = storedExit != null && storedExit.isAfter(entry)
-        ? storedExit
-        : (runtime == null ? null : entry.add(runtime));
     final location = dive.site?.location;
     final bucket = classifier
         .classify(
