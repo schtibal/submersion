@@ -343,6 +343,74 @@ void main() {
 
         expect(current.decoSwitchDepth, isNull);
       });
+
+      testWidgets(
+        'a diluent is its own limit, not lumped with the bottom one',
+        (tester) async {
+          // A Dil MOD distinct from both the bottom and the deco limit, so
+          // nothing here can pass by sharing a limit value with another role.
+          const distinctDil = UnitFormatter(
+            AppSettings(ccrDiluentModPpO2: 1.3),
+          );
+          await tester.pumpWidget(
+            host(
+              item: seed(role: TankRole.backGas, o2: 32, mod: 25),
+              units: distinctDil,
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await pickRole(tester, 'Back Gas', 'Diluent');
+          expect(
+            current.decoSwitchDepth,
+            isNull,
+            reason:
+                "a bottom-limit MOD must not carry onto the diluent's "
+                'own limit',
+          );
+
+          await tester.enterText(field('MOD'), '20');
+          await tester.pumpAndSettle();
+          await pickRole(tester, 'Diluent', 'Stage');
+          expect(
+            current.decoSwitchDepth,
+            25,
+            reason:
+                'Stage shares the bottom limit with Back Gas, not with '
+                'the diluent it was set on',
+          );
+
+          await pickRole(tester, 'Stage', 'Diluent');
+          expect(current.decoSwitchDepth, 20);
+        },
+      );
+
+      testWidgets(
+        'a diluent stays its own limit even sharing the bottom ppO2 value',
+        (tester) async {
+          // Dil MOD and the bottom limit set to the same 1.4: a role is
+          // still the limit it is, not the number it happens to resolve to.
+          const sameValue = UnitFormatter(
+            AppSettings(ppO2MaxWorking: 1.4, ccrDiluentModPpO2: 1.4),
+          );
+          await tester.pumpWidget(
+            host(
+              item: seed(role: TankRole.backGas, o2: 32, mod: 25),
+              units: sameValue,
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await pickRole(tester, 'Back Gas', 'Diluent');
+          expect(
+            current.decoSwitchDepth,
+            isNull,
+            reason:
+                'back gas and diluent are different limits even when both '
+                'happen to be set to 1.4',
+          );
+        },
+      );
     });
 
     testWidgets('the role field and every role option carry the role glyph', (

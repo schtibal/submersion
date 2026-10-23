@@ -84,11 +84,11 @@ class _CylinderConfigItemEditorState extends State<CylinderConfigItemEditor> {
   String? _presetName;
 
   /// MODs set by hand that a role change put aside this session, keyed by
-  /// whether the limit they were set against is the deco one (issue #3567).
-  /// A role on the other limit takes its default; changing back restores
-  /// the MOD, so a slip of the dropdown loses nothing. What is saved is
-  /// only the MOD in effect, so this goes with the page.
-  final Map<bool, double> _setAsideMods = {};
+  /// which limit they were set against (issue #3567). A role on a different
+  /// limit takes its default; changing back restores the MOD, so a slip of
+  /// the dropdown loses nothing. What is saved is only the MOD in effect, so
+  /// this goes with the page.
+  final Map<ModLimitClass, double> _setAsideMods = {};
 
   @override
   void initState() {
@@ -222,14 +222,14 @@ class _CylinderConfigItemEditorState extends State<CylinderConfigItemEditor> {
 
   void _onRole(TankRole role) {
     final item = _item;
-    final fromDeco = usesDecoLimit(item.tankRole, _gas);
-    final toDeco = usesDecoLimit(role, _gas);
-    if (fromDeco == toDeco) {
+    final fromClass = modLimitClassFor(item.tankRole, _gas);
+    final toClass = modLimitClassFor(role, _gas);
+    if (fromClass == toClass) {
       _emit(item.copyWith(tankRole: role));
       return;
     }
-    if (item.decoSwitchDepth case final mod?) _setAsideMods[fromDeco] = mod;
-    _emit(switch (_setAsideMods.remove(toDeco)) {
+    if (item.decoSwitchDepth case final mod?) _setAsideMods[fromClass] = mod;
+    _emit(switch (_setAsideMods.remove(toClass)) {
       final restored? => item.copyWith(
         tankRole: role,
         decoSwitchDepth: restored,
@@ -498,6 +498,7 @@ class _CylinderConfigItemEditorState extends State<CylinderConfigItemEditor> {
                     overrideMeters: item.decoSwitchDepth,
                     bottomPpO2: settings.ppO2MaxWorking,
                     decoPpO2: settings.ppO2MaxDeco,
+                    diluentPpO2: settings.ccrDiluentModPpO2,
                     units: _units,
                     onChanged: (meters) => _emit(
                       meters == null
@@ -515,6 +516,7 @@ class _CylinderConfigItemEditorState extends State<CylinderConfigItemEditor> {
               overrideMeters: item.decoSwitchDepth,
               bottomPpO2: settings.ppO2MaxWorking,
               decoPpO2: settings.ppO2MaxDeco,
+              diluentPpO2: settings.ccrDiluentModPpO2,
               units: _units,
               onReset: () => _emit(item.copyWith(clearDecoSwitchDepth: true)),
             ),

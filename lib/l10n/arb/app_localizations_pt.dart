@@ -14735,6 +14735,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get tankMod_limitDeco => 'limite de descompressão';
 
   @override
+  String get tankMod_limitDiluent => 'MOD Dil';
+
+  @override
   String tankMod_overridden(String depth) {
     return 'Definida por você · padrão $depth';
   }

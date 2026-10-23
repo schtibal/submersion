@@ -14528,6 +14528,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tankMod_limitDeco => 'deco limit';
 
   @override
+  String get tankMod_limitDiluent => 'Dil MOD';
+
+  @override
   String tankMod_overridden(String depth) {
     return 'Set by you · default $depth';
   }
