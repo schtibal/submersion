@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inline dive card editing</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+<style>
+body { margin: 0; padding: 24px; background: #E7EAF0; font-family: Roboto, system-ui, sans-serif; color: #181C20; }
+h1 { font-size: 24px; font-weight: 500; }
+h2 { font-size: 20px; font-weight: 500; margin: 32px 0 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 32px; }
+figure { margin: 0; }
+figcaption { font-size: 14px; color: #42474E; margin-bottom: 8px; }
+figure > div { border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+</style>
+</head>
+<body>
+<h1>Inline editing on the dive detail page (#2976)</h1>
+<h2>Notes</h2>
+<div class="row">
+<figure><figcaption>View</figcaption>
+<div style="width: 390px; height: 760px; box-sizing: border-box; background: #F8F9FF; font-family: Roboto, system-ui, sans-serif; color: #181C20; display: flex; flex-direction: column; overflow: hidden">
+  <div style="height: 64px; display: flex; align-items: center; gap: 4px; padding: 0 4px; flex-shrink: 0">
+    <button aria-label="Back" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #181C20; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg></button>
+    <div style="flex-grow: 1; font-size: 22px">Dive 142</div>
+    <button aria-label="Edit dive" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+  </div>
+  <div style="padding: 8px 16px; display: flex; flex-direction: column; gap: 12px">
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 1px 3px 1px rgba(0,0,0,0.08); padding: 16px; opacity: 0.45">
+      <div style="font-size: 16px; font-weight: 500">Tags</div>
+      <div style="height: 1px; background: #C2C7CF; margin: 12px 0"></div>
+      <div style="display: flex; gap: 8px"><span style="border: 1px solid #72777F; border-radius: 8px; padding: 6px 12px; font-size: 14px">Wall</span><span style="border: 1px solid #72777F; border-radius: 8px; padding: 6px 12px; font-size: 14px">Drift</span></div>
+    </div>
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 1px 3px 1px rgba(0,0,0,0.08); padding: 4px 4px 16px 16px">
+      <div style="display: flex; align-items: center; height: 48px">
+        <div style="flex-grow: 1; font-size: 16px; font-weight: 500">Notes</div>
+        <button aria-label="Edit notes" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #00629D; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+      </div>
+      <div style="height: 1px; background: #C2C7CF; margin: 0 12px 12px 0"></div>
+      <p style="margin: 0 12px 0 0; font-size: 14px; line-height: 20px; color: #181C20">Dropped in on the north wall at 08:40. Mild current running south, so we drifted the whole wall instead of turning at the pinnacle. Pair of eagle rays at 18 m around the ten-minute mark.</p>
+      <p style="margin: 12px 12px 0 0; font-size: 14px; line-height: 20px; color: #181C20">Visibility dropped to about 10 m past the sandy patch. Swap the mask strap before Thursday.</p>
+    </div>
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 1px 3px 1px rgba(0,0,0,0.08); padding: 16px; opacity: 0.45">
+      <div style="font-size: 16px; font-weight: 500">Custom fields</div>
+      <div style="height: 1px; background: #C2C7CF; margin: 12px 0"></div>
+      <div style="font-size: 14px; color: #42474E">Boat: Sea Breeze</div>
+    </div>
+  </div>
+</div>
+</figure>
+<figure><figcaption>Editing</figcaption>
+<div style="width: 390px; height: 760px; box-sizing: border-box; background: #F8F9FF; font-family: Roboto, system-ui, sans-serif; color: #181C20; display: flex; flex-direction: column; overflow: hidden">
+  <div style="height: 64px; display: flex; align-items: center; gap: 4px; padding: 0 4px; flex-shrink: 0">
+    <button aria-label="Back" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #181C20; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg></button>
+    <div style="flex-grow: 1; font-size: 22px">Dive 142</div>
+    <button aria-label="Edit dive" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+  </div>
+  <div style="padding: 8px 16px; display: flex; flex-direction: column; gap: 12px">
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 1px 3px 1px rgba(0,0,0,0.08); padding: 16px; opacity: 0.45">
+      <div style="font-size: 16px; font-weight: 500">Tags</div>
+      <div style="height: 1px; background: #C2C7CF; margin: 12px 0"></div>
+      <div style="display: flex; gap: 8px"><span style="border: 1px solid #72777F; border-radius: 8px; padding: 6px 12px; font-size: 14px">Wall</span><span style="border: 1px solid #72777F; border-radius: 8px; padding: 6px 12px; font-size: 14px">Drift</span></div>
+    </div>
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 0 0 2px #00629D, 0 2px 6px rgba(0,0,0,0.15); padding: 4px 8px 16px 16px">
+      <div style="display: flex; align-items: center; gap: 8px; height: 48px">
+        <div style="flex-grow: 1; font-size: 16px; font-weight: 500">Notes</div>
+        <button style="height: 40px; border: 0; background: transparent; border-radius: 20px; padding: 0 12px; font-family: inherit; font-size: 14px; font-weight: 500; color: #00629D">Cancel</button>
+        <button style="height: 40px; border: 0; background: #00629D; border-radius: 20px; padding: 0 20px; font-family: inherit; font-size: 14px; font-weight: 500; color: #FFFFFF">Save</button>
+      </div>
+      <div style="height: 1px; background: #C2C7CF; margin: 0 8px 16px 0"></div>
+      <div style="position: relative; margin-right: 8px">
+        <label for="notes-field" style="position: absolute; top: -8px; left: 10px; background: #FFFFFF; padding: 0 4px; font-size: 12px; color: #00629D">Notes</label>
+        <textarea id="notes-field" style="display: block; width: 100%; box-sizing: border-box; height: 372px; resize: none; border: 2px solid #00629D; border-radius: 4px; padding: 14px 14px 28px; font-family: inherit; font-size: 16px; line-height: 24px; color: #181C20; background: #FFFFFF">Dropped in on the north wall at 08:40. Mild current running south, so we drifted the whole wall instead of turning at the pinnacle. Pair of eagle rays at 18 m around the ten-minute mark.
+
+Visibility dropped to about 10 m past the sandy patch. Swap the mask strap before Thursday.
+
+Second pass on the way back: </textarea>
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" style="position: absolute; right: 6px; bottom: 6px"><path d="M14 6 6 14M14 10l-4 4" stroke="#72777F" stroke-width="1.6" stroke-linecap="round" fill="none"></path></svg>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin: 6px 8px 0 16px; font-size: 12px; color: #42474E">
+        <span>Grows as you type. Drag the corner for more room.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</figure>
+</div>
+<h2>Buddies</h2>
+<div class="row">
+<figure><figcaption>View</figcaption>
+<div style="width: 390px; height: 760px; box-sizing: border-box; background: #F8F9FF; font-family: Roboto, system-ui, sans-serif; color: #181C20; display: flex; flex-direction: column; overflow: hidden">
+  <div style="height: 64px; display: flex; align-items: center; gap: 4px; padding: 0 4px; flex-shrink: 0">
+    <button aria-label="Back" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #181C20; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg></button>
+    <div style="flex-grow: 1; font-size: 22px">Dive 142</div>
+    <button aria-label="Edit dive" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+  </div>
+  <div style="padding: 8px 16px; display: flex; flex-direction: column; gap: 12px">
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 1px 3px 1px rgba(0,0,0,0.08); padding: 16px; opacity: 0.45">
+      <div style="font-size: 16px; font-weight: 500">Conditions</div>
+      <div style="height: 1px; background: #C2C7CF; margin: 12px 0"></div>
+      <div style="font-size: 14px; color: #42474E">Water 26 °C · Visibility 15 m</div>
+    </div>
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 1px 3px 1px rgba(0,0,0,0.08); padding: 4px 4px 8px 16px">
+      <div style="display: flex; align-items: center; height: 48px">
+        <div style="flex-grow: 1; font-size: 16px; font-weight: 500">Buddies</div>
+        <span style="font-size: 12px; color: #42474E; margin-right: 4px">2 buddies</span>
+        <button aria-label="Add buddy" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #00629D; padding: 0"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg></button>
+        <button aria-label="Edit buddies" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #00629D; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+      </div>
+      <div style="height: 1px; background: #C2C7CF; margin: 0 12px 4px 0"></div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 64px; padding-right: 12px">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #CFE5FF; color: #001D34; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Me</div><div style="font-size: 14px; color: #42474E">Diver</div></div>
+      </div>
+      <a href="#" style="display: flex; align-items: center; gap: 16px; height: 64px; padding-right: 12px; text-decoration: none; color: inherit">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #CFE5FF; color: #001D34; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; flex-shrink: 0">SC</div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Sarah Chen</div><div style="font-size: 14px; color: #42474E">Buddy</div></div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#42474E" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 16px; height: 64px; padding-right: 12px; text-decoration: none; color: inherit">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #CFE5FF; color: #001D34; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; flex-shrink: 0">TR</div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Tom Reyes</div><div style="font-size: 14px; color: #42474E">Dive guide</div></div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#42474E" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>
+      </a>
+    </div>
+  </div>
+</div>
+</figure>
+<figure><figcaption>Editing</figcaption>
+<div style="width: 390px; height: 760px; box-sizing: border-box; background: #F8F9FF; font-family: Roboto, system-ui, sans-serif; color: #181C20; display: flex; flex-direction: column; overflow: hidden">
+  <div style="height: 64px; display: flex; align-items: center; gap: 4px; padding: 0 4px; flex-shrink: 0">
+    <button aria-label="Back" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #181C20; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg></button>
+    <div style="flex-grow: 1; font-size: 22px">Dive 142</div>
+    <button aria-label="Edit dive" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+  </div>
+  <div style="padding: 8px 16px; display: flex; flex-direction: column; gap: 12px">
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 1px 3px 1px rgba(0,0,0,0.08); padding: 16px; opacity: 0.45">
+      <div style="font-size: 16px; font-weight: 500">Conditions</div>
+      <div style="height: 1px; background: #C2C7CF; margin: 12px 0"></div>
+      <div style="font-size: 14px; color: #42474E">Water 26 °C · Visibility 15 m</div>
+    </div>
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 0 0 2px #00629D, 0 2px 6px rgba(0,0,0,0.15); padding: 4px 8px 8px 16px">
+      <div style="display: flex; align-items: center; gap: 4px; height: 48px">
+        <div style="flex-grow: 1; font-size: 16px; font-weight: 500">Buddies</div>
+        <button aria-label="Add buddy" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #00629D; padding: 0"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg></button>
+        <button style="height: 40px; border: 0; background: transparent; border-radius: 20px; padding: 0 12px; font-family: inherit; font-size: 14px; font-weight: 500; color: #00629D">Cancel</button>
+        <button style="height: 40px; border: 0; background: #00629D; border-radius: 20px; padding: 0 20px; font-family: inherit; font-size: 14px; font-weight: 500; color: #FFFFFF">Save</button>
+      </div>
+      <div style="height: 1px; background: #C2C7CF; margin: 0 8px 4px 0"></div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 64px">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #CFE5FF; color: #001D34; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Me</div><div style="font-size: 14px; color: #42474E">Diver</div></div>
+        <div style="display: flex">
+          <button aria-label="Change my role" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+          <div style="width: 44px; height: 44px"></div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 64px">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #CFE5FF; color: #001D34; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; flex-shrink: 0">SC</div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Sarah Chen</div><div style="font-size: 14px; color: #42474E">Buddy</div></div>
+        <div style="display: flex">
+          <button aria-label="Change Sarah Chen's role" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+          <button aria-label="Remove Sarah Chen" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></button>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 64px">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #CFE5FF; color: #001D34; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; flex-shrink: 0">TR</div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Tom Reyes</div><div style="font-size: 14px; color: #42474E">Dive guide, Instructor</div></div>
+        <div style="display: flex">
+          <button aria-label="Change Tom Reyes's role" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+          <button aria-label="Remove Tom Reyes" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</figure>
+</div>
+<h2>Equipment</h2>
+<div class="row">
+<figure><figcaption>View</figcaption>
+<div style="width: 390px; height: 760px; box-sizing: border-box; background: #F8F9FF; font-family: Roboto, system-ui, sans-serif; color: #181C20; display: flex; flex-direction: column; overflow: hidden">
+  <div style="height: 64px; display: flex; align-items: center; gap: 4px; padding: 0 4px; flex-shrink: 0">
+    <button aria-label="Back" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #181C20; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg></button>
+    <div style="flex-grow: 1; font-size: 22px">Dive 142</div>
+    <button aria-label="Edit dive" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+  </div>
+  <div style="padding: 8px 16px; display: flex; flex-direction: column; gap: 12px">
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 1px 3px 1px rgba(0,0,0,0.08); padding: 4px 4px 8px 16px">
+      <div style="display: flex; align-items: center; gap: 12px; height: 56px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#00629D" aria-hidden="true" style="flex-shrink: 0"><path d="M20 8v12c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V8c0-1.86 1.28-3.41 3-3.86V2h3v2h4V2h3v2.14c1.72.45 3 2 3 3.86zM6 12v2h10v2h2v-4H6z"></path></svg>
+        <div style="flex-grow: 1; font-size: 16px; font-weight: 500">Equipment</div>
+        <div style="display: flex">
+          <button aria-label="Arrange equipment" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"></path></svg></button>
+          <button aria-label="Add equipment" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #00629D; padding: 0"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg></button>
+          <button aria-label="Edit equipment" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #00629D; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+          <button aria-label="Collapse equipment" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 8-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"></path></svg></button>
+        </div>
+      </div>
+      <a href="#" style="display: flex; align-items: center; gap: 16px; height: 64px; padding-right: 12px; text-decoration: none; color: inherit">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #DDE3EA; color: #161C22; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4l16-.02V7z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Regulator set</div><div style="font-size: 14px; color: #42474E">3 parts</div></div>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#42474E" aria-hidden="true"><path d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"></path></svg>
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 16px; height: 64px; padding-right: 12px; text-decoration: none; color: inherit">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #DDE3EA; color: #161C22; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4l16-.02V7z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Wing BCD</div><div style="font-size: 14px; color: #42474E">BCD</div></div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#42474E" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 16px; height: 64px; padding-right: 12px; text-decoration: none; color: inherit">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #DDE3EA; color: #161C22; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4l16-.02V7z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Wrist computer</div><div style="font-size: 14px; color: #42474E">Computer</div></div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#42474E" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 16px; height: 64px; padding-right: 12px; text-decoration: none; color: inherit">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #DDE3EA; color: #161C22; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4l16-.02V7z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">5 mm wetsuit</div><div style="font-size: 14px; color: #42474E">Wetsuit</div></div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#42474E" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 16px; height: 64px; padding-right: 12px; text-decoration: none; color: inherit">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #DDE3EA; color: #161C22; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4l16-.02V7z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Open-heel fins</div><div style="font-size: 14px; color: #42474E">Fins</div></div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#42474E" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>
+      </a>
+    </div>
+  </div>
+</div>
+</figure>
+<figure><figcaption>Editing</figcaption>
+<div style="width: 390px; height: 760px; box-sizing: border-box; background: #F8F9FF; font-family: Roboto, system-ui, sans-serif; color: #181C20; display: flex; flex-direction: column; overflow: hidden">
+  <div style="height: 64px; display: flex; align-items: center; gap: 4px; padding: 0 4px; flex-shrink: 0">
+    <button aria-label="Back" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #181C20; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg></button>
+    <div style="flex-grow: 1; font-size: 22px">Dive 142</div>
+    <button aria-label="Edit dive" style="width: 48px; height: 48px; border: 0; background: transparent; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg></button>
+  </div>
+  <div style="padding: 8px 16px; display: flex; flex-direction: column; gap: 12px">
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 0 0 2px #00629D, 0 2px 6px rgba(0,0,0,0.15); padding: 4px 8px 8px 16px">
+      <div style="display: flex; align-items: center; gap: 4px; height: 56px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#00629D" aria-hidden="true" style="flex-shrink: 0; margin-right: 8px"><path d="M20 8v12c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V8c0-1.86 1.28-3.41 3-3.86V2h3v2h4V2h3v2.14c1.72.45 3 2 3 3.86zM6 12v2h10v2h2v-4H6z"></path></svg>
+        <div style="flex-grow: 1; font-size: 16px; font-weight: 500">Equipment</div>
+        <button aria-label="Add equipment" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #00629D; padding: 0"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg></button>
+        <button style="height: 40px; border: 0; background: transparent; border-radius: 20px; padding: 0 12px; font-family: inherit; font-size: 14px; font-weight: 500; color: #00629D">Cancel</button>
+        <button style="height: 40px; border: 0; background: #00629D; border-radius: 20px; padding: 0 20px; font-family: inherit; font-size: 14px; font-weight: 500; color: #FFFFFF">Save</button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 64px">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #DDE3EA; color: #161C22; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4l16-.02V7z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Regulator set</div><div style="font-size: 14px; color: #42474E">3 parts</div></div>
+        <div style="display: flex">
+          <button aria-label="Collapse Regulator set" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 8-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"></path></svg></button>
+          <button aria-label="Remove Regulator set and its parts" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></button>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 52px; padding-left: 40px">
+        <div style="flex-grow: 1"><div style="font-size: 15px">First stage</div><div style="font-size: 13px; color: #42474E">Regulator</div></div>
+        <button aria-label="Remove First stage" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 52px; padding-left: 40px">
+        <div style="flex-grow: 1"><div style="font-size: 15px">Primary second stage</div><div style="font-size: 13px; color: #42474E">Regulator</div></div>
+        <button aria-label="Remove Primary second stage" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 52px; padding-left: 40px">
+        <div style="flex-grow: 1"><div style="font-size: 15px">Octopus</div><div style="font-size: 13px; color: #42474E">Regulator</div></div>
+        <button aria-label="Remove Octopus" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 64px">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #DDE3EA; color: #161C22; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4l16-.02V7z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Wing BCD</div><div style="font-size: 14px; color: #42474E">BCD</div></div>
+        <button aria-label="Remove Wing BCD" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 64px">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #DDE3EA; color: #161C22; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4l16-.02V7z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">Wrist computer</div><div style="font-size: 14px; color: #42474E">Computer</div></div>
+        <button aria-label="Remove Wrist computer" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; height: 64px">
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #DDE3EA; color: #161C22; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4l16-.02V7z"></path></svg></div>
+        <div style="flex-grow: 1"><div style="font-size: 16px">5 mm wetsuit</div><div style="font-size: 14px; color: #42474E">Wetsuit</div></div>
+        <button aria-label="Remove 5 mm wetsuit" style="width: 44px; height: 44px; border: 0; background: transparent; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #42474E; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+</figure>
+</div>
+</body>
+</html>
