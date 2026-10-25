@@ -7223,6 +7223,39 @@ class AppLocalizationsEs extends AppLocalizations {
   String get diveLog_detail_noNotes => 'No hay notas para esta inmersión.';
 
   @override
+  String get diveLog_detail_addBuddy => 'Añadir compañero';
+
+  @override
+  String get diveLog_detail_addEquipment => 'Añadir equipo';
+
+  @override
+  String get diveLog_detail_changeRole => 'Cambiar función';
+
+  @override
+  String get diveLog_detail_editBuddies => 'Editar compañeros';
+
+  @override
+  String get diveLog_detail_editEquipment => 'Editar equipo';
+
+  @override
+  String get diveLog_detail_editNotes => 'Editar notas';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return 'No se pudo guardar: $error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment => 'No hay equipo para esta inmersión.';
+
+  @override
+  String get diveLog_detail_removeBuddy => 'Quitar compañero';
+
+  @override
+  String get diveLog_detail_resizeNotes =>
+      'Arrastra para agrandar el cuadro de notas';
+
+  @override
   String get diveLog_detail_notFound => 'Inmersión no encontrada';
 
   @override

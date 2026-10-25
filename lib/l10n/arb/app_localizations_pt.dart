@@ -7222,6 +7222,40 @@ class AppLocalizationsPt extends AppLocalizations {
   String get diveLog_detail_noNotes => 'Sem anotações para este mergulho.';
 
   @override
+  String get diveLog_detail_addBuddy => 'Adicionar dupla';
+
+  @override
+  String get diveLog_detail_addEquipment => 'Adicionar equipamento';
+
+  @override
+  String get diveLog_detail_changeRole => 'Alterar função';
+
+  @override
+  String get diveLog_detail_editBuddies => 'Editar duplas';
+
+  @override
+  String get diveLog_detail_editEquipment => 'Editar equipamento';
+
+  @override
+  String get diveLog_detail_editNotes => 'Editar notas';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return 'Não foi possível salvar: $error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment =>
+      'Nenhum equipamento para este mergulho.';
+
+  @override
+  String get diveLog_detail_removeBuddy => 'Remover dupla';
+
+  @override
+  String get diveLog_detail_resizeNotes =>
+      'Arraste para aumentar a caixa de notas';
+
+  @override
   String get diveLog_detail_notFound => 'Mergulho não encontrado';
 
   @override

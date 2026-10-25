@@ -7241,6 +7241,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_detail_noNotes => 'Aucune note pour cette plongée.';
 
   @override
+  String get diveLog_detail_addBuddy => 'Ajouter un binôme';
+
+  @override
+  String get diveLog_detail_addEquipment => 'Ajouter de l\'équipement';
+
+  @override
+  String get diveLog_detail_changeRole => 'Changer le rôle';
+
+  @override
+  String get diveLog_detail_editBuddies => 'Modifier les binômes';
+
+  @override
+  String get diveLog_detail_editEquipment => 'Modifier l\'équipement';
+
+  @override
+  String get diveLog_detail_editNotes => 'Modifier les notes';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return 'Échec de l\'enregistrement : $error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment =>
+      'Aucun équipement pour cette plongée.';
+
+  @override
+  String get diveLog_detail_removeBuddy => 'Retirer le binôme';
+
+  @override
+  String get diveLog_detail_resizeNotes =>
+      'Faites glisser pour agrandir la zone de notes';
+
+  @override
   String get diveLog_detail_notFound => 'Plongée introuvable';
 
   @override

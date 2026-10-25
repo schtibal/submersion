@@ -7207,6 +7207,39 @@ class AppLocalizationsHu extends AppLocalizations {
       'Nincsenek jegyzetek ehhez a merüléshez.';
 
   @override
+  String get diveLog_detail_addBuddy => 'Búvártárs hozzáadása';
+
+  @override
+  String get diveLog_detail_addEquipment => 'Felszerelés hozzáadása';
+
+  @override
+  String get diveLog_detail_changeRole => 'Szerep módosítása';
+
+  @override
+  String get diveLog_detail_editBuddies => 'Búvártársak szerkesztése';
+
+  @override
+  String get diveLog_detail_editEquipment => 'Felszerelés szerkesztése';
+
+  @override
+  String get diveLog_detail_editNotes => 'Jegyzetek szerkesztése';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return 'A mentés nem sikerült: $error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment =>
+      'Ehhez a merüléshez nincs felszerelés.';
+
+  @override
+  String get diveLog_detail_removeBuddy => 'Búvártárs eltávolítása';
+
+  @override
+  String get diveLog_detail_resizeNotes => 'Húzd a jegyzetmező nagyításához';
+
+  @override
   String get diveLog_detail_notFound => 'Merülés nem található';
 
   @override

@@ -4925,6 +4925,86 @@ class DiveRepository {
     }
   }
 
+  /// Writes only the dive's notes (the detail page's Notes card, issue
+  /// #2976). A whole-dive update from a copy loaded when the card opened
+  /// would overwrite any other field changed meanwhile.
+  Future<void> setNotes(String diveId, String notes) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await (_db.update(_db.dives)..where((t) => t.id.equals(diveId))).write(
+        DivesCompanion(notes: Value(notes), updatedAt: Value(now)),
+      );
+      await _syncRepository.markRecordPending(
+        entityType: 'dives',
+        recordId: diveId,
+        localUpdatedAt: now,
+      );
+      SyncEventBus.notifyLocalChange();
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to set notes for dive: $diveId',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Writes only the active diver's own roles on the dive (the Buddies
+  /// card's Me row, issue #2976): the primary role on the dive row and the
+  /// full set through the role links, as [updateDive] writes them.
+  Future<void> setDiverRoles(String diveId, List<String> roleIds) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await _db.transaction(() async {
+        await (_db.update(_db.dives)..where((t) => t.id.equals(diveId))).write(
+          DivesCompanion(
+            diverRole: Value(DiveRoleSet.primary(roleIds)),
+            updatedAt: Value(now),
+          ),
+        );
+        await _roleLinks.writeDiverRoles(diveId, roleIds, now: now);
+      });
+      await _syncRepository.markRecordPending(
+        entityType: 'dives',
+        recordId: diveId,
+        localUpdatedAt: now,
+      );
+      SyncEventBus.notifyLocalChange();
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to set diver roles for dive: $diveId',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Writes only the dive's gear links (the Equipment card, issue #2976),
+  /// through the same diff as [updateDive], so unchanged rows are neither
+  /// tombstoned nor re-marked.
+  Future<void> setDiveGear(String diveId, List<GearProvenance> links) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await _db.transaction(() async {
+        await _writeGearDiff(diveId, links, now);
+        await _bumpDives([diveId], now);
+      });
+      SyncEventBus.notifyLocalChange();
+      // The gear changed outside the editor's save, so queue the rescan
+      // that save queues: a shared gear overlap can appear or go with it.
+      scheduleQualityScan([diveId]);
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to set gear for dive: $diveId',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
   /// Get all favorite dives
   Future<List<domain.Dive>> getFavoriteDives({String? diverId}) async {
     try {

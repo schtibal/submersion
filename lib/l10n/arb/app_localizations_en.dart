@@ -7115,6 +7115,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_detail_noNotes => 'No notes for this dive.';
 
   @override
+  String get diveLog_detail_addBuddy => 'Add buddy';
+
+  @override
+  String get diveLog_detail_addEquipment => 'Add equipment';
+
+  @override
+  String get diveLog_detail_changeRole => 'Change role';
+
+  @override
+  String get diveLog_detail_editBuddies => 'Edit buddies';
+
+  @override
+  String get diveLog_detail_editEquipment => 'Edit equipment';
+
+  @override
+  String get diveLog_detail_editNotes => 'Edit notes';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return 'Could not save: $error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment => 'No equipment for this dive.';
+
+  @override
+  String get diveLog_detail_removeBuddy => 'Remove buddy';
+
+  @override
+  String get diveLog_detail_resizeNotes => 'Drag to make the notes box taller';
+
+  @override
   String get diveLog_detail_notFound => 'Dive not found';
 
   @override

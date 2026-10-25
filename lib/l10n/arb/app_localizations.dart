@@ -11365,6 +11365,66 @@ abstract class AppLocalizations {
   /// **'No notes for this dive.'**
   String get diveLog_detail_noNotes;
 
+  /// No description provided for @diveLog_detail_addBuddy.
+  ///
+  /// In en, this message translates to:
+  /// **'Add buddy'**
+  String get diveLog_detail_addBuddy;
+
+  /// No description provided for @diveLog_detail_addEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add equipment'**
+  String get diveLog_detail_addEquipment;
+
+  /// No description provided for @diveLog_detail_changeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Change role'**
+  String get diveLog_detail_changeRole;
+
+  /// No description provided for @diveLog_detail_editBuddies.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit buddies'**
+  String get diveLog_detail_editBuddies;
+
+  /// No description provided for @diveLog_detail_editEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit equipment'**
+  String get diveLog_detail_editEquipment;
+
+  /// No description provided for @diveLog_detail_editNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit notes'**
+  String get diveLog_detail_editNotes;
+
+  /// No description provided for @diveLog_detail_inlineSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save: {error}'**
+  String diveLog_detail_inlineSaveFailed(String error);
+
+  /// No description provided for @diveLog_detail_noEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'No equipment for this dive.'**
+  String get diveLog_detail_noEquipment;
+
+  /// No description provided for @diveLog_detail_removeBuddy.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove buddy'**
+  String get diveLog_detail_removeBuddy;
+
+  /// No description provided for @diveLog_detail_resizeNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to make the notes box taller'**
+  String get diveLog_detail_resizeNotes;
+
   /// No description provided for @diveLog_detail_notFound.
   ///
   /// In en, this message translates to:

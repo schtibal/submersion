@@ -6874,6 +6874,38 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_detail_noNotes => '此次潜水无备注。';
 
   @override
+  String get diveLog_detail_addBuddy => '添加潜伴';
+
+  @override
+  String get diveLog_detail_addEquipment => '添加装备';
+
+  @override
+  String get diveLog_detail_changeRole => '更改角色';
+
+  @override
+  String get diveLog_detail_editBuddies => '编辑潜伴';
+
+  @override
+  String get diveLog_detail_editEquipment => '编辑装备';
+
+  @override
+  String get diveLog_detail_editNotes => '编辑备注';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return '无法保存：$error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment => '此潜水没有装备。';
+
+  @override
+  String get diveLog_detail_removeBuddy => '移除潜伴';
+
+  @override
+  String get diveLog_detail_resizeNotes => '拖动以增大备注框';
+
+  @override
   String get diveLog_detail_notFound => '未找到潜水';
 
   @override

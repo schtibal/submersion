@@ -7228,6 +7228,40 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_detail_noNotes => 'Keine Notizen für diesen Tauchgang.';
 
   @override
+  String get diveLog_detail_addBuddy => 'Tauchpartner hinzufügen';
+
+  @override
+  String get diveLog_detail_addEquipment => 'Ausrüstung hinzufügen';
+
+  @override
+  String get diveLog_detail_changeRole => 'Rolle ändern';
+
+  @override
+  String get diveLog_detail_editBuddies => 'Tauchpartner bearbeiten';
+
+  @override
+  String get diveLog_detail_editEquipment => 'Ausrüstung bearbeiten';
+
+  @override
+  String get diveLog_detail_editNotes => 'Notizen bearbeiten';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return 'Speichern fehlgeschlagen: $error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment =>
+      'Keine Ausrüstung für diesen Tauchgang.';
+
+  @override
+  String get diveLog_detail_removeBuddy => 'Tauchpartner entfernen';
+
+  @override
+  String get diveLog_detail_resizeNotes =>
+      'Ziehen, um das Notizfeld zu vergrößern';
+
+  @override
   String get diveLog_detail_notFound => 'Tauchgang nicht gefunden';
 
   @override

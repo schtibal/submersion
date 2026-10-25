@@ -7080,6 +7080,38 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_detail_noNotes => 'אין הערות לצלילה זו.';
 
   @override
+  String get diveLog_detail_addBuddy => 'הוספת שותף';
+
+  @override
+  String get diveLog_detail_addEquipment => 'הוספת ציוד';
+
+  @override
+  String get diveLog_detail_changeRole => 'שינוי תפקיד';
+
+  @override
+  String get diveLog_detail_editBuddies => 'עריכת שותפים';
+
+  @override
+  String get diveLog_detail_editEquipment => 'עריכת ציוד';
+
+  @override
+  String get diveLog_detail_editNotes => 'עריכת הערות';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return 'השמירה נכשלה: $error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment => 'אין ציוד לצלילה זו.';
+
+  @override
+  String get diveLog_detail_removeBuddy => 'הסרת שותף';
+
+  @override
+  String get diveLog_detail_resizeNotes => 'גרור כדי להגדיל את תיבת ההערות';
+
+  @override
   String get diveLog_detail_notFound => 'הצלילה לא נמצאה';
 
   @override

@@ -7351,6 +7351,38 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_detail_noNotes => 'لا توجد ملاحظات لهذه الغوصة.';
 
   @override
+  String get diveLog_detail_addBuddy => 'إضافة زميل غوص';
+
+  @override
+  String get diveLog_detail_addEquipment => 'إضافة معدات';
+
+  @override
+  String get diveLog_detail_changeRole => 'تغيير الدور';
+
+  @override
+  String get diveLog_detail_editBuddies => 'تعديل زملاء الغوص';
+
+  @override
+  String get diveLog_detail_editEquipment => 'تعديل المعدات';
+
+  @override
+  String get diveLog_detail_editNotes => 'تعديل الملاحظات';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return 'تعذّر الحفظ: $error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment => 'لا توجد معدات لهذه الغطسة.';
+
+  @override
+  String get diveLog_detail_removeBuddy => 'إزالة زميل الغوص';
+
+  @override
+  String get diveLog_detail_resizeNotes => 'اسحب لتكبير مربع الملاحظات';
+
+  @override
   String get diveLog_detail_notFound => 'الغوصة غير موجودة';
 
   @override

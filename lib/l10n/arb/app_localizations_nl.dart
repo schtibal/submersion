@@ -7180,6 +7180,39 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_detail_noNotes => 'Geen notities voor deze duik.';
 
   @override
+  String get diveLog_detail_addBuddy => 'Buddy toevoegen';
+
+  @override
+  String get diveLog_detail_addEquipment => 'Uitrusting toevoegen';
+
+  @override
+  String get diveLog_detail_changeRole => 'Rol wijzigen';
+
+  @override
+  String get diveLog_detail_editBuddies => 'Buddy\'s bewerken';
+
+  @override
+  String get diveLog_detail_editEquipment => 'Uitrusting bewerken';
+
+  @override
+  String get diveLog_detail_editNotes => 'Notities bewerken';
+
+  @override
+  String diveLog_detail_inlineSaveFailed(String error) {
+    return 'Opslaan mislukt: $error';
+  }
+
+  @override
+  String get diveLog_detail_noEquipment => 'Geen uitrusting voor deze duik.';
+
+  @override
+  String get diveLog_detail_removeBuddy => 'Buddy verwijderen';
+
+  @override
+  String get diveLog_detail_resizeNotes =>
+      'Sleep om het notitieveld groter te maken';
+
+  @override
   String get diveLog_detail_notFound => 'Duik niet gevonden';
 
   @override

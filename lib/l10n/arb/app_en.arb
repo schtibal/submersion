@@ -4347,6 +4347,16 @@
   "diveLog_detail_menu_export": "Export",
   "diveLog_detail_menu_openFullPage": "Open Full Page",
   "diveLog_detail_noNotes": "No notes for this dive.",
+  "diveLog_detail_addBuddy": "Add buddy",
+  "diveLog_detail_addEquipment": "Add equipment",
+  "diveLog_detail_changeRole": "Change role",
+  "diveLog_detail_editBuddies": "Edit buddies",
+  "diveLog_detail_editEquipment": "Edit equipment",
+  "diveLog_detail_editNotes": "Edit notes",
+  "diveLog_detail_inlineSaveFailed": "Could not save: {error}",
+  "diveLog_detail_noEquipment": "No equipment for this dive.",
+  "diveLog_detail_removeBuddy": "Remove buddy",
+  "diveLog_detail_resizeNotes": "Drag to make the notes box taller",
   "diveLog_detail_notFound": "Dive not found",
   "diveLog_detail_profilePoints": "{count} points",
   "diveLog_detail_section_altitudeDive": "Altitude Dive",
@@ -5935,6 +5945,13 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "@diveLog_detail_inlineSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
       }
     }
   },
