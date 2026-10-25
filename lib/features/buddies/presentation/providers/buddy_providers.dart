@@ -228,6 +228,23 @@ final buddiesForDiveProvider =
       return repository.getBuddiesForDive(diveId);
     });
 
+/// Refreshes what a change to [diveId]'s buddy links shows: the dive's own
+/// buddies, and the stats and dive lists of every buddy in [buddyIds], those
+/// added and those removed alike.
+void invalidateDiveBuddyLinks(
+  WidgetRef ref,
+  String diveId,
+  Iterable<String> buddyIds,
+) {
+  ref.invalidate(buddiesForDiveProvider(diveId));
+  for (final buddyId in buddyIds.toSet()) {
+    ref.invalidate(buddyStatsProvider(buddyId));
+    ref.invalidate(diveIdsForBuddyProvider(buddyId));
+    ref.invalidate(divesForBuddyProvider(buddyId));
+  }
+  ref.invalidate(allBuddiesWithDiveCountProvider);
+}
+
 /// Buddy search provider
 final buddySearchProvider = FutureProvider.family<List<Buddy>, String>((
   ref,

@@ -6456,17 +6456,11 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       if (savedDiveId != null) {
         final buddyRepository = ref.read(buddyRepositoryProvider);
         await buddyRepository.setBuddiesForDive(savedDiveId, _selectedBuddies);
-        // Invalidate the buddies provider so the detail page shows updated data
-        ref.invalidate(buddiesForDiveProvider(savedDiveId));
-        // Invalidate providers for all affected buddies (added + removed)
-        final newBuddyIds = _selectedBuddies.map((b) => b.buddy.id).toSet();
-        final affectedBuddyIds = _originalBuddyIds.union(newBuddyIds);
-        for (final buddyId in affectedBuddyIds) {
-          ref.invalidate(buddyStatsProvider(buddyId));
-          ref.invalidate(diveIdsForBuddyProvider(buddyId));
-          ref.invalidate(divesForBuddyProvider(buddyId));
-        }
-        ref.invalidate(allBuddiesWithDiveCountProvider);
+        // Refresh the dive's buddies and every buddy added or removed.
+        invalidateDiveBuddyLinks(ref, savedDiveId, {
+          ..._originalBuddyIds,
+          for (final b in _selectedBuddies) b.buddy.id,
+        });
       }
 
       // Apply the staged underwater route links. A planned dive has no

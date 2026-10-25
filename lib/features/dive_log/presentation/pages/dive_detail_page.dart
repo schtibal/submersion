@@ -17,7 +17,6 @@ import 'package:submersion/features/dive_log/presentation/utils/dive_service_sta
 import 'package:submersion/features/equipment/data/services/sensor_summary_scheduler.dart';
 import 'package:submersion/features/equipment/presentation/widgets/observation_status_chip.dart';
 import 'package:submersion/features/tags/presentation/widgets/tag_chip.dart';
-import 'package:submersion/shared/widgets/profile_photo/profile_avatar.dart';
 import 'package:submersion/core/constants/dive_detail_layout.dart';
 import 'package:submersion/core/constants/dive_detail_section_pairs.dart';
 import 'package:submersion/core/constants/dive_detail_sections.dart';
@@ -26,6 +25,7 @@ import 'package:submersion/features/equipment/presentation/widgets/equipment_arr
 import 'package:submersion/features/equipment/domain/services/gear_tree.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_course_rows.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_gear_with_figure.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/inline_edit/dive_buddies_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/inline_edit/dive_notes_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/inline_edit/inline_edit_session.dart';
 import 'package:submersion/shared/widgets/forms/confirm_discard_dialog.dart';
@@ -96,7 +96,6 @@ import 'package:submersion/features/dive_log/presentation/providers/safety_revie
 import 'package:submersion/features/dive_log/presentation/widgets/dive_safety_summary_section.dart';
 import 'package:submersion/features/safety/domain/services/altitude_flag.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_mirror_providers.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/logged_with_tiles.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/mirror_dive_dialog.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/planned_dive_banner.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/site_suggestion_card.dart';
@@ -130,8 +129,6 @@ import 'package:submersion/features/dive_log/presentation/widgets/responsive_sec
 import 'package:submersion/features/dive_log/presentation/widgets/sac_volume_hint.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/sac_segments_no_pressure_note.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/source_bar.dart';
-import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
-import 'package:submersion/features/dive_roles/presentation/dive_role_list_display.dart';
 import 'package:submersion/features/dive_roles/presentation/providers/dive_role_providers.dart';
 import 'package:submersion/features/dive_sites/presentation/pages/site_detail_page.dart';
 import 'package:submersion/features/dive_log/presentation/formatters/dive_type_label.dart';
@@ -578,7 +575,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         return [_cylindersCard(dive, units, settings)];
       },
       DiveDetailSectionId.buddies: (_) {
-        return [_buildBuddiesSection(context, ref, dive)];
+        return [DiveBuddiesCard(dive: dive)];
       },
       DiveDetailSectionId.signatures: (_) {
         return [_signaturesColumn(context, ref, dive)];
@@ -1092,7 +1089,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
             const <BuddyWithRole>[];
         if (buddies.isEmpty && dive.courseIds.isEmpty) return null;
         return _PairCards(
-          _buildBuddiesSection(context, ref, dive),
+          DiveBuddiesCard(dive: dive),
           _signaturesColumn(context, ref, dive),
         );
 
@@ -4583,114 +4580,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildBuddiesSection(BuildContext context, WidgetRef ref, Dive dive) {
-    final buddiesAsync = ref.watch(buddiesForDiveProvider(diveId));
-
-    return buddiesAsync.when(
-      data: (buddies) {
-        // The dive_buddies junction is authoritative once it holds anyone.
-        // The legacy free-text dives.buddy and dives.dive_master columns are
-        // only a fallback for a dive whose people were never linked, such as
-        // a CSV import, so such a dive is not called solo, and the section
-        // offers to link the text to buddy records (#1831). A text holding
-        // only a placeholder like "None" does not count.
-        final showLegacyText =
-            buddies.isEmpty && LegacyBuddyTextSection.hasContent(dive);
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      context.l10n.diveLog_detail_section_buddies,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    if (buddies.isNotEmpty)
-                      Text(
-                        context.l10n.diveLog_detail_buddyCount(buddies.length),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                  ],
-                ),
-                const Divider(),
-                if (dive.diverRoleIds.isNotEmpty)
-                  _buildMyRoleTile(context, ref, dive),
-                if (showLegacyText)
-                  LegacyBuddyTextSection(dive: dive)
-                else if (buddies.isEmpty && dive.diverRoleIds.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      context.l10n.diveLog_detail_soloDive,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  )
-                else
-                  ...buddies.map((bwr) => _buildBuddyTile(context, bwr)),
-                // Other profiles' logs of this outing (issue #2002).
-                LoggedWithTiles(diveId: diveId),
-              ],
-            ),
-          ),
-        );
-      },
-      loading: () => const Card(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      ),
-      error: (_, _) => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _buildBuddyTile(BuildContext context, BuddyWithRole bwr) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: ProfileAvatar(
-        photo: bwr.buddy.photo,
-        initials: bwr.buddy.initials,
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-      ),
-      title: Text(bwr.buddy.name),
-      subtitle: Text(bwr.roles.joinedLocalizedNames(context.l10n)),
-      trailing: const Icon(Icons.chevron_right, size: 20),
-      onTap: () => context.push('/buddies/${bwr.buddy.id}'),
-    );
-  }
-
-  /// The active diver's own roles on this dive (#547, #1221), shown above
-  /// buddies.
-  Widget _buildMyRoleTile(BuildContext context, WidgetRef ref, Dive dive) {
-    final rolesById =
-        ref.watch(diveRoleMapProvider).value ?? const <String, DiveRole>{};
-    final label = rolesForIds(
-      dive.diverRoleIds,
-      rolesById,
-    ).joinedLocalizedNames(context.l10n);
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        child: Icon(
-          Icons.person,
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
-        ),
-      ),
-      title: Text(context.l10n.buddies_picker_me),
-      subtitle: Text(label),
     );
   }
 
