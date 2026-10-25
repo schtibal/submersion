@@ -13,19 +13,15 @@ import 'package:submersion/core/services/export/uddf/uddf_source_fetch.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as pigeon;
 import 'package:submersion/features/dive_log/data/services/derived_metrics_scheduler.dart';
-import 'package:submersion/features/dive_log/presentation/utils/dive_service_status.dart';
 import 'package:submersion/features/equipment/data/services/sensor_summary_scheduler.dart';
-import 'package:submersion/features/equipment/presentation/widgets/observation_status_chip.dart';
 import 'package:submersion/features/tags/presentation/widgets/tag_chip.dart';
 import 'package:submersion/core/constants/dive_detail_layout.dart';
 import 'package:submersion/core/constants/dive_detail_section_pairs.dart';
 import 'package:submersion/core/constants/dive_detail_sections.dart';
 import 'package:submersion/core/constants/enums.dart';
-import 'package:submersion/features/equipment/presentation/widgets/equipment_arrange_sheet.dart';
-import 'package:submersion/features/equipment/domain/services/gear_tree.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_course_rows.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/dive_gear_with_figure.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/inline_edit/dive_buddies_card.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/inline_edit/dive_equipment_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/inline_edit/dive_notes_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/inline_edit/inline_edit_session.dart';
 import 'package:submersion/shared/widgets/forms/confirm_discard_dialog.dart';
@@ -581,8 +577,8 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         return [_signaturesColumn(context, ref, dive)];
       },
       DiveDetailSectionId.equipment: (_) {
-        if (dive.equipment.isEmpty) return [];
-        return [_buildEquipmentSection(context, ref, dive)];
+        // Shown even with no gear, so gear can be added from it (#2976).
+        return [DiveEquipmentCard(dive: dive)];
       },
       DiveDetailSectionId.sightings: (topGap) {
         return [_buildSightingsSection(context, ref, topGap: topGap)];
@@ -4578,62 +4574,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEquipmentSection(
-    BuildContext context,
-    WidgetRef ref,
-    Dive dive,
-  ) {
-    // Get collapsed state from provider
-    final isExpanded = ref.watch(equipmentSectionExpandedProvider);
-
-    // Collapsed subtitle showing the top-level row count as the tree view
-    // places it: an assembly's parts sit inside its row, and an orphaned
-    // row is promoted, so the count matches what expands below (#1487).
-    final collapsedSubtitle = context.l10n.diveLog_detail_equipmentCount(
-      GearTree.topLevelCount(dive.gearProvenance),
-    );
-
-    return CollapsibleCardSection(
-      title: context.l10n.diveLog_detail_section_equipment,
-      icon: Icons.backpack,
-      collapsedSubtitle: collapsedSubtitle,
-      isExpanded: isExpanded,
-      // The header is one large InkWell that toggles the card, so this button
-      // consumes its own tap: without it, arranging would also collapse the
-      // section the diver was looking at.
-      trailing: IconButton(
-        icon: const Icon(Icons.sort, size: 20),
-        tooltip: context.l10n.equipment_list_sortTooltip,
-        onPressed: () => showEquipmentArrangeSheet(context),
-      ),
-      onToggle: (expanded) {
-        ref
-            .read(collapsibleSectionProvider.notifier)
-            .setEquipmentExpanded(expanded);
-      },
-      contentBuilder: (context) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        // The tree, and the diver figure above it when the diver has turned
-        // it on (issue #2326). It marks gear another profile owns against
-        // this dive's diver, as the tree alone did (issue #2046).
-        child: DiveGearWithFigure(
-          dive: dive,
-          showFigure: ref.watch(
-            settingsProvider.select((s) => s.showDiveFigure),
-          ),
-          showServiceStatus: diveGearShowsLiveServiceStatus(
-            dive,
-            DateTime.now(),
-          ),
-          onTap: (item) => context.push('/equipment/${item.id}'),
-          // The check-in chip for each row (condition phase 3a).
-          rowTrailing: (item) =>
-              ObservationStatusChip(equipment: item, dive: dive),
         ),
       ),
     );

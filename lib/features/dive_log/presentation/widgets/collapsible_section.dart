@@ -189,6 +189,13 @@ class CollapsibleCardSection extends StatelessWidget {
   /// The content to show when expanded (this replaces the child's Card wrapper)
   final Widget Function(BuildContext context) contentBuilder;
 
+  /// False holds the section open with no chevron and no header tap, for a
+  /// card in edit mode (issue #2976).
+  final bool collapsible;
+
+  /// The card's shape; the theme's when null.
+  final ShapeBorder? shape;
+
   const CollapsibleCardSection({
     super.key,
     required this.title,
@@ -200,79 +207,82 @@ class CollapsibleCardSection extends StatelessWidget {
     required this.isExpanded,
     required this.onToggle,
     required this.contentBuilder,
+    this.collapsible = true,
+    this.shape,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isExpanded = this.isExpanded || !collapsible;
+
+    final header = Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: iconColor ?? colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (collapsedSubtitle != null && !isExpanded)
+                  Text(
+                    collapsedSubtitle!,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          // Show collapsed-only trailing when collapsed
+          if (collapsedTrailing != null && !isExpanded) ...[
+            collapsedTrailing!,
+            const SizedBox(width: 8),
+          ],
+          // Always show the trailing widget
+          if (trailing != null) ...[
+            _flexibleTrailing(trailing!),
+            if (collapsible) const SizedBox(width: 8),
+          ],
+          if (collapsible)
+            AnimatedRotation(
+              turns: isExpanded ? 0.5 : 0,
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                Icons.expand_more,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+        ],
+      ),
+    );
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      shape: shape,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header row (always visible, clickable)
-          Semantics(
-            button: true,
-            label: isExpanded
-                ? context.l10n.diveLog_collapsible_semantics_collapse(title)
-                : context.l10n.diveLog_collapsible_semantics_expand(title),
-            child: InkWell(
-              onTap: () => onToggle(!isExpanded),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(
-                      icon,
-                      size: 20,
-                      color: iconColor ?? colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          if (collapsedSubtitle != null && !isExpanded)
-                            Text(
-                              collapsedSubtitle!,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    // Show collapsed-only trailing when collapsed
-                    if (collapsedTrailing != null && !isExpanded) ...[
-                      collapsedTrailing!,
-                      const SizedBox(width: 8),
-                    ],
-                    // Always show the trailing widget
-                    if (trailing != null) ...[
-                      _flexibleTrailing(trailing!),
-                      const SizedBox(width: 8),
-                    ],
-                    AnimatedRotation(
-                      turns: isExpanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Icon(
-                        Icons.expand_more,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          // Header row (always visible, clickable while collapsible)
+          if (collapsible)
+            Semantics(
+              button: true,
+              label: isExpanded
+                  ? context.l10n.diveLog_collapsible_semantics_collapse(title)
+                  : context.l10n.diveLog_collapsible_semantics_expand(title),
+              child: InkWell(onTap: () => onToggle(!isExpanded), child: header),
+            )
+          else
+            header,
           // Expandable content
           AnimatedCrossFade(
             firstChild: const SizedBox.shrink(),

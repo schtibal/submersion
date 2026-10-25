@@ -72,7 +72,8 @@ const _earlyReturnSections = [
   DiveDetailSectionId.altitude,
   DiveDetailSectionId.weights,
   DiveDetailSectionId.tanks,
-  DiveDetailSectionId.equipment,
+  // Not equipment: its card shows even with no gear, so gear can be added
+  // from it (issue #2976); dive_equipment_card_test covers it.
   DiveDetailSectionId.tags,
   DiveDetailSectionId.customFields,
 ];

@@ -31,8 +31,10 @@ the card they are looking at.
 
 - Nothing a diver does in a card's edit mode reaches the database before they
   press Save. Cancel leaves the dive exactly as it was.
-- A dive with no notes, no buddies or no equipment must still show its empty
-  state as today when not editing.
+- A dive with no notes or no buddies must still show its empty state as today
+  when not editing. (A dive with no equipment used to show no Equipment card
+  at all; it now shows the card with an empty line, since Add has to be
+  reachable there.)
 
 ## Behaviour
 
@@ -47,6 +49,11 @@ the card they are looking at.
    snackbar reports the error.
 4. Cancel discards the draft and leaves edit mode.
 5. While Save runs, both buttons are disabled.
+6. One card edits at a time: while one is open, the other cards' Add and
+   Edit icons are disabled.
+7. Leaving the page (back), opening the full editor, or stepping to the
+   previous or next dive while the open card's draft differs from what is
+   saved asks first, with the editor's own discard dialog.
 
 ### Notes
 
@@ -65,8 +72,10 @@ the card they are looking at.
    resulting list straight away; closing the sheet without Done changes
    nothing.
 3. Edit: each buddy row trades its chevron for a pencil and an X. The Me row
-   (the active diver's own role, shown when the dive has one) shows only the
-   pencil, with the X slot left empty so the icons line up.
+   shows only the pencil, with the X slot left empty so the icons line up.
+   In view mode Me appears only when the dive has a role of the diver's
+   own; in edit mode it is always there (reading "Set my role" when empty),
+   as the full editor's Me chip is.
    - The pencil opens the role selector for that person, as tapping a chip
      does in the full editor. Me's selector allows no role, as it does there;
      a buddy left with no role becomes "Buddy", as there.
@@ -77,8 +86,8 @@ the card they are looking at.
 4. Save writes the buddy list with their roles, and the diver's own roles,
    only the parts that changed.
 5. A dive that has no linked buddies but legacy free-text buddy names keeps
-   showing the legacy section as today; the Add icon still works, and the
-   Edit icon is hidden until the dive has a linked buddy or a role of its own.
+   showing the legacy section in view mode as today. Add and Edit both work
+   there; edit mode lists only linked buddies, as the full editor does.
 
 ### Equipment
 
