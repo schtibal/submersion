@@ -51,6 +51,9 @@ import 'package:submersion/features/trips/presentation/navigation/open_trip_list
 import 'package:submersion/features/trips/presentation/pages/trip_list_page.dart';
 import 'package:submersion/features/trips/presentation/providers/trip_providers.dart';
 import 'package:submersion/features/dive_log/presentation/pages/bulk_dive_edit_page.dart';
+import 'package:submersion/features/dive_sites/presentation/pages/site_edit_page.dart';
+import 'package:submersion/core/router/shortcut_locations.dart';
+import 'package:submersion/features/import_wizard/presentation/widgets/leave_running_import_dialog.dart';
 
 /// Finds a [GoRoute] by name in a route tree recursively.
 GoRoute? _findRouteByName(List<RouteBase> routes, String name) {
@@ -223,6 +226,48 @@ void main() {
       expect(planning.tripId, 't1');
       expect(planning.initialSection, TripEditSection.planning);
       expect(build('/trips/t1/edit').initialSection, isNull);
+    });
+  });
+
+  group('site duplicate (#3575)', () {
+    test('openDuplicateSite pushes the newSite route', () {
+      // openDuplicateSite writes the path by hand; it must stay this route's.
+      expect(
+        _locationOfRoute(router.configuration.routes, 'newSite'),
+        '/sites/new',
+      );
+    });
+
+    testWidgets('newSite reads the site to duplicate from the URL', (
+      tester,
+    ) async {
+      late BuildContext capturedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      SiteEditPage build(String location) =>
+          _findRouteByName(router.configuration.routes, 'newSite')!.builder!(
+                capturedContext,
+                GoRouterState(
+                  router.configuration,
+                  uri: Uri.parse(location),
+                  matchedLocation: Uri.parse(location).path,
+                  fullPath: '/sites/new',
+                  pathParameters: const {},
+                  pageKey: ValueKey(location),
+                ),
+              )
+              as SiteEditPage;
+
+      expect(build('/sites/new?duplicateOf=s1').duplicateOfId, 's1');
+      expect(build('/sites/new').duplicateOfId, isNull);
     });
   });
 
@@ -2097,7 +2142,6 @@ void main() {
       '/settings/shared-libraries/lib1/backups',
       '/settings/shared-libraries/lib1/connection',
       '/settings/photos-media',
-      '/settings/photos-media/setup',
       '/settings/photos-media/uploads',
       '/settings/media-sources',
       '/settings/media-sources/network-sources',
@@ -2113,6 +2157,9 @@ void main() {
       '/settings/data-quality',
       '/settings/import-options',
       '/settings/data-tools',
+      '/settings/setup',
+      '/settings/setup?step=sync',
+      '/settings/setup?again=true',
     ];
 
     testWidgets('each location builds the page its route builds', (
@@ -2233,6 +2280,32 @@ void main() {
       ]) {
         expect(dataPanePage(Uri.parse(location)), isNull, reason: location);
       }
+    });
+  });
+
+  group('import wizards (#3554)', () {
+    test('every import wizard route asks before leaving a running import', () {
+      for (final name in const [
+        'universalImport',
+        'importFromCloudSuunto',
+        'importFromFileSuunto',
+        'importFromCloudGarmin',
+        'importFromCloudDivelogs',
+        'wearableImport',
+        'discoverDevice',
+        'computerDownload',
+      ]) {
+        final route = _findRouteByName(router.configuration.routes, name);
+        expect(route?.onExit, same(confirmLeaveRunningImport), reason: name);
+      }
+    });
+
+    test('the import wizard as a nav shortcut asks too', () {
+      final shortcut = _findRouteByPath(
+        router.configuration.routes,
+        '$kShortcutLocationPrefix/:id',
+      );
+      expect(shortcut?.onExit, isNotNull);
     });
   });
 }

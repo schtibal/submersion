@@ -49,6 +49,16 @@ class ImportSummaryStep extends ConsumerWidget {
     final state = ref.watch(importWizardNotifierProvider);
     final result = state.importResult;
 
+    if (state.importRefused) {
+      final l10n = context.l10n;
+      return _ErrorView(
+        errorMessage:
+            '${l10n.universalImport_running_title}\n'
+            '${l10n.universalImport_running_body}',
+        onDone: onDone,
+      );
+    }
+
     if (result == null) {
       final error = state.error;
       if (error != null) {
@@ -142,10 +152,20 @@ class _SuccessView extends StatelessWidget {
     // "Import notes" explain dives that imported. Dives that did not (rows
     // whose date could not be read, dives a parser could not read) get their
     // own card.
+    // A notice's action opens a page of the active profile, so it is
+    // dropped when every imported dive went to another profile (issue
+    // #2050): that page would not list them.
+    final divesInActiveProfile =
+        diverOutcomes.isEmpty || diverOutcomes.any((o) => o.isActive);
     final fileNotices = [
       for (final notice in notices)
         if (_fileNoticeWording(l10n, notice) case final wording?)
-          (notice: notice, wording: wording),
+          (
+            notice: notice,
+            wording: divesInActiveProfile
+                ? wording
+                : (title: wording.title, body: wording.body, action: null),
+          ),
     ];
 
     final String title;
@@ -355,7 +375,10 @@ class _SuccessView extends StatelessWidget {
                   onPressed: onDone,
                   child: Text(l10n.universalImport_action_done),
                 ),
-                if (hasActivity) ...[
+                // "View Dives" opens the active profile's list, which holds
+                // none of these dives when they all went elsewhere (#2050);
+                // the By profile section says where to find them instead.
+                if (hasActivity && divesInActiveProfile) ...[
                   const SizedBox(width: 16),
                   FilledButton(
                     onPressed: onViewDives,
@@ -622,6 +645,13 @@ _FileNoticeWording? _fileNoticeWording(
     ImportNoticeKind.photoListingsUnavailable => (
       title: l10n.universalImport_summary_noticePhotoListingsUnavailableTitle,
       body: l10n.universalImport_summary_noticePhotoListingsUnavailableBody(
+        notice.count,
+      ),
+      action: null,
+    ),
+    ImportNoticeKind.photosWithoutLink => (
+      title: l10n.universalImport_summary_noticePhotosWithoutLinkTitle,
+      body: l10n.universalImport_summary_noticePhotosWithoutLinkBody(
         notice.count,
       ),
       action: null,

@@ -2004,10 +2004,6 @@ class AppLocalizationsHe extends AppLocalizations {
       'סנכרון iCloud אינו זמין בגרסה זו של Submersion. השתמש בסנכרון S3 או בגרסת App Store.';
 
   @override
-  String get settings_cloudSync_provider_icloud_unsupportedSubtitle =>
-      'לא זמין בגרסה זו — השתמש ב-S3 או בגרסת App Store';
-
-  @override
   String get settings_cloudSync_encryption_title => 'הצפנה מקצה לקצה';
 
   @override
@@ -2321,8 +2317,8 @@ class AppLocalizationsHe extends AppLocalizations {
       'שינוי גודל החלונית הראשית';
 
   @override
-  String get accessibility_label_sharedWithAllProfiles =>
-      'משותף עם כל פרופילי הצלילה';
+  String get accessibility_label_sharedWithProfiles =>
+      'משותף עם פרופילי צלילה אחרים';
 
   @override
   String get accessibility_label_showList => 'הצגת רשימה';
@@ -2485,6 +2481,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get backup_history_pinAction_unpin => 'בטל הצמדת גיבוי';
 
   @override
+  String get backup_history_pinnedOnAnotherDevice => 'מוצמד במכשיר אחר';
+
+  @override
   String get backup_history_pinError => 'לא ניתן לעדכן את מצב ההצמדה.';
 
   @override
@@ -2584,6 +2583,91 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get backup_schedule_retention_subtitle =>
       'גיבויים ישנים יותר מוסרים אוטומטית';
+
+  @override
+  String get backup_retention_allDevices_title => 'ספירת גיבויים מכל המכשירים';
+
+  @override
+  String get backup_retention_allDevices_off =>
+      'כבוי: מכשיר זה מסיר רק את הגיבויים שהוא יצר';
+
+  @override
+  String backup_retention_allDevices_on(int count) {
+    return 'תיקיית הענן שומרת את $count הגיבויים האחרונים מכל המכשירים. גיבויים מוצמדים נשמרים. אם גם מכשירים אחרים משתמשים בזה, המספר הקטן ביותר קובע. עדכנו קודם את האפליקציה בכל המכשירים כדי שההצמדות שלהם ייראו.';
+  }
+
+  @override
+  String backup_retention_cloudFootprint(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count גיבויים בתיקיית הענן תופסים $size',
+      one: 'גיבוי אחד בתיקיית הענן תופס $size',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backup_retention_confirm_title(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'להסיר $count גיבויים?',
+      one: 'להסיר גיבוי אחד?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backup_retention_confirm_body(int keep, String size) {
+    return 'שמירת $keep הגיבויים האחרונים מסירה את אלה מתיקיית הענן ($size בסך הכול).';
+  }
+
+  @override
+  String backup_retention_confirm_pinnedKept(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count גיבויים מוצמדים נשמרים.',
+      one: 'גיבוי מוצמד אחד נשמר.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backup_retention_confirm_action(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'הסר $count גיבויים',
+      one: 'הסר גיבוי אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backup_retention_source_thisDevice => 'מכשיר זה';
+
+  @override
+  String get backup_retention_source_anotherDevice => 'מכשיר אחר';
+
+  @override
+  String get backup_retention_source_unknown => 'מכשיר לא ידוע';
+
+  @override
+  String get backup_retention_listFailed =>
+      'לא ניתן לקרוא את תיקיית הגיבויים בענן, ולכן לא שונה דבר.';
+
+  @override
+  String backup_retention_removed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'הוסרו $count גיבויים מתיקיית הענן',
+      one: 'הוסר גיבוי אחד מתיקיית הענן',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get backup_section_history => 'היסטוריה';
@@ -6145,6 +6229,10 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveCenters_hint_website => 'www.divecenter.com';
 
   @override
+  String get diveCenters_hint_permanentlyClosed =>
+      'נשמר עבור צלילות קודמות; לא מוצג בין המרכזים הקרובים בבורר.';
+
+  @override
   String diveCenters_import_fromDatabase(Object count) {
     return 'ייבא ממאגר נתונים ($count)';
   }
@@ -6217,11 +6305,17 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveCenters_label_website => 'אתר אינטרנט';
 
   @override
+  String get diveCenters_label_permanentlyClosed => 'סגור לצמיתות';
+
+  @override
   String get diveCenters_map_addCoordinatesHint =>
       'הוסף קואורדינטות למרכזי הצלילה שלך כדי לראות אותם במפה';
 
   @override
   String get diveCenters_map_noCoordinates => 'אין מרכזי צלילה עם קואורדינטות';
+
+  @override
+  String get diveCenters_picker_allCenters => 'כל מרכזי הצלילה';
 
   @override
   String get diveCenters_picker_newCenter => 'מרכז צלילה חדש';
@@ -6230,12 +6324,26 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveCenters_picker_title => 'בחר מרכז צלילה';
 
   @override
+  String diveCenters_picker_nearSite(String siteName) {
+    return 'ליד $siteName';
+  }
+
+  @override
+  String get diveCenters_picker_nearThisDive => 'ליד הצלילה הזו';
+
+  @override
+  String get diveCenters_picker_nearYourLocation => 'ליד המיקום שלך';
+
+  @override
   String diveCenters_search_noResults(Object query) {
     return 'אין תוצאות עבור \"$query\"';
   }
 
   @override
   String get diveCenters_search_prompt => 'חפש מרכזי צלילה';
+
+  @override
+  String get diveCenters_tag_closed => 'סגור';
 
   @override
   String get diveCenters_section_address => 'כתובת';
@@ -8469,6 +8577,17 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get diveSites_detail_duplicateMenu_label => 'שכפל';
+
+  @override
+  String get diveSites_edit_appBar_duplicateSite => 'שכפל אתר';
+
+  @override
+  String diveSites_edit_duplicateName(String name) {
+    return '$name (עותק)';
+  }
+
+  @override
   String get diveSites_edit_group_accessSafety => 'גישה ובטיחות';
 
   @override
@@ -8485,6 +8604,10 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveSites_edit_group_typeTags => 'סוג ותגיות';
+
+  @override
+  String get diveSites_edit_snackbar_featuresNotCopied =>
+      'האתר נוסף, אך לא ניתן היה להעתיק את המאפיינים שלו במפה.';
 
   @override
   String get diveSites_edit_typeTags_manageTypes => 'ניהול סוגים';
@@ -8550,34 +8673,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_manage_setupAssistant_subtitle =>
-      'עיון מחדש ביחידות, במראה ובאפשרויות הגיבוי';
-
-  @override
-  String get setup_backup_cloudCopy => 'אחסון גיבויים בענן';
-
-  @override
-  String get setup_backup_frequency => 'תדירות';
-
-  @override
-  String get setup_backup_frequency_daily => 'יומי';
-
-  @override
-  String get setup_backup_frequency_monthly => 'חודשי';
-
-  @override
-  String get setup_backup_frequency_weekly => 'שבועי';
-
-  @override
-  String get setup_backup_scheduleSubtitle => 'גיבוי הנתונים לפי לוח זמנים';
-
-  @override
-  String get setup_backup_scheduleToggle => 'גיבויים אוטומטיים';
-
-  @override
-  String get setup_backup_subtitle => 'הגנו על הנתונים שלכם מהיום הראשון.';
-
-  @override
-  String get setup_backup_title => 'גיבויים וסנכרון';
+      'עיון מחדש ביחידות, בגיבויים, בסנכרון ובתמונות';
 
   @override
   String get setup_common_back => 'חזרה';
@@ -8685,9 +8781,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get setup_restore_title => 'שחזור גיבוי';
 
   @override
-  String get setup_step_backup => 'גיבוי';
-
-  @override
   String get setup_step_finish => 'סיום';
 
   @override
@@ -8695,9 +8788,6 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get setup_step_units => 'יחידות';
-
-  @override
-  String get setup_syncPull_continue => 'המשך';
 
   @override
   String get setup_syncPull_incomplete_message =>
@@ -8722,50 +8812,6 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get setup_syncPull_noLibrary_title => 'לא נמצאה ספרייה';
-
-  @override
-  String get setup_syncPull_success => 'הספרייה אומצה';
-
-  @override
-  String get setup_syncPull_syncing => 'מושך את הספרייה...';
-
-  @override
-  String get setup_sync_changeProvider => 'החלפת ספק';
-
-  @override
-  String setup_sync_connectedTo(String provider) {
-    return 'מחובר אל $provider';
-  }
-
-  @override
-  String setup_sync_error(Object error) {
-    return 'החיבור נכשל: $error';
-  }
-
-  @override
-  String get setup_sync_header => 'סנכרון ענן';
-
-  @override
-  String get setup_sync_libraryFound_adopt => 'אימוץ הספרייה הקיימת';
-
-  @override
-  String get setup_sync_libraryFound_keepFresh => 'התחלה חדשה';
-
-  @override
-  String get setup_sync_libraryFound_message =>
-      'חשבון זה כבר מכיל ספריית Submersion. לאמץ אותה במקום להתחיל מחדש?';
-
-  @override
-  String get setup_sync_libraryFound_title => 'נמצאה ספרייה קיימת';
-
-  @override
-  String get setup_sync_manageInSettings => 'ניהול בהגדרות';
-
-  @override
-  String get setup_sync_notConnected => 'לא מחובר';
-
-  @override
-  String get setup_sync_subtitle => 'סנכרון הנתונים בין מכשירים';
 
   @override
   String get setup_units_advanced => 'כוונון יחידות';
@@ -9187,6 +9233,11 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_search_jumpTitle => 'מעבר לצלילה';
+
+  @override
+  String diveLog_search_jumpNumberTitle(int number, String title) {
+    return '#$number · $title';
+  }
 
   @override
   String diveLog_ask_row(String text) {
@@ -9862,6 +9913,17 @@ class AppLocalizationsHe extends AppLocalizations {
       'הצג וסתים שהוצאו משימוש ושנמכרו';
 
   @override
+  String get diveLog_tank_addRegulator => 'הוסף וסת';
+
+  @override
+  String diveLog_tank_regulatorNumbered(int number) {
+    return 'וסת $number';
+  }
+
+  @override
+  String get diveLog_tank_removeRegulator => 'הסר וסת';
+
+  @override
   String get diveLog_tank_tripCylinderLabel => 'מכל הטיול';
 
   @override
@@ -10175,6 +10237,14 @@ class AppLocalizationsHe extends AppLocalizations {
   String get divePlanner_label_airBreaksOnO2 => 'על O2 (דק\')';
 
   @override
+  String get divePlanner_label_airBreaksCustom => 'מותאם אישית';
+
+  @override
+  String divePlanner_label_airBreaksCycle(int o2Minutes, int breakMinutes) {
+    return '$o2Minutes/$breakMinutes דק׳';
+  }
+
+  @override
   String get divePlanner_label_altitude => 'גובה:';
 
   @override
@@ -10185,6 +10255,14 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get divePlanner_label_decompression => 'דקומפרסיה';
+
+  @override
+  String divePlanner_label_defaultWithValue(Object value) {
+    return 'ברירת מחדל ($value)';
+  }
+
+  @override
+  String get divePlanner_label_default => 'ברירת מחדל';
 
   @override
   String divePlanner_label_depthAxis(Object depthSymbol) {
@@ -10234,6 +10312,12 @@ class AppLocalizationsHe extends AppLocalizations {
   String get divePlanner_gasOptions_sacFactor => 'מקדם RMV';
 
   @override
+  String get divePlanner_gasOptions_sacStressed => 'RMV בלחץ';
+
+  @override
+  String get divePlanner_gasOptions_sacStressedFactor => 'מקדם RMV בלחץ';
+
+  @override
   String get divePlanner_gasOptions_problemSolvingMinutes => 'זמן לפתרון תקלה';
 
   @override
@@ -10251,6 +10335,12 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get divePlanner_gasOptions_o2Narcotic =>
       'התייחס ל-O₂ כנרקוטי בתוכנית זו';
+
+  @override
+  String get divePlanner_label_on => 'פעיל';
+
+  @override
+  String get divePlanner_label_off => 'כבוי';
 
   @override
   String get divePlanner_label_tanks => 'מיכלים';
@@ -11857,17 +11947,23 @@ class AppLocalizationsHe extends AppLocalizations {
       'התמונות מורדות במהלך הייבוא לתיקייה שתבחרו.';
 
   @override
-  String divelogsImport_fetch_listingPhotos(int current, int total) {
-    return 'מקבל את רשימת התמונות לצלילה $current מתוך $total…';
-  }
-
-  @override
   String divelogsImport_fetch_photoListingsFailed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: 'לא ניתן היה לקבל את רשימת התמונות של $count צלילות.',
       one: 'לא ניתן היה לקבל את רשימת התמונות של $count צלילה.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String divelogsImport_fetch_photosWithoutLink(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ל-$count תמונות אין קישור להורדה והן לא ייובאו.',
+      one: 'ל-$count תמונה אין קישור להורדה והיא לא תיובא.',
     );
     return '$_temp0';
   }
@@ -11934,6 +12030,62 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get divelogsImport_signIn_usernameRequired => 'נדרש שם משתמש';
+
+  @override
+  String get divers_misplacedLogbook_title =>
+      'הצלילות שלך נמצאות בפרופיל צולל אחר';
+
+  @override
+  String divers_misplacedLogbook_body(String target, int count, String active) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count צלילות',
+      one: 'צלילה אחת',
+    );
+    return 'ב-\"$target\" יש $_temp0. מכשיר זה מציג את \"$active\", שאין בו צלילות. זה יכול לקרות כשמכשיר יוצר פרופיל משלו לפני הסנכרון הראשון.';
+  }
+
+  @override
+  String get divers_misplacedLogbook_switchTo => 'החלף';
+
+  @override
+  String get divers_misplacedLogbook_merge => 'מזג';
+
+  @override
+  String get divers_misplacedLogbook_keepBoth => 'השאר את שניהם';
+
+  @override
+  String get divers_misplacedLogbook_confirmTitle => 'למזג פרופילי צוללים?';
+
+  @override
+  String divers_misplacedLogbook_confirmBody(String active, String target) {
+    return 'כל מה שב-\"$active\" יועבר אל \"$target\", ו-\"$active\" יוסר. \"$target\" שומר על השם וההגדרות שלו. ניתן לבטל פעולה זו מיד לאחר המיזוג.';
+  }
+
+  @override
+  String get divers_misplacedLogbook_confirmCancel => 'ביטול';
+
+  @override
+  String get divers_misplacedLogbook_confirmAction => 'מזג';
+
+  @override
+  String divers_misplacedLogbook_mergedSnack(String target) {
+    return 'מוזג אל $target';
+  }
+
+  @override
+  String get divers_misplacedLogbook_undo => 'בטל';
+
+  @override
+  String divers_misplacedLogbook_mergeFailed(String error) {
+    return 'המיזוג נכשל: $error';
+  }
+
+  @override
+  String divers_misplacedLogbook_undoFailed(String error) {
+    return 'הביטול נכשל: $error';
+  }
 
   @override
   String get divers_detail_activeDiver => 'צולל פעיל';
@@ -12334,7 +12486,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get enum_entryMethod_backRoll => 'גלגול אחורה';
 
   @override
-  String get enum_entryMethod_boat => 'כניסה מסירה';
+  String get enum_entryMethod_boat => 'סירה';
 
   @override
   String get enum_entryMethod_frontRoll => 'גלגול קדימה';
@@ -12358,7 +12510,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get enum_entryMethod_seatedEntry => 'כניסה בישיבה';
 
   @override
-  String get enum_entryMethod_shore => 'כניסה מהחוף';
+  String get enum_entryMethod_shore => 'חוף';
 
   @override
   String get enum_equipmentStatus_active => 'פעיל';
@@ -18204,8 +18356,40 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String media_photoPicker_files_diveGroupTitle(String diveId) {
-    return 'צלילה $diveId';
+  String media_photoPicker_files_diveGroupNumberSite(int number, String site) {
+    return 'צלילה #$number · $site';
+  }
+
+  @override
+  String media_photoPicker_files_diveGroupNumber(int number) {
+    return 'צלילה #$number';
+  }
+
+  @override
+  String media_photoPicker_files_diveGroupSite(String site) {
+    return 'צלילה · $site';
+  }
+
+  @override
+  String get media_photoPicker_files_diveGroupUnnamed => 'צלילה';
+
+  @override
+  String media_photoPicker_files_diveGroupWindow(
+    String date,
+    String start,
+    String end,
+  ) {
+    return '$date · $start – $end';
+  }
+
+  @override
+  String media_photoPicker_files_diveGroupStart(String date, String start) {
+    return '$date · $start';
+  }
+
+  @override
+  String media_photoPicker_files_diveGroupSubtitle(String when, String files) {
+    return '$when · $files';
   }
 
   @override
@@ -18468,6 +18652,36 @@ class AppLocalizationsHe extends AppLocalizations {
   String media_photoViewer_failedToShare(Object error) {
     return 'השיתוף נכשל: $error';
   }
+
+  @override
+  String get media_share_preparingVideo => 'מכין סרטון';
+
+  @override
+  String media_share_preparingVideoOf(int current, int total) {
+    return 'מכין סרטון $current מתוך $total';
+  }
+
+  @override
+  String get media_share_correctionFailedTitle =>
+      'לא ניתן היה להחיל את תיקון הצבע';
+
+  @override
+  String media_share_correctionFailedBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'עדיין אפשר לשתף $count סרטונים בלעדיו.',
+      one: 'עדיין אפשר לשתף את הסרטון הזה בלעדיו.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get media_share_shareOriginal => 'שתף מקור';
+
+  @override
+  String get media_share_videoInterrupted =>
+      'הכנת הסרטון נעצרה כאשר Submersion עבר לרקע. שתף שוב כדי להתחיל מחדש.';
 
   @override
   String get media_photoViewer_failedToWriteMetadata =>
@@ -19191,6 +19405,9 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get plannerCanvas_chart_removeWaypoint => 'הסרת נקודת הציון';
+
+  @override
   String get plannerCanvas_contingency_title => 'תוכניות חירום';
 
   @override
@@ -19234,6 +19451,24 @@ class AppLocalizationsHe extends AppLocalizations {
   String plannerCanvas_gas_turnAt(String pressure) {
     return 'פנייה ב-$pressure';
   }
+
+  @override
+  String get plannerCanvas_gas_noTurnRule => 'לא הוגדר כלל לחץ פנייה';
+
+  @override
+  String get plannerCanvas_gas_turnNoStartPressure =>
+      'נקודת הפנייה דורשת לחץ התחלתי';
+
+  @override
+  String get plannerCanvas_gas_minGasNoStartPressure =>
+      'גז מינימלי דורש לחץ התחלתי';
+
+  @override
+  String get plannerCanvas_gas_minGasNoVolume => 'גז מינימלי דורש גודל מכל';
+
+  @override
+  String get plannerCanvas_gas_limitsNoStartPressure =>
+      'נקודת הפנייה והגז המינימלי דורשים לחץ התחלתי';
 
   @override
   String plannerCanvas_gas_usedReading(String reading) {
@@ -19405,6 +19640,15 @@ class AppLocalizationsHe extends AppLocalizations {
   String get plannerCanvas_slate_turn => 'נקודת חזרה';
 
   @override
+  String get plannerCanvas_slate_noTurnRule => 'אין כלל';
+
+  @override
+  String get plannerCanvas_slate_noStartPressure => 'אין לחץ התחלתי';
+
+  @override
+  String get plannerCanvas_slate_noVolume => 'אין גודל';
+
+  @override
   String get plannerCanvas_table_depth => 'עומק';
 
   @override
@@ -19460,6 +19704,13 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get planning_card_gasCalculators_title => 'מחשבוני גז';
+
+  @override
+  String get planning_card_savedPlans_subtitle =>
+      'כל התוכניות השמורות, מקובצות לפי מצב';
+
+  @override
+  String get planning_plannedDives_sortTooltip => 'מיון';
 
   @override
   String get planning_card_surfaceInterval_subtitle =>
@@ -21096,6 +21347,20 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get sharedLibrary_syncError_accountMissing =>
+      'החשבון של הספרייה הזו כבר לא נמצא במכשיר הזה. השתמשו בשינוי החיבור כדי לבחור אותו שוב.';
+
+  @override
+  String get sharedLibrary_syncError_accountSignedOut =>
+      'המכשיר הזה מנותק מהחשבון של הספרייה. התחברו אליו שוב בחשבונות מחוברים, או השתמשו בשינוי החיבור.';
+
+  @override
+  String get sharedLibrary_syncError_notALibrary => 'אין ספרייה במיקום הזה.';
+
+  @override
+  String get sharedLibrary_syncError_failed => 'משהו השתבש.';
+
+  @override
   String get sharedLibrary_library_addMySites => 'הוספת האתרים שלי';
 
   @override
@@ -21958,6 +22223,10 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_conflict_field_autoTagImports => 'תיוג צלילות מיובאות';
+
+  @override
+  String get settings_conflict_field_downloadsFollowComputerOwner =>
+      'הוספת הורדות לבעלים של המחשב';
 
   @override
   String get settings_conflict_field_avgSpeed => 'מהירות ממוצעת';
@@ -23369,6 +23638,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_conflict_field_sharedComputerIds => 'משותף עם מחשבים';
+
+  @override
+  String get settings_conflict_field_extraRegulatorIds => 'וסתים נוספים';
 
   @override
   String get settings_conflict_field_shoreSwimM => 'שחייה לחוף';
@@ -25418,6 +25690,12 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_import_phase_dives => 'מייבא צלילות...';
 
   @override
+  String get settings_import_phase_photos => 'מוריד תמונות...';
+
+  @override
+  String get settings_import_phase_finishing => 'מסיים את הייבוא...';
+
+  @override
   String get settings_import_phase_equipment => 'מייבא ציוד...';
 
   @override
@@ -26378,6 +26656,13 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_section_decompression_title => 'דקומפרסיה';
+
+  @override
+  String get settings_section_plannerDefaults_title => 'ברירות מחדל למתכנן';
+
+  @override
+  String get settings_section_plannerDefaults_subtitle =>
+      'קצבים, גז, תרחישי חירום, צוות DPV';
 
   @override
   String get settings_section_diverProfile_subtitle => 'צולל פעיל ופרופילים';
@@ -29280,6 +29565,14 @@ class AppLocalizationsHe extends AppLocalizations {
       'כל ייבוא חדש מתחיל עם תגית הנושאת את שם המקור והתאריך. אפשר לשנות זאת לייבוא בודד באפשרויות אותו ייבוא.';
 
   @override
+  String get settings_downloadsFollowOwner_title =>
+      'הוספת הורדות לבעלים של המחשב';
+
+  @override
+  String get settings_downloadsFollowOwner_subtitle =>
+      'כשמחשב צלילה שייך לפרופיל אחר, הצלילות שלו נכנסות ליומן של אותו פרופיל. אפשר לשנות זאת במסך הסקירה.';
+
+  @override
   String get tags_manage_searchHint => 'חיפוש תגיות...';
 
   @override
@@ -29356,7 +29649,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get tags_manage_scopeRequired =>
-      'בחר לפחות אחד: צלילות, אתרים או ציוד';
+      'בחר לפחות אחד: צלילות, אתרים, ציוד, מדיה או מסמכים';
 
   @override
   String get tags_manage_scope_dives => 'צלילות';
@@ -29427,27 +29720,6 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String tags_manage_deleteMessage_divesAndSites(
-    String tagName,
-    int diveCount,
-    int siteCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount צלילות',
-      one: 'צלילה אחת',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount אתרים',
-      one: 'אתר אחד',
-    );
-    return '\"$tagName\" תוסר מ-$_temp0 ומ-$_temp1. לא ניתן לבטל פעולה זו.';
-  }
-
-  @override
   String tags_manage_deleteMessage_equipment(String tagName, int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -29459,78 +29731,8 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String tags_manage_deleteMessage_divesAndEquipment(
-    String tagName,
-    int diveCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount צלילות',
-      one: 'צלילה אחת',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount פריטי ציוד',
-      one: 'פריט ציוד אחד',
-    );
-    return '\"$tagName\" תוסר מ-$_temp0 ומ-$_temp1. לא ניתן לבטל פעולה זו.';
-  }
-
-  @override
-  String tags_manage_deleteMessage_sitesAndEquipment(
-    String tagName,
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount אתרים',
-      one: 'אתר אחד',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount פריטי ציוד',
-      one: 'פריט ציוד אחד',
-    );
-    return '\"$tagName\" תוסר מ-$_temp0 ומ-$_temp1. לא ניתן לבטל פעולה זו.';
-  }
-
-  @override
-  String tags_manage_deleteMessage_all(
-    String tagName,
-    int diveCount,
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount צלילות',
-      one: 'צלילה אחת',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount אתרים',
-      one: 'אתר אחד',
-    );
-    String _temp2 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount פריטי ציוד',
-      one: 'פריט ציוד אחד',
-    );
-    return '\"$tagName\" תוסר מ-$_temp0, מ-$_temp1 ומ-$_temp2. לא ניתן לבטל פעולה זו.';
-  }
-
-  @override
   String tags_manage_deleteMessage_unused(String tagName) {
-    return '\"$tagName\" אינה בשימוש באף צלילה, אתר או פריט ציוד. לא ניתן לבטל פעולה זו.';
+    return '\"$tagName\" אינה בשימוש בשום מקום. לא ניתן לבטל פעולה זו.';
   }
 
   @override
@@ -29562,26 +29764,6 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String tags_manage_bulkDeleteMessage_divesAndSites(
-    int diveCount,
-    int siteCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount צלילות',
-      one: 'צלילה אחת',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount אתרים',
-      one: 'אתר אחד',
-    );
-    return 'תגיות אלו יוסרו מ-$_temp0 ומ-$_temp1 בסך הכל. לא ניתן לבטל פעולה זו.';
-  }
-
-  @override
   String tags_manage_bulkDeleteMessage_equipment(int equipmentCount) {
     String _temp0 = intl.Intl.pluralLogic(
       equipmentCount,
@@ -29593,75 +29775,8 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String tags_manage_bulkDeleteMessage_divesAndEquipment(
-    int diveCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount צלילות',
-      one: 'צלילה אחת',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount פריטי ציוד',
-      one: 'פריט ציוד אחד',
-    );
-    return 'תגיות אלו יוסרו מ-$_temp0 ומ-$_temp1 בסך הכל. לא ניתן לבטל פעולה זו.';
-  }
-
-  @override
-  String tags_manage_bulkDeleteMessage_sitesAndEquipment(
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount אתרים',
-      one: 'אתר אחד',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount פריטי ציוד',
-      one: 'פריט ציוד אחד',
-    );
-    return 'תגיות אלו יוסרו מ-$_temp0 ומ-$_temp1 בסך הכל. לא ניתן לבטל פעולה זו.';
-  }
-
-  @override
-  String tags_manage_bulkDeleteMessage_all(
-    int diveCount,
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount צלילות',
-      one: 'צלילה אחת',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount אתרים',
-      one: 'אתר אחד',
-    );
-    String _temp2 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount פריטי ציוד',
-      one: 'פריט ציוד אחד',
-    );
-    return 'תגיות אלו יוסרו מ-$_temp0, מ-$_temp1 ומ-$_temp2 בסך הכל. לא ניתן לבטל פעולה זו.';
-  }
-
-  @override
   String get tags_manage_bulkDeleteMessage_unused =>
-      'תגיות אלו אינן בשימוש באף צלילה, אתר או פריט ציוד. לא ניתן לבטל פעולה זו.';
+      'תגיות אלו אינן בשימוש בשום מקום. לא ניתן לבטל פעולה זו.';
 
   @override
   String tags_manage_mergeTitle(int count) {
@@ -29698,23 +29813,6 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String tags_manage_mergeAffected_divesAndSites(int diveCount, int siteCount) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount צלילות',
-      one: 'צלילה אחת',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount אתרים',
-      one: 'אתר אחד',
-    );
-    return 'פעולה זו תשפיע על $_temp0 ועל $_temp1 בסך הכל.';
-  }
-
-  @override
   String tags_manage_mergeAffected_equipment(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -29726,75 +29824,8 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String tags_manage_mergeAffected_divesAndEquipment(
-    int diveCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount צלילות',
-      one: 'צלילה אחת',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount פריטי ציוד',
-      one: 'פריט ציוד אחד',
-    );
-    return 'פעולה זו תשפיע על $_temp0 ועל $_temp1 בסך הכל.';
-  }
-
-  @override
-  String tags_manage_mergeAffected_sitesAndEquipment(
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount אתרים',
-      one: 'אתר אחד',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount פריטי ציוד',
-      one: 'פריט ציוד אחד',
-    );
-    return 'פעולה זו תשפיע על $_temp0 ועל $_temp1 בסך הכל.';
-  }
-
-  @override
-  String tags_manage_mergeAffected_all(
-    int diveCount,
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount צלילות',
-      one: 'צלילה אחת',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount אתרים',
-      one: 'אתר אחד',
-    );
-    String _temp2 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount פריטי ציוד',
-      one: 'פריט ציוד אחד',
-    );
-    return 'פעולה זו תשפיע על $_temp0, על $_temp1 ועל $_temp2 בסך הכל.';
-  }
-
-  @override
   String get tags_manage_mergeAffected_unused =>
-      'תגיות אלו אינן בשימוש באף צלילה, אתר או פריט ציוד.';
+      'תגיות אלו אינן בשימוש בשום מקום.';
 
   @override
   String get tags_manage_mergeAction => 'מיזוג';
@@ -32047,6 +32078,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get universalImport_summary_newProfile => 'פרופיל חדש';
 
   @override
+  String get universalImport_summary_unnamedProfile => 'פרופיל ללא שם';
+
+  @override
   String universalImport_summary_switchToSee(String name) {
     return 'עבור אל $name כדי לראות צלילות אלה';
   }
@@ -32220,6 +32254,21 @@ class AppLocalizationsHe extends AppLocalizations {
           'לא ניתן היה לקבל את רשימת התמונות של $count צלילות, ולכן הן לא יובאו.',
       one:
           'לא ניתן היה לקבל את רשימת התמונות של $count צלילה, ולכן הן לא יובאו.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get universalImport_summary_noticePhotosWithoutLinkTitle =>
+      'חלק מהתמונות ללא קישור';
+
+  @override
+  String universalImport_summary_noticePhotosWithoutLinkBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ל-$count תמונות לא היה קישור להורדה, ולכן הן לא יובאו.',
+      one: 'ל-$count תמונה לא היה קישור להורדה, ולכן היא לא יובאה.',
     );
     return '$_temp0';
   }
@@ -34953,6 +35002,14 @@ class AppLocalizationsHe extends AppLocalizations {
   String get universalImport_title_importOptions => 'אפשרויות ייבוא';
 
   @override
+  String universalImport_computerOwner_notice(String owner, String chosen) {
+    return 'המחשב הזה שייך ל-$owner. הצלילות יתווספו ליומן של $chosen.';
+  }
+
+  @override
+  String get universalImport_computerOwner_profileLabel => 'פרופיל';
+
+  @override
   String get universalImport_label_options => 'אפשרויות';
 
   @override
@@ -35013,29 +35070,19 @@ class AppLocalizationsHe extends AppLocalizations {
       'שתף אתרים וטיולים חדשים כברירת מחדל';
 
   @override
-  String get settings_shareAllSites_title => 'שתף את כל האתרים שלי';
+  String get settings_shareAllSites_title => 'שתף את כל האתרים שלי...';
 
   @override
-  String get settings_shareAllTrips_title => 'שתף את כל הטיולים שלי';
+  String get settings_shareAllTrips_title => 'שתף את כל הטיולים שלי...';
 
   @override
   String settings_shareAllSites_confirm(int count) {
-    return 'להציג את כל $count האתרים שלך לכל פרופיל צלילה באפליקציה? תוכל לבטל שיתוף של אתרים בודדים בהמשך.';
+    return 'בחר מי רואה את כל $count האתרים שלך. כדי לשנות אתר אחד בהמשך, פתח אותו והקש על משותף עם.';
   }
 
   @override
   String settings_shareAllTrips_confirm(int count) {
-    return 'להציג את כל $count הטיולים שלך לכל פרופיל צלילה באפליקציה? תוכל לבטל שיתוף של טיולים בודדים בהמשך.';
-  }
-
-  @override
-  String settings_shareAllSites_snackbar(int count) {
-    return '$count אתרים שותפו עם כל פרופילי הצלילה.';
-  }
-
-  @override
-  String settings_shareAllTrips_snackbar(int count) {
-    return '$count טיולים שותפו עם כל פרופילי הצלילה.';
+    return 'בחר מי רואה את כל $count הטיולים שלך. כדי לשנות טיול אחד בהמשך, פתח אותו והקש על משותף עם.';
   }
 
   @override
@@ -35071,7 +35118,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String trips_unshareConfirm_body(String name) {
-    return 'פעולה זו תסיר את «$name» מתצוגות של פרופילי צלילה אחרים. תוכל לשתף שוב בהמשך.';
+    return 'פרופילים שתסיר לא יראו עוד את \"$name\". הצלילות שלהם יישארו מקושרות אליו, ותוכל לשתף אותו איתם שוב בהמשך.';
   }
 
   @override
@@ -35079,7 +35126,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String sites_unshareConfirm_body(String name) {
-    return 'פעולה זו תסיר את «$name» מתצוגות של פרופילי צלילה אחרים. תוכל לשתף שוב בהמשך.';
+    return 'פרופילים שתסיר לא יראו עוד את \"$name\". הצלילות שלהם יישארו מקושרות אליו, ותוכל לשתף אותו איתם שוב בהמשך.';
   }
 
   @override
@@ -35154,6 +35201,31 @@ class AppLocalizationsHe extends AppLocalizations {
       one: 'להסיר $count פריט מהפרופיל שלך?',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get sharedItems_bulkShare_action => 'שיתוף עם...';
+
+  @override
+  String sharedItems_bulkShare_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטים שותפו',
+      one: 'פריט $count שותף',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sharedItems_bulkShare_doneSkipped(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטים שותפו',
+      one: 'פריט $count שותף',
+    );
+    return '$_temp0, דולגו $skipped שאינם בבעלותך';
   }
 
   @override
@@ -35248,6 +35320,21 @@ class AppLocalizationsHe extends AppLocalizations {
   String get sharedItems_removedSnackbar => 'הוסר מהפרופיל שלך';
 
   @override
+  String get sharedItems_shareDialog_everyoneSubtitle =>
+      'כל פרופילי הצלילה, כולל פרופילים שיתווספו בהמשך';
+
+  @override
+  String get sharedItems_shareDialog_siteBody =>
+      'הפרופילים שתבחר רואים את האתר הזה ויכולים לתעד בו את הצלילות שלהם. רק אתה יכול למחוק אותו או לשנות עם מי הוא משותף.';
+
+  @override
+  String get sharedItems_shareDialog_title => 'שיתוף עם';
+
+  @override
+  String get sharedItems_shareDialog_tripBody =>
+      'הפרופילים שתבחר רואים את הטיול הזה ויכולים להוסיף לו את הצלילות שלהם. רק אתה יכול למחוק אותו או לשנות עם מי הוא משותף.';
+
+  @override
   String sharedItems_shareOwnerOnly(String owner) {
     return 'רק $owner יכול לשנות את השיתוף';
   }
@@ -35256,6 +35343,15 @@ class AppLocalizationsHe extends AppLocalizations {
   String sharedItems_sharedBy(String owner) {
     return 'שותף על ידי $owner';
   }
+
+  @override
+  String get sharedItems_sharedWith_everyone => 'כולם';
+
+  @override
+  String get sharedItems_sharedWith_label => 'משותף עם';
+
+  @override
+  String get sharedItems_sharedWith_none => 'לא משותף';
 
   @override
   String get sharedItems_undo => 'בטל';
@@ -35286,6 +35382,17 @@ class AppLocalizationsHe extends AppLocalizations {
       one: 'אתר משותף הועבר',
     );
     return 'הצולל נמחק. $trips $_temp0 ו-$sites $_temp1 אל $name.';
+  }
+
+  @override
+  String divers_delete_handedOver(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count טיולים ואתרים משותפים עברו לפרופילים שאיתם שותפו.',
+      one: 'טיול או אתר משותף $count עבר לפרופיל שאיתו שותף.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -36101,30 +36208,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_sources_compareIn3d => 'השוואה בתלת-ממד';
 
   @override
-  String get settings_setup_pendingTitle => 'השלם את הגדרת המכשיר הזה';
-
-  @override
-  String settings_setup_mediaStoreAttach(String hint) {
-    return 'חיבור אחסון מדיה ($hint)';
-  }
-
-  @override
-  String settings_setup_mediaStoreReconnect(String hint) {
-    return 'חיבור מחדש של אחסון מדיה ($hint)';
-  }
-
-  @override
-  String settings_setup_accountSignIn(String label) {
-    return 'התחברות אל $label';
-  }
-
-  @override
-  String get settings_setup_dismiss => 'התעלם';
-
-  @override
-  String get settings_photosMedia_guidedSetup => 'הגדרה מודרכת';
-
-  @override
   String get settings_photosMedia_photoSources_subtitle =>
       'גלריה, קבצים ואפשרויות ייבוא';
 
@@ -36172,43 +36255,6 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get settings_connectedAccounts_removeConfirmBody =>
       'החשבון מוסר מכל המכשירים המסונכרנים. אישורים השמורים במכשירים אחרים אינם נמחקים.';
-
-  @override
-  String get settings_setupGuide_title => 'הגדרת תמונות ומדיה';
-
-  @override
-  String get settings_setupGuide_intro =>
-      'חבר את מקורות התמונות ואת מקום שמירת העותקים. אפשר להריץ זאת שוב בכל עת.';
-
-  @override
-  String get settings_setupGuide_stepSources => 'מקורות תמונות';
-
-  @override
-  String get settings_setupGuide_stepSources_desc =>
-      'צרף תמונות מספריית התמונות, מקבצים או מ-Lightroom.';
-
-  @override
-  String get settings_setupGuide_stepStorage => 'אחסון מדיה';
-
-  @override
-  String get settings_setupGuide_stepStorage_desc =>
-      'שמור עותקים של התמונות בענן שלך כדי שכל מכשיר יוכל להציגן.';
-
-  @override
-  String get settings_setupGuide_stepSync => 'סנכרון ענן';
-
-  @override
-  String get settings_setupGuide_stepSync_desc =>
-      'סנכרן נתוני צלילה בין מכשירים.';
-
-  @override
-  String get settings_setupGuide_statusDone => 'מוגדר';
-
-  @override
-  String get settings_setupGuide_statusTodo => 'לא מוגדר';
-
-  @override
-  String get settings_setupGuide_open => 'פתח';
 
   @override
   String get settings_connectedAccounts_loadError => 'לא ניתן לטעון חשבונות';
@@ -46560,6 +46606,38 @@ class AppLocalizationsHe extends AppLocalizations {
       'הספים שבהם משתמשים הצבעים והאירועים של קצב העלייה בפרופיל. סקירת הבטיחות שומרת על מגבלות קבועות משלה, כך ששינוי ערכים אלה אינו משנה צלילות שכבר נסקרו.';
 
   @override
+  String get settings_decompression_header_plannerRates => 'קצבי מתכנן';
+
+  @override
+  String get settings_decompression_header_plannerRates_subtitle =>
+      'קצבי הירידה והעלייה שאיתם מתחילה תוכנית חדשה. שינוי אחד בתוך תוכנית יחליף אותו רק שם, מבלי לשנות ברירת מחדל זו.';
+
+  @override
+  String get settings_decompression_header_plannerGas => 'גז מתכנן';
+
+  @override
+  String get settings_decompression_header_plannerGas_subtitle =>
+      'ברירות המחדל לצריכת גז שאיתן מתחילה תוכנית חדשה. שינוי אחת בתוך תוכנית יחליף אותה רק שם, מבלי לשנות ברירת מחדל זו.';
+
+  @override
+  String get settings_decompression_header_plannerContingency =>
+      'תרחיש חירום מתכנן';
+
+  @override
+  String get settings_decompression_header_plannerContingency_subtitle =>
+      'סטיית ה\'מה אם\' שאיתה מתחילה תוכנית חדשה. שינוי בתוך תוכנית יחליף אותה רק שם, מבלי לשנות ברירת מחדל זו.';
+
+  @override
+  String get settings_decompression_header_plannerDpvTeam => 'צוות DPV מתכנן';
+
+  @override
+  String get settings_decompression_header_plannerDpvTeam_subtitle =>
+      'רזרבת הסקוטר וקצב ההליכה שאיתם מתחילה משימת DPV חדשה. שינוי בתוך משימה יחליף אותו רק שם, מבלי לשנות ברירת מחדל זו.';
+
+  @override
+  String get settings_decompression_rates_finalAscent => 'קצב עלייה סופי';
+
+  @override
   String get settings_decompression_ascentRateThresholds => 'ספי קצב עלייה';
 
   @override
@@ -47730,6 +47808,55 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get universalImport_cancel_discardSelections =>
       'להשליך את הבחירות ולבטל?';
+
+  @override
+  String get universalImport_leave_title => 'הייבוא עדיין פועל';
+
+  @override
+  String get universalImport_leave_body =>
+      'הייבוא עדיין לא הסתיים. להמשיך ברקע?';
+
+  @override
+  String get universalImport_leave_stay => 'להישאר';
+
+  @override
+  String get universalImport_leave_continueInBackground => 'להמשיך ברקע';
+
+  @override
+  String get universalImport_leave_bodyStops =>
+      'הייבוא עדיין לא הסתיים. יציאה תבטל אותו.';
+
+  @override
+  String universalImport_background_finished(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'הייבוא הסתיים: יובאו $count צלילות.',
+      one: 'הייבוא הסתיים: יובאה $count צלילה.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String universalImport_background_stopped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'הייבוא נעצר: יובאו $count צלילות.',
+      one: 'הייבוא נעצר: יובאה $count צלילה.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get universalImport_background_failed => 'הייבוא נכשל.';
+
+  @override
+  String get universalImport_running_title => 'ייבוא עדיין פועל';
+
+  @override
+  String get universalImport_running_body =>
+      'יש להמתין לסיומו, או לבטל אותו, לפני שמתחילים ייבוא נוסף.';
 
   @override
   String get universalImport_action_importSelected => 'ייבוא הנבחרים';
@@ -51719,6 +51846,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get query_centers_city => 'עיר';
 
   @override
+  String get query_centers_closed => 'סגור לצמיתות';
+
+  @override
   String get query_centers_coordinates => 'קואורדינטות';
 
   @override
@@ -53734,4 +53864,667 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_conflict_field_remoteStoreId => 'הועלה אל';
+
+  @override
+  String get tags_manage_scope_media => 'מדיה';
+
+  @override
+  String get tags_manage_scope_documents => 'מסמכים';
+
+  @override
+  String get tags_manage_useForMedia => 'שימוש למדיה';
+
+  @override
+  String get tags_manage_useForDocuments => 'שימוש למסמכים';
+
+  @override
+  String tags_manage_mediaCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטי מדיה',
+      one: 'פריט מדיה אחד',
+      zero: '0 פריטי מדיה',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tags_manage_documentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מסמכים',
+      one: 'מסמך אחד',
+      zero: '0 מסמכים',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tags_manage_narrowDialog_media(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'התגית הזו מופיעה ב-$count פריטי מדיה. כיבוי \"שימוש למדיה\" יסיר אותה מפריטים אלה.',
+      one:
+          'התגית הזו מופיעה בפריט מדיה אחד. כיבוי \"שימוש למדיה\" יסיר אותה מפריט זה.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tags_manage_narrowDialog_documents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'התגית הזו מופיעה ב-$count מסמכים. כיבוי \"שימוש למסמכים\" יסיר אותה ממסמכים אלה.',
+      one:
+          'התגית הזו מופיעה במסמך אחד. כיבוי \"שימוש למסמכים\" יסיר אותה ממסמך זה.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tags_manage_deleteMessage_media(String tagName, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטי מדיה',
+      one: 'פריט מדיה אחד',
+    );
+    return '\"$tagName\" תוסר מ-$_temp0. לא ניתן לבטל פעולה זו.';
+  }
+
+  @override
+  String tags_manage_deleteMessage_documents(String tagName, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מסמכים',
+      one: 'מסמך אחד',
+    );
+    return '\"$tagName\" תוסר מ-$_temp0. לא ניתן לבטל פעולה זו.';
+  }
+
+  @override
+  String tags_manage_bulkDeleteMessage_media(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטי מדיה',
+      one: 'פריט מדיה אחד',
+    );
+    return 'תגיות אלו יוסרו מ-$_temp0 בסך הכל. לא ניתן לבטל פעולה זו.';
+  }
+
+  @override
+  String tags_manage_bulkDeleteMessage_documents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מסמכים',
+      one: 'מסמך אחד',
+    );
+    return 'תגיות אלו יוסרו מ-$_temp0 בסך הכל. לא ניתן לבטל פעולה זו.';
+  }
+
+  @override
+  String tags_manage_mergeAffected_media(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטי מדיה',
+      one: 'פריט מדיה אחד',
+    );
+    return 'פעולה זו תשפיע על $_temp0 בסך הכל.';
+  }
+
+  @override
+  String tags_manage_mergeAffected_documents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מסמכים',
+      one: 'מסמך אחד',
+    );
+    return 'פעולה זו תשפיע על $_temp0 בסך הכל.';
+  }
+
+  @override
+  String tags_manage_deleteMessage_several(String tagName) {
+    return '\"$tagName\" תוסר מ:';
+  }
+
+  @override
+  String get tags_manage_bulkDeleteMessage_several => 'תגיות אלו יוסרו מ:';
+
+  @override
+  String get tags_manage_mergeAffected_several => 'פעולה זו תשפיע על:';
+
+  @override
+  String get tags_manage_cannotUndo => 'לא ניתן לבטל פעולה זו.';
+
+  @override
+  String get tags_action_edit => 'עריכת תגיות';
+
+  @override
+  String get media_info_tags => 'תגיות';
+
+  @override
+  String get media_info_noTags => 'אין תגיות עדיין';
+
+  @override
+  String media_info_showWithTag(String tagName) {
+    return 'הצג מדיה עם התגית $tagName';
+  }
+
+  @override
+  String get media_library_filter_tags => 'תגיות';
+
+  @override
+  String media_bulkTags_confirmAdding(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'הוספה לכל $count פריטי המדיה',
+      one: 'הוספה לפריט מדיה אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String media_bulkTags_confirmRemoving(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'הסרה מכל $count פריטי המדיה',
+      one: 'הסרה מפריט מדיה אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get media_bulkTags_empty => 'אין תגיות מדיה עדיין';
+
+  @override
+  String get documents_field_tags => 'תגיות';
+
+  @override
+  String documents_detail_showWithTag(String tagName) {
+    return 'הצג מסמכים עם התגית $tagName';
+  }
+
+  @override
+  String tags_bulk_adding(int total) {
+    return 'מוסיף לכל $total';
+  }
+
+  @override
+  String tags_bulk_applied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'התגיות של $count פריטים עודכנו',
+      one: 'התגיות של פריט אחד עודכנו',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tags_bulk_confirmTitle => 'להחיל שינויים?';
+
+  @override
+  String tags_bulk_failed(String error) {
+    return 'לא ניתן לעדכן את התגיות: $error';
+  }
+
+  @override
+  String tags_bulk_onAll(int count) {
+    return 'בכל $count';
+  }
+
+  @override
+  String tags_bulk_onSome(int count, int total) {
+    return 'ב-$count מתוך $total';
+  }
+
+  @override
+  String get tags_bulk_removing => 'מסיר מהכול';
+
+  @override
+  String get tags_bulk_tagsLabel => 'תגיות';
+
+  @override
+  String tags_bulk_title(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'עריכת תגיות של $count פריטים',
+      one: 'עריכת תגיות של פריט אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tags_bulk_undo => 'ביטול';
+
+  @override
+  String get tags_bulk_undoFailed => 'לא ניתן לבטל את שינוי התגיות.';
+
+  @override
+  String get settings_conflict_field_appliesToMedia => 'זמין במדיה';
+
+  @override
+  String get settings_conflict_field_appliesToDocuments => 'זמין במסמכים';
+
+  @override
+  String get documents_export_manifest_tags => 'תגיות';
+
+  @override
+  String settings_setUpDevice_title(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': 'הגדרת הטלפון הזה',
+      'tablet': 'הגדרת הטאבלט הזה',
+      'computer': 'הגדרת המחשב הזה',
+      'other': 'הגדרת המכשיר הזה',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_titleFinish(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': 'סיום ההגדרה של הטלפון הזה',
+      'tablet': 'סיום ההגדרה של הטאבלט הזה',
+      'computer': 'סיום ההגדרה של המחשב הזה',
+      'other': 'סיום ההגדרה של המכשיר הזה',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_again(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': 'הגדרת הטלפון הזה מחדש',
+      'tablet': 'הגדרת הטאבלט הזה מחדש',
+      'computer': 'הגדרת המחשב הזה מחדש',
+      'other': 'הגדרת המכשיר הזה מחדש',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_count(int done, int total) {
+    return '$done מתוך $total';
+  }
+
+  @override
+  String settings_setUpDevice_countSemantics(int done, int total) {
+    return 'שלבים שהושלמו: $done מתוך $total';
+  }
+
+  @override
+  String get settings_setUpDevice_hide => 'הסתרת הכרטיס הזה';
+
+  @override
+  String get settings_setUpDevice_step_account =>
+      'בחירת המקום שבו הנתונים נשמרים';
+
+  @override
+  String get settings_setUpDevice_step_sync => 'הצלילות בכל מכשיר';
+
+  @override
+  String get settings_setUpDevice_step_backups => 'גיבוי אוטומטי';
+
+  @override
+  String get settings_setUpDevice_step_photos =>
+      'שיתוף עותקים של תמונות (רשות)';
+
+  @override
+  String get settings_setUpDevice_mark_done => 'הושלם';
+
+  @override
+  String get settings_setUpDevice_mark_next => 'הבא';
+
+  @override
+  String get settings_setUpDevice_mark_notYet => 'עדיין לא';
+
+  @override
+  String get settings_setUpDevice_mark_skipped => 'דולג';
+
+  @override
+  String get settings_setUpDevice_item_signInAction => 'התחברות';
+
+  @override
+  String get settings_setUpDevice_item_reconnectAction => 'חיבור מחדש';
+
+  @override
+  String settings_setUpDevice_item_signIn(String account) {
+    return 'יש להתחבר שוב אל $account. הסנכרון והגיבויים מושהים עד אז.';
+  }
+
+  @override
+  String settings_setUpDevice_item_signInShort(String account) {
+    return 'יש להתחבר שוב אל $account.';
+  }
+
+  @override
+  String settings_setUpDevice_item_attach(String account) {
+    return 'המכשירים האחרים שלך שומרים עותקים של תמונות ב-$account.';
+  }
+
+  @override
+  String settings_setUpDevice_item_reconnect(String account) {
+    return 'יש לחבר מחדש את עותקי התמונות ב-$account.';
+  }
+
+  @override
+  String get settings_setUpDevice_againSubtitle =>
+      'חשבון, סנכרון, גיבויים ותמונות';
+
+  @override
+  String settings_setUpDevice_stepSemantics(String step, String mark) {
+    return '$step: $mark';
+  }
+
+  @override
+  String settings_setUpDevice_item_signInSync(String account) {
+    return 'יש להתחבר שוב אל $account. הסנכרון מושהה עד אז.';
+  }
+
+  @override
+  String settings_setUpDevice_item_signInBackups(String account) {
+    return 'יש להתחבר שוב אל $account. הגיבויים מושהים עד אז.';
+  }
+
+  @override
+  String get settings_setUpDevice_next => 'הבא';
+
+  @override
+  String get settings_setUpDevice_notNow => 'לא עכשיו';
+
+  @override
+  String get settings_setUpDevice_skip => 'דילוג';
+
+  @override
+  String get settings_setUpDevice_account_title =>
+      'היכן ש-Submersion ישמור את הנתונים שלך?';
+
+  @override
+  String get settings_setUpDevice_account_note =>
+      'הצלילות שלך נשמרות רק בחשבון שבחרת. ל-Submersion אין שרת משלה.';
+
+  @override
+  String get settings_setUpDevice_account_backupFile =>
+      'יש לי קובץ גיבוי במקום';
+
+  @override
+  String get settings_setUpDevice_offer_icloud =>
+      'משתמש ב-Apple ID שלך. אין צורך להתחבר.';
+
+  @override
+  String get settings_setUpDevice_offer_googleDrive => 'התחברות עם Google';
+
+  @override
+  String get settings_setUpDevice_offer_dropbox => 'התחברות עם Dropbox';
+
+  @override
+  String get settings_setUpDevice_offer_ownServer =>
+      'אחסון תואם S3 או שרת WebDAV';
+
+  @override
+  String get settings_setUpDevice_sync_title => 'הצלילות בכל מכשיר';
+
+  @override
+  String settings_setUpDevice_sync_signedIn(String account) {
+    return 'מחובר אל $account';
+  }
+
+  @override
+  String settings_setUpDevice_sync_noLibrary(String account) {
+    return 'ב-$account עדיין אין ספריית Submersion. הצלילות כאן יהפכו לספרייה שכל המכשירים שלך חולקים.';
+  }
+
+  @override
+  String settings_setUpDevice_sync_found(
+    String account,
+    String when,
+    String device,
+  ) {
+    return 'הספרייה שלך נמצאה ב-$account, שונתה לאחרונה $when ב-$device.';
+  }
+
+  @override
+  String settings_setUpDevice_sync_foundPlain(String account) {
+    return 'הספרייה שלך נמצאה ב-$account.';
+  }
+
+  @override
+  String get settings_setUpDevice_sync_foundEmpty =>
+      'עדיין אין כאן צלילות, ולכן הספרייה פשוט מורדת.';
+
+  @override
+  String get settings_setUpDevice_sync_combine => 'לשלב אותן';
+
+  @override
+  String get settings_setUpDevice_sync_combineDetail =>
+      'הצלילות כאן מצטרפות לספרייה. צלילה שתועדה בנפרד בשני המכשירים תופיע פעמיים.';
+
+  @override
+  String get settings_setUpDevice_sync_replace =>
+      'להחליף את הצלילות כאן בספרייה';
+
+  @override
+  String get settings_setUpDevice_sync_replaceDetail =>
+      'קודם נשמר גיבוי של הצלילות כאן, תחת גיבויים.';
+
+  @override
+  String get settings_setUpDevice_sync_keepInStepDetail =>
+      'כמה שניות אחרי כל שינוי, בהפעלה ובחזרה לאפליקציה';
+
+  @override
+  String get settings_setUpDevice_sync_turnOn => 'הפעלת סנכרון';
+
+  @override
+  String get settings_setUpDevice_sync_download => 'הורדת הספרייה';
+
+  @override
+  String get settings_setUpDevice_sync_combineAndDownload => 'שילוב והורדה';
+
+  @override
+  String get settings_setUpDevice_sync_replaceAndDownload => 'החלפה והורדה';
+
+  @override
+  String get settings_setUpDevice_sync_noAccount =>
+      'קודם יש לבחור היכן הנתונים נשמרים.';
+
+  @override
+  String get settings_setUpDevice_replace_title => 'להחליף את הצלילות כאן?';
+
+  @override
+  String get settings_setUpDevice_replace_working =>
+      'מניחים בצד את הצלילות כאן ומורידים את הספרייה...';
+
+  @override
+  String get settings_setUpDevice_replace_doneTitle => 'הספרייה הורדה';
+
+  @override
+  String get settings_setUpDevice_replace_stillUploading =>
+      'הספרייה עדיין מועלית ממכשיר אחר. אפשר לנסות שוב כשזה יסתיים.';
+
+  @override
+  String get settings_setUpDevice_replace_photosBusy =>
+      'העלאות התמונות עדיין מסתיימות. אפשר לנסות שוב בעוד רגע.';
+
+  @override
+  String get settings_setUpDevice_replace_failed =>
+      'לא ניתן היה להוריד את הספרייה. שום דבר לא השתנה.';
+
+  @override
+  String settings_setUpDevice_sync_unreachable(String account) {
+    return 'לא ניתן לקרוא את $account. יש לבדוק את החיבור ולנסות שוב.';
+  }
+
+  @override
+  String settings_setUpDevice_replace_noLibrary(String account) {
+    return 'ב-$account עדיין אין ספרייה להצטרף אליה.';
+  }
+
+  @override
+  String settings_setUpDevice_replace_newerSchema(String devices) {
+    return '$devices משתמשים בגרסה חדשה יותר של Submersion. יש לעדכן קודם את המכשיר הזה.';
+  }
+
+  @override
+  String settings_setUpDevice_replace_backupNote(String date) {
+    return 'לפני ההצטרפות לספרייה, $date';
+  }
+
+  @override
+  String settings_setUpDevice_replace_body(int count, String account) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count הצלילות כאן מוחלפות בספרייה ב-$account. קודם נשמר מהן גיבוי, שנשאר תחת גיבויים.',
+      one:
+          'הצלילה כאן מוחלפת בספרייה ב-$account. קודם נשמר ממנה גיבוי, שנשאר תחת גיבויים.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_replace_doneBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count הצלילות שלך הונחו בצד והספרייה הורדה. Submersion ייטען מחדש.',
+      one: 'הצלילה שלך הונחה בצד והספרייה הורדה. Submersion ייטען מחדש.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_backups_title(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': 'גיבוי ששורד אובדן של הטלפון',
+      'tablet': 'גיבוי ששורד אובדן של הטאבלט',
+      'computer': 'גיבוי ששורד אובדן של המחשב',
+      'other': 'גיבוי ששורד אובדן של המכשיר',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_setUpDevice_backups_intro =>
+      'סנכרון שומר על המכשירים מתואמים. גיבוי הוא עותק מרגע מסוים שאפשר לחזור אליו.';
+
+  @override
+  String settings_setUpDevice_backups_autoDetail(String frequency, int count) {
+    return '$frequency. $count האחרונים נשמרים כאן.';
+  }
+
+  @override
+  String settings_setUpDevice_backups_autoDetailDesktop(
+    String frequency,
+    int count,
+  ) {
+    return '$frequency, כל עוד Submersion פתוח. $count האחרונים נשמרים כאן.';
+  }
+
+  @override
+  String settings_setUpDevice_backups_copy(String account) {
+    return 'לשמור גם עותק ב-$account';
+  }
+
+  @override
+  String get settings_setUpDevice_backups_noAccount =>
+      'עותק מחוץ למכשיר הזה דורש חשבון או תיקיית גיבוי.';
+
+  @override
+  String get settings_setUpDevice_backups_openBackups => 'פתיחת גיבויים';
+
+  @override
+  String get settings_setUpDevice_backups_note =>
+      'התזמון, התיקייה, ההגנה בסיסמה והגיבויים הישנים נמצאים תחת גיבויים.';
+
+  @override
+  String get settings_setUpDevice_photos_title => 'התמונות בכל מכשיר';
+
+  @override
+  String settings_setUpDevice_photos_firstIntro(String account) {
+    return 'שמירת עותקים של התמונות והסרטונים ב-$account כדי שהמכשירים האחרים שלך יוכלו להציג אותם. המקוריים נשארים במקומם.';
+  }
+
+  @override
+  String settings_setUpDevice_photos_keepCopies(String account) {
+    return 'לשמור עותקים של תמונות ב-$account';
+  }
+
+  @override
+  String get settings_setUpDevice_photos_firstNote =>
+      'אפשר להפעיל זאת אחר כך תחת תמונות וסרטונים. עד אז שום דבר לא מועלה.';
+
+  @override
+  String settings_setUpDevice_photos_secondIntro(String account) {
+    return 'המכשירים האחרים שלך שומרים עותקים של תמונות וסרטונים ב-$account. להציג אותם גם כאן?';
+  }
+
+  @override
+  String settings_setUpDevice_photos_useCopies(String account) {
+    return 'להשתמש בעותקי התמונות ב-$account';
+  }
+
+  @override
+  String get settings_setUpDevice_photos_sameAccount =>
+      'אותו חשבון. אין מה להקליד.';
+
+  @override
+  String settings_setUpDevice_photos_signInFirst(String account) {
+    return 'מתחבר קודם אל $account.';
+  }
+
+  @override
+  String get settings_setUpDevice_photos_autoUploadHere =>
+      'להעלות אוטומטית תמונות שנוספו כאן';
+
+  @override
+  String settings_setUpDevice_photos_attachedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count תמונות וסרטונים מקושרים',
+      one: 'תמונה או סרטון אחד מקושר',
+      zero: 'עדיין אין תמונות או סרטונים מקושרים',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_done_title(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': 'הטלפון הזה מוגדר',
+      'tablet': 'הטאבלט הזה מוגדר',
+      'computer': 'המחשב הזה מוגדר',
+      'other': 'המכשיר הזה מוגדר',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_done_otherDevices(String account) {
+    return 'במכשירים האחרים שלך, פתחו את Submersion, בחרו $account, ואותה ספרייה תופיע.';
+  }
+
+  @override
+  String settings_setUpDevice_sync_inStep(String account) {
+    return 'הצלילות כאן מתואמות עם הספרייה שלך ב-$account.';
+  }
+
+  @override
+  String get setup_syncPull_startFresh => 'התחלת יומן חדש';
 }

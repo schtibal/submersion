@@ -8,6 +8,7 @@ import 'package:submersion/core/deco/constants/buhlmann_coefficients.dart';
 import 'package:submersion/core/deco/entities/cns_calculation_method.dart';
 import 'package:submersion/core/deco/entities/dive_environment.dart';
 import 'package:submersion/core/deco/entities/tissue_compartment.dart';
+import 'package:submersion/core/deco/max_operating_depth.dart';
 import 'package:submersion/core/deco/o2_toxicity_calculator.dart';
 import 'package:submersion/core/utils/gas_compressibility.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
@@ -404,6 +405,7 @@ class PlanCalculatorService {
       runtime: runtime,
       bottomPpO2: bottomPpO2 ?? ppO2Warning,
       decoPpO2: decoPpO2 ?? ppO2Critical,
+      environment: environment,
     );
 
     // Determine if dive has deco obligation
@@ -445,10 +447,11 @@ class PlanCalculatorService {
   ///
   /// The simulated ascent breathes the best eligible carried gas at each depth
   /// via an [OptimalOcAscentGas] plan derived from [tanks]. Each gas is
-  /// eligible from its cylinder's MOD up: the one set by hand, or the default
-  /// for its role at [bottomPpO2] / [decoPpO2] (issue #3567). Each stop
-  /// reports the gas actually selected at its depth. With a single carried gas this reduces to the legacy
-  /// fixed-gas ascent.
+  /// eligible from its cylinder's MOD up: the one set by hand, or the switch
+  /// depth for its role's limit at [bottomPpO2] / [decoPpO2] (issue #3567),
+  /// measured in [environment] (issue #3566, see [gasSwitchDepthMeters]).
+  /// Each stop reports the gas actually selected at its depth. With a single
+  /// carried gas this reduces to the legacy fixed-gas ascent.
   List<DecoStop> _buildDecoSchedule({
     required BuhlmannAlgorithm algorithm,
     required List<PlanSegment> segments,
@@ -456,6 +459,7 @@ class PlanCalculatorService {
     required int runtime,
     required double bottomPpO2,
     required double decoPpO2,
+    required DiveEnvironment environment,
   }) {
     if (segments.isEmpty) return [];
 
@@ -470,6 +474,7 @@ class PlanCalculatorService {
       tanks,
       bottomPpO2: bottomPpO2,
       decoPpO2: decoPpO2,
+      environment: environment,
       diluentPpO2: ccrDiluentModPpO2,
     );
     final AscentGasPlan? ascentGas = ascentGases.isEmpty

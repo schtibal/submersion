@@ -76,6 +76,15 @@ extension BeforeOpenBackstops on AppDatabase {
     await _assertSegmentSplitAtRateColumn();
     // v296 backstop: media.color_adjustment, diver_settings.auto_color_correction.
     await _assertColorCorrectionColumns();
+    // v304 backstop: diver_settings planner Setup-accordion global defaults.
+    await _assertPlannerDefaultColumns();
+    // v305 backstop: dive_plans Setup-accordion columns made nullable.
+    await _assertDivePlanSetupFieldsNullable();
+    // v306 backstop: dive_plan_missions battery_reserve_fraction/
+    // walk_speed_mps made nullable.
+    await _assertDivePlanMissionFieldsNullable();
+    // v307 onward (before_open_settings_columns.dart).
+    await _assertSettingsColumnsFromV307();
 
     // v210 backstop: the dive_tanks equipment link sets null on delete.
     // First, while foreign keys are still off: the rebuild it may do
@@ -236,7 +245,7 @@ extension BeforeOpenBackstops on AppDatabase {
     // database stranded at any lower version by a parallel-branch
     // version collision self-heals here.
     await _assertCylinderConfigSchema();
-    await _assertCylinderConfigItemModColumn(); // v304
+    await _assertCylinderConfigItemModColumn(); // v314
 
     // v142 backstop: re-assert trips.return_flight_at.
     await _assertTripReturnFlightColumn();

@@ -79,9 +79,9 @@ extension CylinderMigrations on AppDatabase {
     );
   }
 
-  /// Idempotent DDL for the v304 cylinder_config_items.deco_switch_depth
+  /// Idempotent DDL for the v314 cylinder_config_items.deco_switch_depth
   /// column (issue #3567): the MOD a diver set on a saved cylinder. Called
-  /// from the v304 onUpgrade step and the beforeOpen backstop, self-guarding
+  /// from the v314 onUpgrade step and the beforeOpen backstop, self-guarding
   /// when the table is absent.
   Future<void> _assertCylinderConfigItemModColumn() async {
     final cols = await customSelect(

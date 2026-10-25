@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/constants/enums.dart';
+import 'package:submersion/core/deco/entities/dive_environment.dart';
+import 'package:submersion/core/deco/max_operating_depth.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/planner/domain/services/tank_mod.dart';
 
@@ -244,6 +246,8 @@ void main() {
   });
 
   group('ascent gases', () {
+    final salt = DiveEnvironment.forConditions(waterType: WaterType.salt);
+
     test('carry each tank effective MOD', () {
       final gases = ascentGasesFor(
         [
@@ -253,11 +257,25 @@ void main() {
         ],
         bottomPpO2: bottom,
         decoPpO2: deco,
+        environment: salt,
       );
       expect(gases, hasLength(3));
-      expect(gases[0].maxPpO2Mod, closeTo((1.4 / 0.18 - 1) * 10, 1e-9));
+      expect(
+        gases[0].maxPpO2Mod,
+        closeTo(
+          gasSwitchDepthMeters(0.18, maxPpO2: 1.4, environment: salt),
+          1e-9,
+        ),
+      );
+      // A MOD set by hand is used as typed, not converted to the water.
       expect(gases[1].maxPpO2Mod, 21);
-      expect(gases[2].maxPpO2Mod, closeTo(22, 1e-9));
+      expect(
+        gases[2].maxPpO2Mod,
+        closeTo(
+          gasSwitchDepthMeters(0.5, maxPpO2: 1.6, environment: salt),
+          1e-9,
+        ),
+      );
       expect(gases[2].fN2, closeTo(0.5, 1e-9));
       expect(gases[0].fHe, closeTo(0.45, 1e-9));
     });
@@ -267,9 +285,16 @@ void main() {
         [tank(ean40, role: TankRole.diluent)],
         bottomPpO2: bottom,
         decoPpO2: deco,
+        environment: salt,
         diluentPpO2: 1.6,
       );
-      expect(gases.single.maxPpO2Mod, closeTo(30, 1e-9));
+      expect(
+        gases.single.maxPpO2Mod,
+        closeTo(
+          gasSwitchDepthMeters(0.4, maxPpO2: 1.6, environment: salt),
+          1e-9,
+        ),
+      );
     });
   });
 }

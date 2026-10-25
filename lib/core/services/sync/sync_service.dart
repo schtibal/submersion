@@ -61,6 +61,8 @@ import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:uuid/uuid.dart';
 
+part 'sync_service_replace_join.dart';
+
 /// Sync operation result
 enum SyncResultStatus {
   success,
@@ -1819,6 +1821,9 @@ class SyncService {
           // After their parents (trips, sites and divers), issue #2594.
           (type: 'tripHides', records: data.tripHides, hasUpdatedAt: false),
           (type: 'siteHides', records: data.siteHides, hasUpdatedAt: false),
+          // After their parents (trips, sites and divers), issue #2151.
+          (type: 'tripShares', records: data.tripShares, hasUpdatedAt: false),
+          (type: 'siteShares', records: data.siteShares, hasUpdatedAt: false),
           (
             type: 'equipmentOwnershipEvents',
             records: data.equipmentOwnershipEvents,
@@ -1872,6 +1877,12 @@ class SyncService {
             records: data.documentPages,
             hasUpdatedAt: true,
           ),
+          // After both parents (documents and tags), issue #1970.
+          (
+            type: 'documentTags',
+            records: data.documentTags,
+            hasUpdatedAt: false,
+          ),
           (
             type: 'serviceRecords',
             records: data.serviceRecords,
@@ -1912,6 +1923,8 @@ class SyncService {
             hasUpdatedAt: true,
           ),
           (type: 'media', records: data.media, hasUpdatedAt: false),
+          // After both parents (media and tags), issue #1970.
+          (type: 'mediaTags', records: data.mediaTags, hasUpdatedAt: false),
           (
             type: 'mediaEnrichment',
             records: data.mediaEnrichment,
@@ -2817,10 +2830,14 @@ class SyncService {
     'diveBuddyRoles': false,
     'siteTags': false,
     'equipmentTags': false,
+    'mediaTags': false,
+    'documentTags': false,
     'equipmentShares': false,
     'tripEquipment': false,
     'tripHides': false,
     'siteHides': false,
+    'tripShares': false,
+    'siteShares': false,
     'equipmentOwnershipEvents': false,
     'equipmentLocations': true,
     'equipmentLocationMoves': false,
@@ -3246,6 +3263,15 @@ class SyncService {
       (field: 'equipmentId', parent: 'equipment', nullable: false),
       (field: 'tagId', parent: 'tags', nullable: false),
     ],
+    // v309: a photo's or video's tags and a document's tags (issue #1970).
+    'mediaTags': [
+      (field: 'mediaId', parent: 'media', nullable: false),
+      (field: 'tagId', parent: 'tags', nullable: false),
+    ],
+    'documentTags': [
+      (field: 'documentId', parent: 'documents', nullable: false),
+      (field: 'tagId', parent: 'tags', nullable: false),
+    ],
     // v234: equipment sharing (issue #2046). The diver keys are left to
     // repairDanglingForeignKeys like every diverId (see the note above).
     'equipmentShares': [
@@ -3262,6 +3288,15 @@ class SyncService {
       (field: 'diverId', parent: 'divers', nullable: false),
     ],
     'siteHides': [
+      (field: 'siteId', parent: 'diveSites', nullable: false),
+      (field: 'diverId', parent: 'divers', nullable: false),
+    ],
+    // v311: the profiles a trip or site is shared with (issue #2151).
+    'tripShares': [
+      (field: 'tripId', parent: 'trips', nullable: false),
+      (field: 'diverId', parent: 'divers', nullable: false),
+    ],
+    'siteShares': [
       (field: 'siteId', parent: 'diveSites', nullable: false),
       (field: 'diverId', parent: 'divers', nullable: false),
     ],

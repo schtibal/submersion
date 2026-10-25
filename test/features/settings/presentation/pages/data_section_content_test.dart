@@ -16,7 +16,14 @@ import 'package:submersion/core/services/log_file_service.dart';
 import 'package:submersion/features/backup/data/repositories/backup_preferences.dart';
 import 'package:submersion/features/backup/presentation/providers/backup_providers.dart';
 import 'package:submersion/features/settings/domain/data_health/feature_health.dart';
+import 'package:submersion/features/settings/domain/setup/set_up_progress.dart';
+import 'package:submersion/features/settings/presentation/providers/account_group_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/debug_log_providers.dart';
+import 'package:submersion/features/settings/presentation/providers/pending_setup_items_provider.dart';
+import 'package:submersion/features/settings/presentation/providers/set_up_progress_provider.dart';
+import 'package:submersion/features/settings/presentation/pages/data_section_content.dart';
+import 'package:submersion/features/settings/presentation/widgets/data_health/data_facts_line.dart';
+import 'package:submersion/features/settings/presentation/widgets/set_up_device/set_up_device_card.dart';
 import 'package:submersion/features/settings/presentation/pages/settings_page.dart';
 import 'package:submersion/features/settings/presentation/widgets/data_health/data_health_strip.dart';
 import 'package:submersion/features/settings/presentation/widgets/data_health/health_symbol.dart';
@@ -24,6 +31,7 @@ import 'package:submersion/features/settings/presentation/widgets/settings_list_
 import 'package:submersion/l10n/arb/app_localizations.dart';
 
 import '../../../../helpers/mock_providers.dart';
+import '../../set_up_progress_fixture.dart';
 
 void main() {
   const health = [
@@ -58,11 +66,16 @@ void main() {
     Size size = const Size(400, 2400),
     double textScale = 1,
     bool storeAttachedHere = false,
+    SetUpProgress? setUp,
   }) async {
     // MediaQuery follows the view, which the layout breakpoints read.
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = size;
+    // The set up card's device word follows the display.
+    tester.view.display.devicePixelRatio = 1;
+    tester.view.display.size = size;
     addTearDown(tester.view.reset);
+    addTearDown(tester.view.display.reset);
     final router = GoRouter(
       initialLocation: '/settings?selected=data',
       routes: [
@@ -80,10 +93,13 @@ void main() {
           '/settings/data-tools',
           '/settings/cloud-sync',
           '/settings/photos-media',
+          '/settings/connected-accounts',
+          '/settings/setup',
         ])
           GoRoute(
             path: path,
-            builder: (context, state) => Scaffold(body: Text('page $path')),
+            builder: (context, state) =>
+                Scaffold(body: Text('page ${state.uri}')),
           ),
       ],
     );
@@ -104,6 +120,11 @@ void main() {
           logFileServiceProvider.overrideWithValue(
             LogFileService(logDirectory: logDir.path),
           ),
+          // Null unless a test sets it: no set up card, no again row.
+          setUpProgressProvider.overrideWithValue(setUp),
+          pendingSetupItemsProvider.overrideWith((ref) async => const []),
+          // The flow opened in the pane lists the accounts.
+          accountGroupsProvider.overrideWith((ref) async => const []),
         ],
         child: MaterialApp.router(
           locale: const Locale('en'),
@@ -212,7 +233,40 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('page /settings/cloud-sync'), findsOneWidget);
+    // No account chosen yet: Set up starts from the account step.
+    expect(find.text('page /settings/setup?step=account'), findsOneWidget);
+  });
+
+  // Sync offers Set up only while it is off, so step 2 would have no
+  // account to read even when a backup copy or photos name one.
+  testWidgets('with another feature naming an account, Sync still starts '
+      'from the account step', (tester) async {
+    await pumpData(
+      tester,
+      dataHealth: [
+        health[0],
+        const FeatureHealth(
+          feature: DataFeature.sync,
+          level: HealthLevel.attention,
+          reason: HealthReason.syncOff,
+        ),
+        health[2],
+        health[3],
+      ],
+      setUp: setUpProgressOf(accountHere: true),
+    );
+
+    await tester.tap(
+      find.descendant(
+        of: find.ancestor(
+          of: find.text('Only on this device'),
+          matching: find.byType(ListTile),
+        ),
+        matching: find.text('Set up'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('page /settings/setup?step=account'), findsOneWidget);
   });
 
   testWidgets('photos row offers set up when copies are not kept', (
@@ -231,7 +285,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('page /settings/photos-media'), findsOneWidget);
+    expect(find.text('page /settings/setup?step=photos'), findsOneWidget);
   });
 
   testWidgets('advanced rows push their pages', (tester) async {
@@ -386,6 +440,85 @@ void main() {
     expect(find.text('page /settings/import-options'), findsOneWidget);
     expect(router.canPop(), isTrue);
     expect(find.text('Your data'), findsNothing);
+  });
+
+  Finder inDataPage(Finder f) =>
+      find.descendant(of: find.byType(DataSectionContent), matching: f);
+
+  group('the set up card', () {
+    testWidgets('sits between the strip and the facts line', (tester) async {
+      await pumpData(tester, setUp: setUpProgressOf(accountHere: true));
+
+      final card = inDataPage(find.byType(SetUpDeviceCard));
+      expect(card, findsOneWidget);
+      expect(tester.widget<SetUpDeviceCard>(card).compact, isFalse);
+      expect(
+        tester.getTopLeft(find.byType(DataHealthStrip)).dy,
+        lessThan(tester.getTopLeft(card).dy),
+      );
+      expect(
+        tester.getTopLeft(card).dy,
+        lessThan(tester.getTopLeft(find.byType(DataFactsLine)).dy),
+      );
+    });
+
+    testWidgets('on a phone Continue pushes the next step', (tester) async {
+      await pumpData(tester, setUp: setUpProgressOf(accountHere: true));
+
+      await tester.tap(inDataPage(find.text('Continue')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('page /settings/setup?step=sync'), findsOneWidget);
+    });
+
+    testWidgets('on a master-detail window Continue opens the step in the '
+        'Data pane', (tester) async {
+      final router = await pumpData(
+        tester,
+        size: const Size(1400, 2400),
+        setUp: setUpProgressOf(accountHere: true),
+      );
+
+      await tester.tap(inDataPage(find.text('Continue')));
+      await tester.pumpAndSettle();
+
+      expect(router.routerDelegate.currentConfiguration.uri.queryParameters, {
+        'selected': 'data',
+        'dataPage': 'setup?step=sync',
+      });
+      expect(find.byType(SettingsListContent), findsOneWidget);
+    });
+  });
+
+  group('Set up this device again', () {
+    testWidgets('is not offered while the card shows its steps', (
+      tester,
+    ) async {
+      await pumpData(tester, setUp: setUpProgressOf(accountHere: true));
+      expect(find.text('Set up this phone again'), findsNothing);
+    });
+
+    testWidgets('is offered under Advanced once setup is complete', (
+      tester,
+    ) async {
+      await pumpData(tester, setUp: setUpProgressOf(everything: true));
+
+      expect(find.text('Set up this phone again'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Advanced')).dy,
+        lessThan(tester.getTopLeft(find.text('Set up this phone again')).dy),
+      );
+    });
+
+    // The flow opened afresh shows a hidden card again (its own test).
+    testWidgets('on a hidden card, opens the flow afresh', (tester) async {
+      await pumpData(tester, setUp: setUpProgressOf(hidden: true));
+
+      await tester.tap(find.text('Set up this phone again'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('page /settings/setup?again=true'), findsOneWidget);
+    });
   });
 
   testWidgets('a Lightroom-only photos row draws no healthy mark', (

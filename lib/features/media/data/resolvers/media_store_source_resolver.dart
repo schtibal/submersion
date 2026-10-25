@@ -79,7 +79,13 @@ class MediaStoreSourceResolver implements MediaSourceResolver {
     // Store unreachable/unconfigured is transient: cloud-backed rows must
     // never orphan for a reason that is not about the store's contents.
     if (remote() == null) return VerifyResult.transientError;
-    final seen = stampsInStore(item, storeId?.call());
+    final attached = storeId?.call();
+    // Stamped in another store (issue #3569): the bytes are there, out of
+    // this device's reach while it stays on this one. notFound would set the
+    // sticky, synced missing flag on every device, so it reads as a reach
+    // problem, which the verifier never writes.
+    if (stampedElsewhere(item, attached)) return VerifyResult.fromOtherDevice;
+    final seen = stampsInStore(item, attached);
     return (seen.contentHash != null && seen.remoteUploadedAt != null)
         ? VerifyResult.available
         : VerifyResult.notFound;

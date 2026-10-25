@@ -113,6 +113,8 @@ String legacyDataSourceId(String diveId) => '$kLegacyDataSourceIdPrefix$diveId';
     Media,
     MediaEnrichment,
     MediaSpecies,
+    // Media tags (v309, issue #1970)
+    MediaTags,
     PendingPhotoSuggestions,
     MediaRepairLog,
     MediaSmartAlbums,
@@ -260,6 +262,8 @@ String legacyDataSourceId(String diveId) => '$kLegacyDataSourceIdPrefix$diveId';
     // A profile's hidden shared trips and sites (v250, issue #2594)
     TripHides,
     SiteHides,
+    TripShares,
+    SiteShares,
     // Insight observation dismissals (v265)
     InsightObservationDismissals,
     // Certification currency (v271, issue #2267)
@@ -269,6 +273,8 @@ String legacyDataSourceId(String diveId) => '$kLegacyDataSourceIdPrefix$diveId';
     // Documents store (v277, issue #2613)
     Documents,
     DocumentPages,
+    // Document tags (v309, issue #1970)
+    DocumentTags,
     // Shared dive-site library (v289, issue #2567)
     SharedLibraries,
     SharedLibraryMembers,
@@ -286,7 +292,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 304;
+  static const int currentSchemaVersion = 314;
 
   /// The oldest schema whose reader can apply this build's sync payloads
   /// without loss or misinterpretation (the compatibility floor).
@@ -418,7 +424,18 @@ class AppDatabase extends _$AppDatabase {
   /// Raised 299 -> 300 by the same change applied to
   /// pre_dive_session_items.section (issue #3360), the last of the four
   /// checklist-sections table groups.
-  static const int minimumCompatibleSchemaVersion = 300;
+  ///
+  /// Raised 300 -> 308 by the planner Setup defaults (#3552): v305, v306
+  /// and v308 drop NOT NULL from synced dive_plans and dive_plan_missions
+  /// columns (rates, SAC, gradient factors, reserve, battery reserve, walk
+  /// speed), and this build writes NULL there to mean "follow the diver's
+  /// Settings". Every build before 305 decodes those columns with a
+  /// non-nullable DivePlan.fromJson / DivePlanMission.fromJson, which
+  /// throws on null, so the second rule above classifies the change as
+  /// breaking. Peers below 308 are held until they update. Their own
+  /// payloads still arrive here and decode cleanly: a concrete value is a
+  /// valid override in the nullable columns.
+  static const int minimumCompatibleSchemaVersion = 308;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1345,9 +1362,56 @@ class AppDatabase extends _$AppDatabase {
     // v303: media.remote_store_id (issue #3482). Additive and nullable, and
     // an older peer omits it, so the floor stays at 300.
     303,
-    // v304: cylinder_config_items.deco_switch_depth (issue #3567). Additive
-    // and nullable, and an older peer omits it, so the floor stays at 300.
+    // v304: diver_settings planner Setup-accordion global defaults (issue
+    // #3552). Additive columns only; does not move the compatibility floor.
+    // Renumbered from 302 as #3482 shipped 302-303 first.
     304,
+    // v305: dive_plans Setup-accordion columns made nullable (issue #3552).
+    // Table rebuild; NULL now means "follow Settings", which an older
+    // reader cannot decode, so the floor moves (to 308, with v306/v308).
+    // Renumbered from 303.
+    305,
+    // v306: dive_plan_missions battery_reserve_fraction/walk_speed_mps made
+    // nullable (issue #3552). Table rebuild, same as 305 and part of the
+    // same floor move. Renumbered from 304.
+    306,
+    // v307: diver_settings air-break/turn-pressure defaults and
+    // dive_plans.air_breaks_explicitly_off (issue #3552). Additive only;
+    // does not move the compatibility floor. Renumbered from 305.
+    307,
+    // v308: dive_plans.reserve_pressure/gf_low/gf_high made nullable,
+    // diver_settings.planner_reserve_pressure added (issue #3552). Table
+    // rebuild for dive_plans; raises the compatibility floor to 308 for
+    // the whole v305-v308 nullability change. Renumbered from 306.
+    308,
+    // v309: media and document tags (issue #1970). tags.applies_to_media and
+    // tags.applies_to_documents (off for every existing tag), and the
+    // media_tags and document_tags junctions with their unique indexes.
+    // Additive only, so the compatibility floor stays.
+    309,
+    // v310: diver_settings.downloads_follow_computer_owner (issue #2050).
+    // Additive, on by default; the floor does not move. Renumbered from 309
+    // as #3605 shipped 309 first.
+    310,
+    // v311: trip_shares and site_shares, the profiles a trip or site is
+    // shared with when it is not shared with everyone (issue #2151).
+    // Table-only rung, no backfill; an older peer keeps the new entity types
+    // as inert unknowns and sees such an item as private, so the floor does
+    // not move. Renumbered from 309 and 310, which #1970 and #2050 took.
+    311,
+    // v312: dive_tanks.extra_regulator_ids, the regulators on a cylinder
+    // after the first (issue #3375). An additive nullable column, so the
+    // floor stays: an older peer's payload omits it and the row keeps null.
+    // Renumbered from 310 and 311 as #3611 and #2151 shipped them first.
+    312,
+    // v313: dive_centers.is_permanently_closed (issue #3379). Additive synced
+    // column, no backfill: an older peer ignores the field, so the floor
+    // stays. Renumbered from 310 and 312, which #2050 and #3375 took.
+    313,
+    // v314: cylinder_config_items.deco_switch_depth (issue #3567). Additive
+    // and nullable, and an older peer omits it, so the floor stays.
+    // Renumbered from 304, which #3552 took.
+    314,
   ];
 
   /// Returns the number of migration steps that will execute when upgrading

@@ -78,8 +78,11 @@ void main() {
     expect(_firstStop(engine.compute(_plan())), greaterThan(30));
   });
 
-  test('without an override, EAN40 as deco gas joins at 30 m (1.6)', () {
-    expect(_deepestEan40Stop(engine.compute(_plan())), 30);
+  test('without an override, EAN40 as deco gas joins below 30 m (1.6)', () {
+    // The default switch is measured in the plan's seawater (issue #3566):
+    // EAN40 at 30 m is 1.606 bar and reads 1.61, so the deepest stop on it
+    // is 27 m.
+    expect(_deepestEan40Stop(engine.compute(_plan())), 27);
   });
 
   test('a 21 m override switches to EAN40 at 21 m, not 30 m', () {

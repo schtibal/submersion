@@ -100,6 +100,37 @@ void main() {
     });
   });
 
+  // Issue #3569: a device on a store the library no longer announces leaves
+  // rows stamped in another store alone, so the two never trade them.
+  group('a device on a store that is not announced', () {
+    test('neither counts nor uploads rows stamped elsewhere', () async {
+      await add('moved.jpg', original: true, store: 'store-b');
+      await add('here.jpg', original: true, store: 'store-a');
+      final waiting = await add('waiting.jpg');
+
+      final progress = await repo.countUploadProgress(
+        storeId: 'store-a',
+        takesOver: false,
+      );
+      final ids = await repo.getBackfillCandidateIds(
+        storeId: 'store-a',
+        takesOver: false,
+      );
+
+      expect(progress.total, 2, reason: 'here and waiting');
+      expect(progress.copied, 1);
+      expect(ids, [waiting]);
+    });
+
+    test('the announced store still takes them over', () async {
+      final moved = await add('moved.jpg', original: true, store: 'store-a');
+
+      final ids = await repo.getBackfillCandidateIds(storeId: 'store-b');
+
+      expect(ids, [moved]);
+    });
+  });
+
   group('stamping for a store', () {
     test('records the store with the stamp', () async {
       final id = await add('new.jpg');
@@ -129,6 +160,47 @@ void main() {
       expect(r.remoteCompressedUploadedAt, isNull);
       expect(r.compressedLevel, isNull);
       expect(r.compressedSizeBytes, isNull);
+    });
+
+    // Issue #3569 review: the decision is re-made inside the stamp's own
+    // transaction, so an upload that started before another device took
+    // the row over cannot undo the takeover.
+    test('a store that does not take over leaves another store\'s stamps '
+        'alone', () async {
+      final id = await add('moved.jpg', original: true, store: 'store-b');
+
+      await repo.stampRemoteThumbUploaded(
+        id,
+        uploadedAt: at,
+        storeId: 'store-a',
+        takesOver: () async => false,
+      );
+
+      final r = await row(id);
+      expect(r.remoteStoreId, 'store-b');
+      expect(r.remoteUploadedAt, 1);
+      expect(r.remoteThumbUploadedAt, isNull);
+    });
+
+    // Review: the decision is only asked for a row another store holds, so
+    // a stamp on any other row costs no announced-store read.
+    test('a row no other store holds never asks', () async {
+      final id = await add('fresh.jpg');
+      var asked = 0;
+
+      final applied = await repo.stampRemoteUploaded(
+        id,
+        uploadedAt: at,
+        storeId: 'store-a',
+        takesOver: () async {
+          asked++;
+          return false;
+        },
+      );
+
+      expect(applied, isTrue);
+      expect(asked, 0);
+      expect((await row(id)).remoteStoreId, 'store-a');
     });
 
     test('an unclaimed row keeps its stamps and takes the store', () async {

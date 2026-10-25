@@ -1,5 +1,6 @@
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/deco/ascent/ascent_gas_plan.dart';
+import 'package:submersion/core/deco/entities/dive_environment.dart';
 import 'package:submersion/core/deco/max_operating_depth.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 
@@ -132,21 +133,34 @@ double ppO2AtDepth(GasMix gas, double depthMeters) =>
 
 /// The gases an open-circuit ascent can breathe, one per tank, each eligible
 /// from its MOD up. [tanks] must carry resolved roles.
+///
+/// A MOD set by hand is used as typed. A default one is the switch depth for
+/// the role's limit in [environment], the water the schedule's ppO2 is
+/// computed in (issue #3566, see [gasSwitchDepthMeters]), so no table line
+/// shows a gas above its limit.
 List<AvailableGas> ascentGasesFor(
   Iterable<DiveTank> tanks, {
   required double bottomPpO2,
   required double decoPpO2,
+  required DiveEnvironment environment,
   double? diluentPpO2,
 }) => [
   for (final tank in tanks)
     AvailableGas(
       fN2: (100.0 - tank.gasMix.o2 - tank.gasMix.he) / 100.0,
       fHe: tank.gasMix.he / 100.0,
-      maxPpO2Mod: effectiveModMeters(
-        tank,
-        bottomPpO2: bottomPpO2,
-        decoPpO2: decoPpO2,
-        diluentPpO2: diluentPpO2,
-      ),
+      maxPpO2Mod:
+          tank.decoSwitchDepth ??
+          gasSwitchDepthMeters(
+            tank.gasMix.o2 / 100.0,
+            maxPpO2: modPpO2For(
+              tank.role,
+              tank.gasMix,
+              bottomPpO2: bottomPpO2,
+              decoPpO2: decoPpO2,
+              diluentPpO2: diluentPpO2,
+            ),
+            environment: environment,
+          ),
     ),
 ];

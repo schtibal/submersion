@@ -18,10 +18,14 @@ import 'package:submersion/features/media/domain/entities/media_item.dart'
     as domain;
 import 'package:submersion/features/media/domain/entities/media_source_type.dart';
 import 'package:submersion/features/media/domain/services/photo_gps_point_selector.dart';
+import 'package:submersion/features/tags/data/repositories/tag_link_repository.dart';
+import 'package:submersion/features/tags/domain/entities/tag.dart'
+    show TagScope;
 
 class MediaRepository {
   AppDatabase get _db => DatabaseService.instance.database;
   final SyncRepository _syncRepository = SyncRepository();
+  final _tagLinks = TagLinkRepository(TagScope.media);
   final _uuid = const Uuid();
   final _log = LoggerService.forClass(MediaRepository);
 
@@ -120,6 +124,18 @@ class MediaRepository {
       );
       rethrow;
     }
+  }
+
+  /// How many photos and videos the library holds, whatever they are
+  /// attached to: what a photo store would keep copies of. Signatures and
+  /// documents are not counted.
+  Future<int> countPhotosAndVideos() async {
+    final count = _db.media.id.count();
+    final query = _db.selectOnly(_db.media)
+      ..addColumns([count])
+      ..where(_db.media.fileType.isIn(const ['photo', 'video']));
+    final row = await query.getSingle();
+    return row.read(count) ?? 0;
   }
 
   /// Count of media directly attached to a site (badges/headers).
@@ -533,6 +549,7 @@ class MediaRepository {
       _log.info('Deleting media: $id');
       await _db.transaction(() async {
         await _dropEnrichmentRows([id]);
+        await _tagLinks.deleteLinksFor([id]);
         await (_db.delete(_db.media)..where((t) => t.id.equals(id))).go();
         await _syncRepository.logDeletion(entityType: 'media', recordId: id);
       });
@@ -581,6 +598,8 @@ class MediaRepository {
         // the FK cascade, which removes them without logging anything. See
         // [_dropEnrichmentRows] for why the tombstone matters.
         await _dropEnrichmentRows(targets);
+        // The tag links likewise (issue #1970).
+        await _tagLinks.deleteLinksFor(targets);
         for (final id in targets) {
           await (_db.delete(_db.media)..where((t) => t.id.equals(id))).go();
           await _syncRepository.logDeletion(entityType: 'media', recordId: id);
@@ -1950,10 +1969,15 @@ class MediaRepository {
 
   /// Confirms the original object exists in the media store. Once this
   /// syncs, every device knows the bytes are fetchable.
-  Future<void> stampRemoteUploaded(
+  ///
+  /// Returns whether it was written: false, with nothing written, when
+  /// another store holds the row's stamps and [takesOver], asked inside
+  /// the transaction, answers false.
+  Future<bool> stampRemoteUploaded(
     String mediaId, {
     required DateTime uploadedAt,
     String? storeId,
+    Future<bool> Function()? takesOver,
   }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     // One transaction: a fact column and the clock that orders it must not
@@ -1961,8 +1985,9 @@ class MediaRepository {
     // the new value under the PREVIOUS group clock and with no pending
     // record, so a later row edit exported it under that stale clock and a
     // peer's older fact beat it (media sync program spec 5.1).
-    await _db.transaction(() async {
-      final base = await _storeColumns(mediaId, storeId);
+    final applied = await _db.transaction(() async {
+      final base = await _storeColumns(mediaId, storeId, takesOver: takesOver);
+      if (base == null) return false;
       await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
         base.copyWith(
           remoteUploadedAt: Value(uploadedAt.millisecondsSinceEpoch),
@@ -1975,8 +2000,10 @@ class MediaRepository {
         localUpdatedAt: now,
         group: SyncFactGroups.mediaUpload,
       );
+      return true;
     });
-    SyncEventBus.notifyLocalChange();
+    if (applied) SyncEventBus.notifyLocalChange();
+    return applied;
   }
 
   /// A media row is linked to the logbook when it references a dive, a site
@@ -2748,12 +2775,18 @@ class MediaRepository {
   /// orphaned rows are never uploaded (orphan-prevention spec section 4.1).
   ///
   /// With [storeId], stamps made in another store do not count as copied.
-  Future<List<String>> getBackfillCandidateIds({String? storeId}) async {
+  /// Unless [takesOver] (this device's store is the one the library
+  /// announces), rows stamped in another store are left alone entirely.
+  Future<List<String>> getBackfillCandidateIds({
+    String? storeId,
+    bool takesOver = true,
+  }) async {
     final id = _db.media.id;
     final query = _db.selectOnly(_db.media)
       ..addColumns([id])
       ..where(
         _uploadEligible(await _syncRepository.getDeviceId()) &
+            _inReach(storeId, takesOver: takesOver) &
             _uploadDone(storeId).not(),
       )
       ..orderBy([OrderingTerm.desc(_db.media.takenAt)]);
@@ -2766,8 +2799,11 @@ class MediaRepository {
   /// left to copy is exactly what a backfill would upload.
   Future<({int copied, int total})> countUploadProgress({
     String? storeId,
+    bool takesOver = true,
   }) async {
-    final eligible = _uploadEligible(await _syncRepository.getDeviceId());
+    final eligible =
+        _uploadEligible(await _syncRepository.getDeviceId()) &
+        _inReach(storeId, takesOver: takesOver);
     final done = _uploadDone(storeId);
     final total = countAll(filter: eligible);
     final copied = countAll(filter: eligible & done);
@@ -2848,22 +2884,56 @@ class MediaRepository {
             _db.media.remoteStoreId.equals(storeId));
   }
 
+  /// The rows a device attached to [storeId] may upload (issue #3569): all
+  /// of them when it [takesOver], else none stamped in another store. The
+  /// same rule as stampedElsewhere.
+  Expression<bool> _inReach(String? storeId, {required bool takesOver}) {
+    if (storeId == null || takesOver) return const Constant(true);
+    final stampedElsewhere =
+        _db.media.remoteStoreId.isNotNull() &
+        _db.media.remoteStoreId.equals(storeId).not() &
+        _anyStamp;
+    return stampedElsewhere.not();
+  }
+
+  /// Whether the row carries any upload stamp, in whichever store: the
+  /// stamp half of stampedElsewhere, shared by [_inReach] and
+  /// [_storeColumns] so the two cannot disagree.
+  Expression<bool> get _anyStamp =>
+      _db.media.remoteUploadedAt.isNotNull() |
+      _db.media.remoteThumbUploadedAt.isNotNull() |
+      _db.media.remoteCompressedUploadedAt.isNotNull();
+
   /// What a stamp for [storeId] writes besides itself (issue #3482): the
   /// store, and when the row's stamps were made in another store, those
   /// stamps cleared, since they say nothing about this one. A null
   /// [storeId] leaves the store as it is. Read inside the stamp's
-  /// transaction.
-  Future<MediaCompanion> _storeColumns(String mediaId, String? storeId) async {
+  /// transaction, which is where the take-over decision is made (issue
+  /// #3569): null, write nothing, when another store holds the row's stamps
+  /// and this one does not [takesOver], so an upload that started before
+  /// another device took the row over cannot undo that. [takesOver] is
+  /// asked here, inside the transaction and only for such a row, so the
+  /// answer cannot go stale before the write; null takes over.
+  Future<MediaCompanion?> _storeColumns(
+    String mediaId,
+    String? storeId, {
+    Future<bool> Function()? takesOver,
+  }) async {
     if (storeId == null) return const MediaCompanion();
-    final owner = _db.media.remoteStoreId;
+    final m = _db.media;
+    final stamped = _anyStamp;
     final current =
-        await (_db.selectOnly(_db.media)
-              ..addColumns([owner])
-              ..where(_db.media.id.equals(mediaId)))
-            .map((r) => r.read(owner))
+        await (_db.selectOnly(m)
+              ..addColumns([m.remoteStoreId, stamped])
+              ..where(m.id.equals(mediaId)))
             .getSingleOrNull();
-    if (current == null || current == storeId) {
+    final owner = current?.read(m.remoteStoreId);
+    if (owner == null || owner == storeId) {
       return MediaCompanion(remoteStoreId: Value(storeId));
+    }
+    if ((current!.read(stamped) ?? false) &&
+        !(await takesOver?.call() ?? true)) {
+      return null;
     }
     return MediaCompanion(
       remoteStoreId: Value(storeId),
@@ -2929,10 +2999,15 @@ class MediaRepository {
   }
 
   /// Confirms the thumbnail object exists in the media store.
-  Future<void> stampRemoteThumbUploaded(
+  ///
+  /// Returns whether it was written: false, with nothing written, when
+  /// another store holds the row's stamps and [takesOver], asked inside
+  /// the transaction, answers false.
+  Future<bool> stampRemoteThumbUploaded(
     String mediaId, {
     required DateTime uploadedAt,
     String? storeId,
+    Future<bool> Function()? takesOver,
   }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     // One transaction: a fact column and the clock that orders it must not
@@ -2940,8 +3015,9 @@ class MediaRepository {
     // the new value under the PREVIOUS group clock and with no pending
     // record, so a later row edit exported it under that stale clock and a
     // peer's older fact beat it (media sync program spec 5.1).
-    await _db.transaction(() async {
-      final base = await _storeColumns(mediaId, storeId);
+    final applied = await _db.transaction(() async {
+      final base = await _storeColumns(mediaId, storeId, takesOver: takesOver);
+      if (base == null) return false;
       await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
         base.copyWith(
           remoteThumbUploadedAt: Value(uploadedAt.millisecondsSinceEpoch),
@@ -2954,18 +3030,25 @@ class MediaRepository {
         localUpdatedAt: now,
         group: SyncFactGroups.mediaUpload,
       );
+      return true;
     });
-    SyncEventBus.notifyLocalChange();
+    if (applied) SyncEventBus.notifyLocalChange();
+    return applied;
   }
 
   /// Confirms a compressed rendition exists in the store, recording which
   /// level produced it (first-writer-wins) and its byte size.
-  Future<void> stampRemoteCompressedUploaded(
+  ///
+  /// Returns whether it was written: false, with nothing written, when
+  /// another store holds the row's stamps and [takesOver], asked inside
+  /// the transaction, answers false.
+  Future<bool> stampRemoteCompressedUploaded(
     String mediaId, {
     required DateTime uploadedAt,
     required String level,
     required int sizeBytes,
     String? storeId,
+    Future<bool> Function()? takesOver,
   }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     // One transaction: a fact column and the clock that orders it must not
@@ -2973,8 +3056,9 @@ class MediaRepository {
     // the new value under the PREVIOUS group clock and with no pending
     // record, so a later row edit exported it under that stale clock and a
     // peer's older fact beat it (media sync program spec 5.1).
-    await _db.transaction(() async {
-      final base = await _storeColumns(mediaId, storeId);
+    final applied = await _db.transaction(() async {
+      final base = await _storeColumns(mediaId, storeId, takesOver: takesOver);
+      if (base == null) return false;
       await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
         base.copyWith(
           remoteCompressedUploadedAt: Value(uploadedAt.millisecondsSinceEpoch),
@@ -2989,8 +3073,10 @@ class MediaRepository {
         localUpdatedAt: now,
         group: SyncFactGroups.mediaUpload,
       );
+      return true;
     });
-    SyncEventBus.notifyLocalChange();
+    if (applied) SyncEventBus.notifyLocalChange();
+    return applied;
   }
 
   /// Clears the original-upload stamp (used when a re-upload override

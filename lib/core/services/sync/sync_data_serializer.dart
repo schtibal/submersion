@@ -25,6 +25,7 @@ import 'package:submersion/core/services/sync/view_config_merge.dart';
 import 'package:submersion/core/services/sync/changeset_log/sync_temp_dir.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
+import 'package:submersion/features/media/data/repositories/smart_album_tag_repoint.dart';
 import 'package:submersion/features/dive_import/data/services/imported_file_reclaimer.dart';
 import 'package:submersion/features/dive_log/domain/codecs/profile_series_codec.dart';
 import 'package:submersion/features/dive_log/domain/codecs/profile_series_codec_exception.dart';
@@ -372,10 +373,14 @@ class SyncData {
   final List<Map<String, dynamic>> diveBuddyRoles;
   final List<Map<String, dynamic>> siteTags;
   final List<Map<String, dynamic>> equipmentTags;
+  final List<Map<String, dynamic>> mediaTags;
+  final List<Map<String, dynamic>> documentTags;
   final List<Map<String, dynamic>> equipmentShares;
   final List<Map<String, dynamic>> tripEquipment;
   final List<Map<String, dynamic>> tripHides;
   final List<Map<String, dynamic>> siteHides;
+  final List<Map<String, dynamic>> tripShares;
+  final List<Map<String, dynamic>> siteShares;
   final List<Map<String, dynamic>> equipmentOwnershipEvents;
   final List<Map<String, dynamic>> equipmentLocations;
   final List<Map<String, dynamic>> equipmentLocationMoves;
@@ -505,10 +510,14 @@ class SyncData {
     this.diveBuddyRoles = const [],
     this.siteTags = const [],
     this.equipmentTags = const [],
+    this.mediaTags = const [],
+    this.documentTags = const [],
     this.equipmentShares = const [],
     this.tripEquipment = const [],
     this.tripHides = const [],
     this.siteHides = const [],
+    this.tripShares = const [],
+    this.siteShares = const [],
     this.equipmentOwnershipEvents = const [],
     this.equipmentLocations = const [],
     this.equipmentLocationMoves = const [],
@@ -632,10 +641,14 @@ class SyncData {
     'diveBuddyRoles': diveBuddyRoles,
     'siteTags': siteTags,
     'equipmentTags': equipmentTags,
+    'mediaTags': mediaTags,
+    'documentTags': documentTags,
     'equipmentShares': equipmentShares,
     'tripEquipment': tripEquipment,
     'tripHides': tripHides,
     'siteHides': siteHides,
+    'tripShares': tripShares,
+    'siteShares': siteShares,
     'equipmentOwnershipEvents': equipmentOwnershipEvents,
     'equipmentLocations': equipmentLocations,
     'equipmentLocationMoves': equipmentLocationMoves,
@@ -776,10 +789,14 @@ class SyncData {
       diveBuddyRoles: _parseList(json['diveBuddyRoles']),
       siteTags: _parseList(json['siteTags']),
       equipmentTags: _parseList(json['equipmentTags']),
+      mediaTags: _parseList(json['mediaTags']),
+      documentTags: _parseList(json['documentTags']),
       equipmentShares: _parseList(json['equipmentShares']),
       tripEquipment: _parseList(json['tripEquipment']),
       tripHides: _parseList(json['tripHides']),
       siteHides: _parseList(json['siteHides']),
+      tripShares: _parseList(json['tripShares']),
+      siteShares: _parseList(json['siteShares']),
       equipmentOwnershipEvents: _parseList(json['equipmentOwnershipEvents']),
       equipmentLocations: _parseList(json['equipmentLocations']),
       equipmentLocationMoves: _parseList(json['equipmentLocationMoves']),
@@ -1376,6 +1393,8 @@ class SyncDataSerializer {
     (key: 'diveBuddyRoles', table: _db.diveBuddyRoles, blob: false, full: null),
     (key: 'siteTags', table: _db.siteTags, blob: false, full: null),
     (key: 'equipmentTags', table: _db.equipmentTags, blob: false, full: null),
+    (key: 'mediaTags', table: _db.mediaTags, blob: false, full: null),
+    (key: 'documentTags', table: _db.documentTags, blob: false, full: null),
     (
       key: 'equipmentShares',
       table: _db.equipmentShares,
@@ -1385,6 +1404,8 @@ class SyncDataSerializer {
     (key: 'tripEquipment', table: _db.tripEquipment, blob: false, full: null),
     (key: 'tripHides', table: _db.tripHides, blob: false, full: null),
     (key: 'siteHides', table: _db.siteHides, blob: false, full: null),
+    (key: 'tripShares', table: _db.tripShares, blob: false, full: null),
+    (key: 'siteShares', table: _db.siteShares, blob: false, full: null),
     (
       key: 'equipmentOwnershipEvents',
       table: _db.equipmentOwnershipEvents,
@@ -1836,10 +1857,14 @@ class SyncDataSerializer {
     'siteSiteTypes',
     'siteTags',
     'equipmentTags',
+    'mediaTags',
+    'documentTags',
     'equipmentShares',
     'tripEquipment',
     'tripHides',
     'siteHides',
+    'tripShares',
+    'siteShares',
     'equipmentOwnershipEvents',
     'weightPresetEntries',
     'equipmentLocationMoves',
@@ -2066,10 +2091,14 @@ class SyncDataSerializer {
     'diveBuddyRoles': 'dive_buddy_roles',
     'siteTags': 'site_tags',
     'equipmentTags': 'equipment_tags',
+    'mediaTags': 'media_tags',
+    'documentTags': 'document_tags',
     'equipmentShares': 'equipment_shares',
     'tripEquipment': 'trip_equipment',
     'tripHides': 'trip_hides',
     'siteHides': 'site_hides',
+    'tripShares': 'trip_shares',
+    'siteShares': 'site_shares',
     'equipmentOwnershipEvents': 'equipment_ownership_events',
     'equipmentLocationMoves': 'equipment_location_moves',
     'diveDiveTypes': 'dive_dive_types',
@@ -2710,6 +2739,22 @@ class SyncDataSerializer {
           pendingChildren,
         ),
       ),
+      mediaTags: await _safeExport(
+        'mediaTags',
+        () async => _withPendingChildren(
+          'mediaTags',
+          await _exportMediaTags(hlcSince),
+          pendingChildren,
+        ),
+      ),
+      documentTags: await _safeExport(
+        'documentTags',
+        () async => _withPendingChildren(
+          'documentTags',
+          await _exportDocumentTags(hlcSince),
+          pendingChildren,
+        ),
+      ),
       equipmentShares: await _safeExport(
         'equipmentShares',
         () async => _withPendingChildren(
@@ -2739,6 +2784,22 @@ class SyncDataSerializer {
         () async => _withPendingChildren(
           'siteHides',
           await _exportSiteHides(hlcSince),
+          pendingChildren,
+        ),
+      ),
+      tripShares: await _safeExport(
+        'tripShares',
+        () async => _withPendingChildren(
+          'tripShares',
+          await _exportTripShares(hlcSince),
+          pendingChildren,
+        ),
+      ),
+      siteShares: await _safeExport(
+        'siteShares',
+        () async => _withPendingChildren(
+          'siteShares',
+          await _exportSiteShares(hlcSince),
           pendingChildren,
         ),
       ),
@@ -3391,6 +3452,16 @@ class SyncDataSerializer {
           _db.equipmentTags,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         return row?.toJson();
+      case 'mediaTags':
+        final row = await (_db.select(
+          _db.mediaTags,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'documentTags':
+        final row = await (_db.select(
+          _db.documentTags,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
       case 'equipmentShares':
         final row = await (_db.select(
           _db.equipmentShares,
@@ -3409,6 +3480,16 @@ class SyncDataSerializer {
       case 'siteHides':
         final row = await (_db.select(
           _db.siteHides,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'tripShares':
+        final row = await (_db.select(
+          _db.tripShares,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'siteShares':
+        final row = await (_db.select(
+          _db.siteShares,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         return row?.toJson();
       case 'equipmentOwnershipEvents':
@@ -4359,6 +4440,14 @@ class SyncDataSerializer {
     for (final junction in tagScopeTables) {
       await _foldTagLinks(junction, loser: loser, survivor: survivor);
     }
+    // Saved smart albums filtered by the loser follow it too (issue #1970).
+    await repointSmartAlbumTags(
+      _db,
+      _syncRepository,
+      fromTagIds: [loser],
+      toTagId: survivor,
+      now: DateTime.now().millisecondsSinceEpoch,
+    );
     await (_db.delete(_db.tags)..where((t) => t.id.equals(loser))).go();
     _tagIdAliases[loser] = survivor;
   }
@@ -4676,10 +4765,18 @@ class SyncDataSerializer {
   }
 
   /// Applies one incoming `equipment_tags` row (v219, issue #1942), the
-  /// equipment twin of [_applySiteTagRecord]: the (equipment, tag) unique
-  /// index makes a peer's copy of a pair this device holds under another id
-  /// a no-op instead of a throw.
+  /// equipment twin of [_applySiteTagRecord]: a link to a tag not offered on
+  /// equipment is refused, and a peer's copy of a pair this device holds
+  /// under another id is reconciled to the lower id, so a later tombstone
+  /// for either id removes the link on every device (#1970 review).
   Future<void> _applyEquipmentTagRecord(EquipmentTag record) async {
+    if (!await _reconcileScopedTagLink(equipmentTagScopeTable, (
+      parent: record.equipmentId,
+      child: record.tagId,
+      id: record.id,
+    ))) {
+      return;
+    }
     await _db
         .into(_db.equipmentTags)
         .insert(
@@ -4688,6 +4785,85 @@ class SyncDataSerializer {
             target: const [],
           ),
         );
+  }
+
+  /// Applies one incoming `media_tags` row (v309, issue #1970), the media
+  /// twin of [_applyEquipmentTagRecord].
+  Future<void> _applyMediaTagRecord(MediaTag record) async {
+    if (!await _reconcileScopedTagLink(mediaTagScopeTable, (
+      parent: record.mediaId,
+      child: record.tagId,
+      id: record.id,
+    ))) {
+      return;
+    }
+    await _db
+        .into(_db.mediaTags)
+        .insert(
+          record,
+          onConflict: DoNothing<$MediaTagsTable, MediaTag>(target: const []),
+        );
+  }
+
+  /// Applies one incoming `document_tags` row (v309, issue #1970), the
+  /// document twin of [_applyEquipmentTagRecord].
+  Future<void> _applyDocumentTagRecord(DocumentTag record) async {
+    if (!await _reconcileScopedTagLink(documentTagScopeTable, (
+      parent: record.documentId,
+      child: record.tagId,
+      id: record.id,
+    ))) {
+      return;
+    }
+    await _db
+        .into(_db.documentTags)
+        .insert(
+          record,
+          onConflict: DoNothing<$DocumentTagsTable, DocumentTag>(
+            target: const [],
+          ),
+        );
+  }
+
+  /// Readies one incoming tag link of [junction] for insertion: false when
+  /// its tag is not offered in that scope (the link is refused), otherwise
+  /// any local copy of the same pair under a higher id is dropped first, as
+  /// [_applySiteTagRecord] does.
+  Future<bool> _reconcileScopedTagLink(
+    TagScopeTable junction,
+    JunctionPair pair,
+  ) async {
+    if ((await _tagsOutsideScope(junction)).contains(pair.child)) return false;
+    await _reconcileJunctionIds(
+      junction.junctionTable,
+      parentColumn: junction.parentColumn,
+      childColumn: 'tag_id',
+      pairs: [pair],
+    );
+    return true;
+  }
+
+  /// [rows] of [junction] ready for a batch insert: links to tags not
+  /// offered in that scope dropped, one row per pair (the lowest id), and
+  /// any local copy of a pair under a higher id deleted, as the `siteTags`
+  /// batch does.
+  Future<List<T>> _reconcileScopedTagLinks<T>(
+    TagScopeTable junction,
+    List<T> rows,
+    JunctionPair Function(T row) pairOf,
+  ) async {
+    final offScope = await _tagsOutsideScope(junction);
+    final kept = _lowestIdPerPair(
+      rows.where((row) => !offScope.contains(pairOf(row).child)).toList(),
+      pairOf,
+    );
+    await _reconcileJunctionIds(
+      junction.junctionTable,
+      parentColumn: junction.parentColumn,
+      childColumn: 'tag_id',
+      pairs: [for (final row in kept) pairOf(row)],
+    );
+    return kept;
   }
 
   /// Applies one incoming `equipment_shares` row (v234, issue #2046). The
@@ -4768,6 +4944,45 @@ class SyncDataSerializer {
         .insert(
           record,
           onConflict: DoNothing<$SiteHidesTable, SiteHideRow>(target: const []),
+        );
+  }
+
+  /// Applies one incoming `trip_shares` row (v311, issue #2151). The
+  /// (trip, profile) pair is unique: a peer's copy under another id is
+  /// reconciled to the lower id and then skipped, as
+  /// [_applyTripEquipmentRecord] does.
+  Future<void> _applyTripShareRecord(TripShareRow record) async {
+    await _reconcileJunctionIds(
+      'trip_shares',
+      parentColumn: 'trip_id',
+      childColumn: 'diver_id',
+      pairs: [(parent: record.tripId, child: record.diverId, id: record.id)],
+    );
+    await _db
+        .into(_db.tripShares)
+        .insert(
+          record,
+          onConflict: DoNothing<$TripSharesTable, TripShareRow>(
+            target: const [],
+          ),
+        );
+  }
+
+  /// As [_applyTripShareRecord], for `site_shares`.
+  Future<void> _applySiteShareRecord(SiteShareRow record) async {
+    await _reconcileJunctionIds(
+      'site_shares',
+      parentColumn: 'site_id',
+      childColumn: 'diver_id',
+      pairs: [(parent: record.siteId, child: record.diverId, id: record.id)],
+    );
+    await _db
+        .into(_db.siteShares)
+        .insert(
+          record,
+          onConflict: DoNothing<$SiteSharesTable, SiteShareRow>(
+            target: const [],
+          ),
         );
   }
 
@@ -5309,6 +5524,14 @@ class SyncDataSerializer {
           EquipmentTag.fromJson(_withTagAlias(data)),
         );
         return;
+      case 'mediaTags':
+        await _applyMediaTagRecord(MediaTag.fromJson(_withTagAlias(data)));
+        return;
+      case 'documentTags':
+        await _applyDocumentTagRecord(
+          DocumentTag.fromJson(_withTagAlias(data)),
+        );
+        return;
       case 'equipmentShares':
         await _applyEquipmentShareRecord(EquipmentShareRow.fromJson(data));
         return;
@@ -5320,6 +5543,12 @@ class SyncDataSerializer {
         return;
       case 'siteHides':
         await _applySiteHideRecord(SiteHideRow.fromJson(data));
+        return;
+      case 'tripShares':
+        await _applyTripShareRecord(TripShareRow.fromJson(data));
+        return;
+      case 'siteShares':
+        await _applySiteShareRecord(SiteShareRow.fromJson(data));
         return;
       case 'equipmentOwnershipEvents':
         await _db
@@ -6702,13 +6931,46 @@ class SyncDataSerializer {
         );
         return;
       case 'equipmentTags':
+        final equipmentTagsRows = await _reconcileScopedTagLinks(
+          equipmentTagScopeTable,
+          records.map((r) => EquipmentTag.fromJson(_withTagAlias(r))).toList(),
+          (row) => (parent: row.equipmentId, child: row.tagId, id: row.id),
+        );
         await _db.batch(
           (b) => b.insertAll(
             _db.equipmentTags,
-            records
-                .map((r) => EquipmentTag.fromJson(_withTagAlias(r)))
-                .toList(),
+            equipmentTagsRows,
             onConflict: DoNothing<$EquipmentTagsTable, EquipmentTag>(
+              target: const [],
+            ),
+          ),
+        );
+        return;
+      case 'mediaTags':
+        final mediaTagsRows = await _reconcileScopedTagLinks(
+          mediaTagScopeTable,
+          records.map((r) => MediaTag.fromJson(_withTagAlias(r))).toList(),
+          (row) => (parent: row.mediaId, child: row.tagId, id: row.id),
+        );
+        await _db.batch(
+          (b) => b.insertAll(
+            _db.mediaTags,
+            mediaTagsRows,
+            onConflict: DoNothing<$MediaTagsTable, MediaTag>(target: const []),
+          ),
+        );
+        return;
+      case 'documentTags':
+        final documentTagsRows = await _reconcileScopedTagLinks(
+          documentTagScopeTable,
+          records.map((r) => DocumentTag.fromJson(_withTagAlias(r))).toList(),
+          (row) => (parent: row.documentId, child: row.tagId, id: row.id),
+        );
+        await _db.batch(
+          (b) => b.insertAll(
+            _db.documentTags,
+            documentTagsRows,
+            onConflict: DoNothing<$DocumentTagsTable, DocumentTag>(
               target: const [],
             ),
           ),
@@ -6809,6 +7071,56 @@ class SyncDataSerializer {
             _db.siteHides,
             siteHideRows,
             onConflict: DoNothing<$SiteHidesTable, SiteHideRow>(
+              target: const [],
+            ),
+          ),
+        );
+        return;
+      case 'tripShares':
+        // DoNothing: see [_applyTripShareRecord].
+        final tripShareRows = _lowestIdPerPair(
+          records.map((r) => TripShareRow.fromJson(r)).toList(),
+          (row) => (parent: row.tripId, child: row.diverId, id: row.id),
+        );
+        await _reconcileJunctionIds(
+          'trip_shares',
+          parentColumn: 'trip_id',
+          childColumn: 'diver_id',
+          pairs: [
+            for (final row in tripShareRows)
+              (parent: row.tripId, child: row.diverId, id: row.id),
+          ],
+        );
+        await _db.batch(
+          (b) => b.insertAll(
+            _db.tripShares,
+            tripShareRows,
+            onConflict: DoNothing<$TripSharesTable, TripShareRow>(
+              target: const [],
+            ),
+          ),
+        );
+        return;
+      case 'siteShares':
+        // DoNothing: see [_applySiteShareRecord].
+        final siteShareRows = _lowestIdPerPair(
+          records.map((r) => SiteShareRow.fromJson(r)).toList(),
+          (row) => (parent: row.siteId, child: row.diverId, id: row.id),
+        );
+        await _reconcileJunctionIds(
+          'site_shares',
+          parentColumn: 'site_id',
+          childColumn: 'diver_id',
+          pairs: [
+            for (final row in siteShareRows)
+              (parent: row.siteId, child: row.diverId, id: row.id),
+          ],
+        );
+        await _db.batch(
+          (b) => b.insertAll(
+            _db.siteShares,
+            siteShareRows,
+            onConflict: DoNothing<$SiteSharesTable, SiteShareRow>(
               target: const [],
             ),
           ),
@@ -7495,6 +7807,10 @@ class SyncDataSerializer {
         return plain(_db.siteTags, _db.siteTags.id);
       case 'equipmentTags':
         return plain(_db.equipmentTags, _db.equipmentTags.id);
+      case 'mediaTags':
+        return plain(_db.mediaTags, _db.mediaTags.id);
+      case 'documentTags':
+        return plain(_db.documentTags, _db.documentTags.id);
       case 'equipmentShares':
         return plain(_db.equipmentShares, _db.equipmentShares.id);
       case 'tripEquipment':
@@ -7503,6 +7819,10 @@ class SyncDataSerializer {
         return plain(_db.tripHides, _db.tripHides.id);
       case 'siteHides':
         return plain(_db.siteHides, _db.siteHides.id);
+      case 'tripShares':
+        return plain(_db.tripShares, _db.tripShares.id);
+      case 'siteShares':
+        return plain(_db.siteShares, _db.siteShares.id);
       case 'equipmentOwnershipEvents':
         return plain(
           _db.equipmentOwnershipEvents,
@@ -7999,6 +8319,10 @@ class SyncDataSerializer {
         return _db.siteTags;
       case 'equipmentTags':
         return _db.equipmentTags;
+      case 'mediaTags':
+        return _db.mediaTags;
+      case 'documentTags':
+        return _db.documentTags;
       case 'equipmentShares':
         return _db.equipmentShares;
       case 'tripEquipment':
@@ -8007,6 +8331,10 @@ class SyncDataSerializer {
         return _db.tripHides;
       case 'siteHides':
         return _db.siteHides;
+      case 'tripShares':
+        return _db.tripShares;
+      case 'siteShares':
+        return _db.siteShares;
       case 'equipmentOwnershipEvents':
         return _db.equipmentOwnershipEvents;
       case 'equipmentLocations':
@@ -8572,6 +8900,16 @@ class SyncDataSerializer {
           _db.equipmentTags,
         )..where((t) => t.id.equals(recordId))).go();
         return;
+      case 'mediaTags':
+        await (_db.delete(
+          _db.mediaTags,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'documentTags':
+        await (_db.delete(
+          _db.documentTags,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
       case 'equipmentShares':
         await (_db.delete(
           _db.equipmentShares,
@@ -8590,6 +8928,16 @@ class SyncDataSerializer {
       case 'siteHides':
         await (_db.delete(
           _db.siteHides,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'tripShares':
+        await (_db.delete(
+          _db.tripShares,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'siteShares':
+        await (_db.delete(
+          _db.siteShares,
         )..where((t) => t.id.equals(recordId))).go();
         return;
       case 'equipmentOwnershipEvents':
@@ -10354,6 +10702,58 @@ class SyncDataSerializer {
     return rows.map((r) => r.toJson()).toList();
   }
 
+  /// Media tag links (v309, issue #1970), gated on the parent media row's
+  /// clock like [_exportEquipmentTags]. A changed link travels on its own
+  /// pending mark, never by re-stamping the photo.
+  Future<List<Map<String, dynamic>>> _exportMediaTags(String? hlcSince) async {
+    if (hlcSince != null) {
+      // Ids only: a media row can carry a signature's image bytes.
+      final ids =
+          await (_db.selectOnly(_db.media)
+                ..addColumns([_db.media.id])
+                ..where(_db.media.hlc.isBiggerThanValue(hlcSince)))
+              .map((r) => r.read(_db.media.id)!)
+              .get()
+              .then((ids) => ids.toSet());
+      if (ids.isEmpty) return [];
+
+      return _childRowsOf(
+        ids,
+        (chunk) => (_db.select(
+          _db.mediaTags,
+        )..where((t) => t.mediaId.isIn(chunk))).get(),
+      );
+    }
+    final rows = await _db.select(_db.mediaTags).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  /// Document tag links (v309, issue #1970), gated on the parent document's
+  /// clock like [_exportEquipmentTags].
+  Future<List<Map<String, dynamic>>> _exportDocumentTags(
+    String? hlcSince,
+  ) async {
+    if (hlcSince != null) {
+      final ids =
+          await (_db.selectOnly(_db.documents)
+                ..addColumns([_db.documents.id])
+                ..where(_db.documents.hlc.isBiggerThanValue(hlcSince)))
+              .map((r) => r.read(_db.documents.id)!)
+              .get()
+              .then((ids) => ids.toSet());
+      if (ids.isEmpty) return [];
+
+      return _childRowsOf(
+        ids,
+        (chunk) => (_db.select(
+          _db.documentTags,
+        )..where((t) => t.documentId.isIn(chunk))).get(),
+      );
+    }
+    final rows = await _db.select(_db.documentTags).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
   /// Equipment shares (v234, issue #2046), gated on the parent item's clock
   /// like [_exportEquipmentTags].
   Future<List<Map<String, dynamic>>> _exportEquipmentShares(
@@ -10433,6 +10833,46 @@ class SyncDataSerializer {
       );
     }
     final rows = await _db.select(_db.siteHides).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  /// The profiles a trip is shared with (v311, issue #2151), gated on the
+  /// parent trip's clock like [_exportTripEquipment]. A share travels on its
+  /// own pending mark, never by re-stamping the trip.
+  Future<List<Map<String, dynamic>>> _exportTripShares(String? hlcSince) async {
+    if (hlcSince != null) {
+      final trips = await (_db.select(
+        _db.trips,
+      )..where((t) => t.hlc.isBiggerThanValue(hlcSince))).get();
+      final tripIds = trips.map((t) => t.id).toSet();
+      if (tripIds.isEmpty) return [];
+      return _childRowsOf(
+        tripIds,
+        (chunk) => (_db.select(
+          _db.tripShares,
+        )..where((t) => t.tripId.isIn(chunk))).get(),
+      );
+    }
+    final rows = await _db.select(_db.tripShares).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  /// As [_exportTripShares], for the profiles a site is shared with.
+  Future<List<Map<String, dynamic>>> _exportSiteShares(String? hlcSince) async {
+    if (hlcSince != null) {
+      final sites = await (_db.select(
+        _db.diveSites,
+      )..where((t) => t.hlc.isBiggerThanValue(hlcSince))).get();
+      final siteIds = sites.map((s) => s.id).toSet();
+      if (siteIds.isEmpty) return [];
+      return _childRowsOf(
+        siteIds,
+        (chunk) => (_db.select(
+          _db.siteShares,
+        )..where((t) => t.siteId.isIn(chunk))).get(),
+      );
+    }
+    final rows = await _db.select(_db.siteShares).get();
     return rows.map((r) => r.toJson()).toList();
   }
 
@@ -11020,6 +11460,7 @@ class SyncDataSerializer {
       'showMapBackgroundOnDiveCards': false,
       'groupTripsInDiveList': false,
       'autoTagImports': true,
+      'downloadsFollowComputerOwner': true,
       'showMapBackgroundOnSiteCards': false,
       // Dive profile markers
       'showMaxDepthMarker': true,

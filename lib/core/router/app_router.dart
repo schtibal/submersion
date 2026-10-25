@@ -124,7 +124,6 @@ import 'package:submersion/features/media_store/presentation/pages/transfers_pag
 import 'package:submersion/features/settings/presentation/pages/connected_accounts_page.dart';
 import 'package:submersion/features/settings/presentation/pages/account_detail_page.dart';
 import 'package:submersion/features/settings/presentation/pages/lightroom_settings_page.dart';
-import 'package:submersion/features/settings/presentation/pages/photos_media_setup_page.dart';
 import 'package:submersion/features/settings/presentation/pages/fix_dive_times_page.dart';
 import 'package:submersion/features/settings/presentation/pages/link_buddy_names_page.dart';
 import 'package:submersion/features/settings/presentation/pages/retype_other_gear_page.dart';
@@ -148,6 +147,7 @@ import 'package:submersion/features/safety/presentation/pages/incidents_list_pag
 import 'package:submersion/features/safety/presentation/pages/emergency_card_page.dart';
 import 'package:submersion/features/settings/presentation/pages/equipment_condition_settings_page.dart';
 import 'package:submersion/features/settings/presentation/pages/decompression_settings_page.dart';
+import 'package:submersion/features/settings/presentation/pages/planner_defaults_settings_page.dart';
 import 'package:submersion/features/settings/presentation/pages/safety_hub_page.dart';
 import 'package:submersion/features/settings/presentation/pages/safety_review_settings_page.dart';
 import 'package:submersion/features/settings/presentation/pages/language_settings_page.dart';
@@ -169,6 +169,7 @@ import 'package:submersion/features/settings/presentation/pages/debug_log_viewer
 import 'package:submersion/features/media/presentation/pages/media_sources_page.dart';
 import 'package:submersion/features/media/presentation/pages/network_sources_page.dart';
 import 'package:submersion/features/settings/presentation/pages/section_appearance_page.dart';
+import 'package:submersion/features/settings/presentation/pages/set_up_device_page.dart';
 import 'package:submersion/features/transfer/presentation/pages/transfer_page.dart';
 import 'package:submersion/features/dive_types/presentation/pages/dive_types_page.dart';
 import 'package:submersion/features/site_types/presentation/pages/site_types_page.dart';
@@ -231,8 +232,10 @@ import 'package:submersion/features/nav_track/presentation/providers/nav_track_p
 import 'package:submersion/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:submersion/features/planner/presentation/pages/plan_canvas_page.dart';
 import 'package:submersion/features/planner/presentation/pages/plan_compare_page.dart';
+import 'package:submersion/features/planning/presentation/pages/planned_dives_page.dart';
 import 'package:submersion/features/surface_interval_tool/presentation/pages/surface_interval_tool_page.dart';
 import 'package:submersion/features/import_wizard/presentation/pages/universal_import_wizard_route.dart';
+import 'package:submersion/features/import_wizard/presentation/widgets/leave_running_import_dialog.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/widgets/main_scaffold.dart';
 import 'package:submersion/features/certification_agencies/presentation/pages/certification_agencies_page.dart';
@@ -367,6 +370,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     name: 'editPlan',
                     builder: (context, state) =>
                         PlanCanvasPage(planId: state.pathParameters['planId']),
+                  ),
+                  GoRoute(
+                    path: 'planned-dives',
+                    name: 'plannedDives',
+                    builder: (context, state) => const PlannedDivesPage(),
                   ),
                   GoRoute(
                     path: 'deco-calculator',
@@ -603,8 +611,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'new',
                 name: 'newSite',
-                builder: (context, state) =>
-                    SiteEditPage.fromNewSiteExtra(state.extra),
+                builder: (context, state) => SiteEditPage.fromNewSiteExtra(
+                  state.extra,
+                  duplicateOfId: state.uri.queryParameters['duplicateOf'],
+                ),
               ),
               GoRoute(
                 path: 'merge',
@@ -897,6 +907,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   initialType: DocumentType.values.asNameMap()[q['type']],
                   initialExpiringOnly: q['filter'] == 'expiring',
                   initialPersonalOnly: q['owner'] == 'personal',
+                  initialTagId: q['tag'],
                 ),
               );
             },
@@ -1187,17 +1198,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'import-wizard',
                 name: 'universalImport',
+                onExit: confirmLeaveRunningImport,
                 builder: (context, state) => const UniversalImportWizardRoute(),
               ),
               GoRoute(
                 path: 'import-cloud/suunto',
                 name: 'importFromCloudSuunto',
+                onExit: confirmLeaveRunningImport,
                 builder: (context, state) =>
                     const _SuuntoCloudImportWizardRoute(),
               ),
               GoRoute(
                 path: 'import-file/suunto',
                 name: 'importFromFileSuunto',
+                onExit: confirmLeaveRunningImport,
                 builder: (context, state) => _SuuntoFileImportWizardRoute(
                   initialFiles: state.extra is List<SuuntoJsonFile>
                       ? state.extra! as List<SuuntoJsonFile>
@@ -1207,12 +1221,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'import-cloud/garmin',
                 name: 'importFromCloudGarmin',
+                onExit: confirmLeaveRunningImport,
                 builder: (context, state) =>
                     const _GarminCloudImportWizardRoute(),
               ),
               GoRoute(
                 path: 'import-cloud/divelogs',
                 name: 'importFromCloudDivelogs',
+                onExit: confirmLeaveRunningImport,
                 builder: (context, state) => const _DivelogsImportWizardRoute(),
               ),
             ],
@@ -1366,6 +1382,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) => const StorageSettingsPage(),
               ),
               GoRoute(
+                path: 'setup',
+                name: 'setUpDevice',
+                builder: (context, state) => SetUpDevicePage.fromUri(state.uri),
+              ),
+              GoRoute(
                 path: 'import-options',
                 name: 'importOptions',
                 builder: (context, state) => const ImportOptionsPage(),
@@ -1494,6 +1515,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         const DecompressionSettingsPage(),
                   ),
                   GoRoute(
+                    path: 'planner-defaults',
+                    name: 'plannerDefaultsSettings',
+                    builder: (context, state) =>
+                        const PlannerDefaultsSettingsPage(),
+                  ),
+                  GoRoute(
                     path: 'equipment-condition',
                     name: 'equipmentConditionSettings',
                     builder: (context, state) =>
@@ -1534,6 +1561,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'wearable-import',
                 name: 'wearableImport',
+                onExit: confirmLeaveRunningImport,
                 builder: (context, state) =>
                     const _HealthKitImportWizardRoute(),
               ),
@@ -1661,11 +1689,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 name: 'photosMedia',
                 builder: (context, state) => const PhotosVideosPage(),
                 routes: [
-                  GoRoute(
-                    path: 'setup',
-                    name: 'photosMediaSetup',
-                    builder: (context, state) => const PhotosMediaSetupPage(),
-                  ),
                   GoRoute(
                     path: 'uploads',
                     name: 'photosUploads',
@@ -2062,6 +2085,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'discover',
                 name: 'discoverDevice',
+                onExit: confirmLeaveRunningImport,
                 builder: (context, state) =>
                     const _DiveComputerDiscoveryWizardRoute(),
               ),
@@ -2075,6 +2099,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'download',
                     name: 'computerDownload',
+                    onExit: confirmLeaveRunningImport,
                     builder: (context, state) =>
                         _DiveComputerDownloadWizardRoute(
                           computerId: state.pathParameters['computerId']!,

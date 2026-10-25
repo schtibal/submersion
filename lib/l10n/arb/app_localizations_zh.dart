@@ -1952,10 +1952,6 @@ class AppLocalizationsZh extends AppLocalizations {
       '此 Submersion 版本不支持 iCloud 同步。请使用 S3 同步或 App Store 版本。';
 
   @override
-  String get settings_cloudSync_provider_icloud_unsupportedSubtitle =>
-      '此版本不可用 — 请使用 S3 或 App Store 版本';
-
-  @override
   String get settings_cloudSync_encryption_title => '端到端加密';
 
   @override
@@ -2241,7 +2237,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accessibility_label_resizeMasterPane => '调整主窗格大小';
 
   @override
-  String get accessibility_label_sharedWithAllProfiles => '已与所有潜水员资料共享';
+  String get accessibility_label_sharedWithProfiles => '已与其他潜水员资料共享';
 
   @override
   String get accessibility_label_showList => '显示列表';
@@ -2401,6 +2397,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backup_history_pinAction_unpin => '取消置顶备份';
 
   @override
+  String get backup_history_pinnedOnAnotherDevice => '已在另一台设备上置顶';
+
+  @override
   String get backup_history_pinError => '无法更新置顶状态。';
 
   @override
@@ -2496,6 +2495,84 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get backup_schedule_retention_subtitle => '旧备份将自动删除';
+
+  @override
+  String get backup_retention_allDevices_title => '统计所有设备的备份';
+
+  @override
+  String get backup_retention_allDevices_off => '关闭：此设备只删除自己创建的备份';
+
+  @override
+  String backup_retention_allDevices_on(int count) {
+    return '云文件夹保留所有设备最近的 $count 个备份。已置顶的备份会被保留。如果其他设备也开启此项，以最小的数字为准。请先在所有设备上更新应用，以便识别它们置顶的备份。';
+  }
+
+  @override
+  String backup_retention_cloudFootprint(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '云文件夹中的 $count 个备份占用 $size',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backup_retention_confirm_title(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '删除 $count 个备份？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backup_retention_confirm_body(int keep, String size) {
+    return '保留最近 $keep 个备份将从云文件夹中删除以下备份（共 $size）。';
+  }
+
+  @override
+  String backup_retention_confirm_pinnedKept(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '保留 $count 个已置顶的备份。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backup_retention_confirm_action(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '删除 $count 个备份',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backup_retention_source_thisDevice => '此设备';
+
+  @override
+  String get backup_retention_source_anotherDevice => '其他设备';
+
+  @override
+  String get backup_retention_source_unknown => '未知设备';
+
+  @override
+  String get backup_retention_listFailed => '无法读取云备份文件夹，因此未做任何更改。';
+
+  @override
+  String backup_retention_removed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已从云文件夹删除 $count 个备份',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get backup_section_history => '历史记录';
@@ -5962,6 +6039,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveCenters_hint_website => 'www.divecenter.com';
 
   @override
+  String get diveCenters_hint_permanentlyClosed =>
+      '仍保留用于以往的潜水记录；在选择器中不会列入附近的潜水中心。';
+
+  @override
   String diveCenters_import_fromDatabase(Object count) {
     return '从数据库导入 ($count)';
   }
@@ -6033,10 +6114,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveCenters_label_website => '网站';
 
   @override
+  String get diveCenters_label_permanentlyClosed => '已永久关闭';
+
+  @override
   String get diveCenters_map_addCoordinatesHint => '为您的潜水中心添加坐标以在地图上显示';
 
   @override
   String get diveCenters_map_noCoordinates => '没有带坐标的潜水中心';
+
+  @override
+  String get diveCenters_picker_allCenters => '所有潜水中心';
 
   @override
   String get diveCenters_picker_newCenter => '新建潜水中心';
@@ -6045,12 +6132,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveCenters_picker_title => '选择潜水中心';
 
   @override
+  String diveCenters_picker_nearSite(String siteName) {
+    return '$siteName 附近';
+  }
+
+  @override
+  String get diveCenters_picker_nearThisDive => '此次潜水附近';
+
+  @override
+  String get diveCenters_picker_nearYourLocation => '你的位置附近';
+
+  @override
   String diveCenters_search_noResults(Object query) {
     return '未找到“$query”的结果';
   }
 
   @override
   String get diveCenters_search_prompt => '搜索潜水中心';
+
+  @override
+  String get diveCenters_tag_closed => '已关闭';
 
   @override
   String get diveCenters_section_address => '地址';
@@ -8225,6 +8326,17 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get diveSites_detail_duplicateMenu_label => '复制';
+
+  @override
+  String get diveSites_edit_appBar_duplicateSite => '复制潜水点';
+
+  @override
+  String diveSites_edit_duplicateName(String name) {
+    return '$name（副本）';
+  }
+
+  @override
   String get diveSites_edit_group_accessSafety => '通行与安全';
 
   @override
@@ -8241,6 +8353,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveSites_edit_group_typeTags => '类型和标签';
+
+  @override
+  String get diveSites_edit_snackbar_featuresNotCopied => '潜水点已添加，但无法复制其地图特征。';
 
   @override
   String get diveSites_edit_typeTags_manageTypes => '管理类型';
@@ -8302,34 +8417,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_manage_setupAssistant => '设置向导';
 
   @override
-  String get settings_manage_setupAssistant_subtitle => '重新设置单位、外观和备份选项';
-
-  @override
-  String get setup_backup_cloudCopy => '在云端存储备份';
-
-  @override
-  String get setup_backup_frequency => '频率';
-
-  @override
-  String get setup_backup_frequency_daily => '每天';
-
-  @override
-  String get setup_backup_frequency_monthly => '每月';
-
-  @override
-  String get setup_backup_frequency_weekly => '每周';
-
-  @override
-  String get setup_backup_scheduleSubtitle => '按计划备份你的数据';
-
-  @override
-  String get setup_backup_scheduleToggle => '自动备份';
-
-  @override
-  String get setup_backup_subtitle => '从第一天起保护你的数据。';
-
-  @override
-  String get setup_backup_title => '备份与同步';
+  String get settings_manage_setupAssistant_subtitle => '重新设置单位、备份、同步和照片';
 
   @override
   String get setup_common_back => '返回';
@@ -8430,9 +8518,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setup_restore_title => '恢复备份';
 
   @override
-  String get setup_step_backup => '备份';
-
-  @override
   String get setup_step_finish => '完成';
 
   @override
@@ -8440,9 +8525,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get setup_step_units => '单位';
-
-  @override
-  String get setup_syncPull_continue => '继续';
 
   @override
   String get setup_syncPull_incomplete_message =>
@@ -8466,50 +8548,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get setup_syncPull_noLibrary_title => '未找到资料库';
-
-  @override
-  String get setup_syncPull_success => '已采用资料库';
-
-  @override
-  String get setup_syncPull_syncing => '正在拉取资料库...';
-
-  @override
-  String get setup_sync_changeProvider => '更换服务商';
-
-  @override
-  String setup_sync_connectedTo(String provider) {
-    return '已连接到 $provider';
-  }
-
-  @override
-  String setup_sync_error(Object error) {
-    return '无法连接：$error';
-  }
-
-  @override
-  String get setup_sync_header => '云同步';
-
-  @override
-  String get setup_sync_libraryFound_adopt => '采用现有资料库';
-
-  @override
-  String get setup_sync_libraryFound_keepFresh => '重新开始';
-
-  @override
-  String get setup_sync_libraryFound_message =>
-      '此账户已包含 Submersion 资料库。要采用它而不是重新开始吗？';
-
-  @override
-  String get setup_sync_libraryFound_title => '发现现有资料库';
-
-  @override
-  String get setup_sync_manageInSettings => '在设置中管理';
-
-  @override
-  String get setup_sync_notConnected => '未连接';
-
-  @override
-  String get setup_sync_subtitle => '在多设备间同步数据';
 
   @override
   String get setup_units_advanced => '微调单位';
@@ -8928,6 +8966,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_search_jumpTitle => '跳转到潜水';
+
+  @override
+  String diveLog_search_jumpNumberTitle(int number, String title) {
+    return '#$number · $title';
+  }
 
   @override
   String diveLog_ask_row(String text) {
@@ -9593,6 +9636,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_tank_regulatorShowLeftKit => '显示已退役和已售出的调节器';
 
   @override
+  String get diveLog_tank_addRegulator => '添加调节器';
+
+  @override
+  String diveLog_tank_regulatorNumbered(int number) {
+    return '调节器 $number';
+  }
+
+  @override
+  String get diveLog_tank_removeRegulator => '移除调节器';
+
+  @override
   String get diveLog_tank_tripCylinderLabel => '行程气瓶';
 
   @override
@@ -9902,6 +9956,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get divePlanner_label_airBreaksOnO2 => '吸 O2（分钟）';
 
   @override
+  String get divePlanner_label_airBreaksCustom => '自定义';
+
+  @override
+  String divePlanner_label_airBreaksCycle(int o2Minutes, int breakMinutes) {
+    return '$o2Minutes/$breakMinutes 分钟';
+  }
+
+  @override
   String get divePlanner_label_altitude => '高海拔:';
 
   @override
@@ -9912,6 +9974,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get divePlanner_label_decompression => '减压';
+
+  @override
+  String divePlanner_label_defaultWithValue(Object value) {
+    return '默认（$value）';
+  }
+
+  @override
+  String get divePlanner_label_default => '默认';
 
   @override
   String divePlanner_label_depthAxis(Object depthSymbol) {
@@ -9961,6 +10031,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get divePlanner_gasOptions_sacFactor => 'RMV 系数';
 
   @override
+  String get divePlanner_gasOptions_sacStressed => '压力 RMV';
+
+  @override
+  String get divePlanner_gasOptions_sacStressedFactor => '压力 RMV 系数';
+
+  @override
   String get divePlanner_gasOptions_problemSolvingMinutes => '问题处理时间';
 
   @override
@@ -9977,6 +10053,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get divePlanner_gasOptions_o2Narcotic => '在此计划中将 O₂ 视为麻醉性气体';
+
+  @override
+  String get divePlanner_label_on => '开';
+
+  @override
+  String get divePlanner_label_off => '关';
 
   @override
   String get divePlanner_label_tanks => '气瓶';
@@ -11541,16 +11623,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get divelogsImport_fetch_includePhotosHint => '照片会在导入过程中下载到您选择的文件夹。';
 
   @override
-  String divelogsImport_fetch_listingPhotos(int current, int total) {
-    return '正在列出第 $current 次潜水的照片，共 $total 次…';
-  }
-
-  @override
   String divelogsImport_fetch_photoListingsFailed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: '无法列出 $count 次潜水的照片。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String divelogsImport_fetch_photosWithoutLink(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 张照片没有下载链接，将不会导入。',
     );
     return '$_temp0';
   }
@@ -11614,6 +11701,55 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get divelogsImport_signIn_usernameRequired => '请输入用户名';
+
+  @override
+  String get divers_misplacedLogbook_title => '你的潜水记录在另一个潜水员档案中';
+
+  @override
+  String divers_misplacedLogbook_body(String target, int count, String active) {
+    return '「$target」中有 $count 次潜水。此设备显示的是「$active」，其中没有潜水记录。如果设备在首次同步之前创建了自己的档案，就可能出现这种情况。';
+  }
+
+  @override
+  String get divers_misplacedLogbook_switchTo => '切换';
+
+  @override
+  String get divers_misplacedLogbook_merge => '合并';
+
+  @override
+  String get divers_misplacedLogbook_keepBoth => '保留两者';
+
+  @override
+  String get divers_misplacedLogbook_confirmTitle => '合并潜水员档案？';
+
+  @override
+  String divers_misplacedLogbook_confirmBody(String active, String target) {
+    return '「$active」中的所有内容将移入「$target」，并删除「$active」。「$target」保留其名称和设置。合并后可立即撤销此操作。';
+  }
+
+  @override
+  String get divers_misplacedLogbook_confirmCancel => '取消';
+
+  @override
+  String get divers_misplacedLogbook_confirmAction => '合并';
+
+  @override
+  String divers_misplacedLogbook_mergedSnack(String target) {
+    return '已合并到 $target';
+  }
+
+  @override
+  String get divers_misplacedLogbook_undo => '撤销';
+
+  @override
+  String divers_misplacedLogbook_mergeFailed(String error) {
+    return '合并失败：$error';
+  }
+
+  @override
+  String divers_misplacedLogbook_undoFailed(String error) {
+    return '撤销失败：$error';
+  }
 
   @override
   String get divers_detail_activeDiver => '当前潜水员';
@@ -12013,7 +12149,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get enum_entryMethod_backRoll => '背滚式入水';
 
   @override
-  String get enum_entryMethod_boat => '船只入水';
+  String get enum_entryMethod_boat => '船只';
 
   @override
   String get enum_entryMethod_frontRoll => '前滚式入水';
@@ -12037,7 +12173,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get enum_entryMethod_seatedEntry => '坐式入水';
 
   @override
-  String get enum_entryMethod_shore => '岸边入水';
+  String get enum_entryMethod_shore => '岸边';
 
   @override
   String get enum_equipmentStatus_active => '活跃';
@@ -17729,8 +17865,40 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String media_photoPicker_files_diveGroupTitle(String diveId) {
-    return '潜水 $diveId';
+  String media_photoPicker_files_diveGroupNumberSite(int number, String site) {
+    return '潜水 #$number · $site';
+  }
+
+  @override
+  String media_photoPicker_files_diveGroupNumber(int number) {
+    return '潜水 #$number';
+  }
+
+  @override
+  String media_photoPicker_files_diveGroupSite(String site) {
+    return '潜水 · $site';
+  }
+
+  @override
+  String get media_photoPicker_files_diveGroupUnnamed => '潜水';
+
+  @override
+  String media_photoPicker_files_diveGroupWindow(
+    String date,
+    String start,
+    String end,
+  ) {
+    return '$date · $start – $end';
+  }
+
+  @override
+  String media_photoPicker_files_diveGroupStart(String date, String start) {
+    return '$date · $start';
+  }
+
+  @override
+  String media_photoPicker_files_diveGroupSubtitle(String when, String files) {
+    return '$when · $files';
   }
 
   @override
@@ -17982,6 +18150,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String media_photoViewer_failedToShare(Object error) {
     return '分享失败: $error';
   }
+
+  @override
+  String get media_share_preparingVideo => '正在准备视频';
+
+  @override
+  String media_share_preparingVideoOf(int current, int total) {
+    return '正在准备第 $current 个视频，共 $total 个';
+  }
+
+  @override
+  String get media_share_correctionFailedTitle => '无法应用色彩校正';
+
+  @override
+  String media_share_correctionFailedBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个视频仍可在不校正的情况下分享。',
+      one: '此视频仍可在不校正的情况下分享。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get media_share_shareOriginal => '分享原始文件';
+
+  @override
+  String get media_share_videoInterrupted =>
+      'Submersion 转入后台时视频准备已停止。请重新分享以重新开始。';
 
   @override
   String get media_photoViewer_failedToWriteMetadata => '写入元数据失败';
@@ -18689,6 +18886,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get plannerCanvas_chart_removeWaypoint => '删除航点';
+
+  @override
   String get plannerCanvas_contingency_title => '应急计划';
 
   @override
@@ -18731,6 +18931,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String plannerCanvas_gas_turnAt(String pressure) {
     return '$pressure 时折返';
   }
+
+  @override
+  String get plannerCanvas_gas_noTurnRule => '未设置折返规则';
+
+  @override
+  String get plannerCanvas_gas_turnNoStartPressure => '折返需要起始压力';
+
+  @override
+  String get plannerCanvas_gas_minGasNoStartPressure => '最低气量需要起始压力';
+
+  @override
+  String get plannerCanvas_gas_minGasNoVolume => '最低气量需要气瓶容积';
+
+  @override
+  String get plannerCanvas_gas_limitsNoStartPressure => '折返和最低气量需要起始压力';
 
   @override
   String plannerCanvas_gas_usedReading(String reading) {
@@ -18898,6 +19113,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerCanvas_slate_turn => '折返';
 
   @override
+  String get plannerCanvas_slate_noTurnRule => '无规则';
+
+  @override
+  String get plannerCanvas_slate_noStartPressure => '无起始压力';
+
+  @override
+  String get plannerCanvas_slate_noVolume => '无容积';
+
+  @override
   String get plannerCanvas_table_depth => '深度';
 
   @override
@@ -18950,6 +19174,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get planning_card_gasCalculators_title => '气体计算器';
+
+  @override
+  String get planning_card_savedPlans_subtitle => '所有已保存的计划，按模式分组';
+
+  @override
+  String get planning_plannedDives_sortTooltip => '排序';
 
   @override
   String get planning_card_surfaceInterval_subtitle => '规划重复潜水间隔';
@@ -20502,6 +20732,20 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get sharedLibrary_syncError_accountMissing =>
+      '此库的账户已不在此设备上。请使用“更改连接”重新选择。';
+
+  @override
+  String get sharedLibrary_syncError_accountSignedOut =>
+      '此设备已退出此库的账户。请在“已连接账户”中重新登录，或使用“更改连接”。';
+
+  @override
+  String get sharedLibrary_syncError_notALibrary => '此位置没有库。';
+
+  @override
+  String get sharedLibrary_syncError_failed => '出现问题。';
+
+  @override
   String get sharedLibrary_library_addMySites => '添加我的潜点';
 
   @override
@@ -21334,6 +21578,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_conflict_field_autoTagImports => '为导入的潜水添加标签';
+
+  @override
+  String get settings_conflict_field_downloadsFollowComputerOwner =>
+      '将下载的记录添加到电脑所属的潜水员';
 
   @override
   String get settings_conflict_field_avgSpeed => '平均速度';
@@ -22661,6 +22909,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_conflict_field_sharedComputerIds => '与电脑共享';
+
+  @override
+  String get settings_conflict_field_extraRegulatorIds => '额外调节器';
 
   @override
   String get settings_conflict_field_shoreSwimM => '游回岸边';
@@ -24638,6 +24889,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_import_phase_dives => '正在导入潜水...';
 
   @override
+  String get settings_import_phase_photos => '正在下载照片...';
+
+  @override
+  String get settings_import_phase_finishing => '正在完成导入...';
+
+  @override
   String get settings_import_phase_equipment => '正在导入装备...';
 
   @override
@@ -25547,6 +25804,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_section_decompression_title => '减压';
+
+  @override
+  String get settings_section_plannerDefaults_title => '计划器默认值';
+
+  @override
+  String get settings_section_plannerDefaults_subtitle => '速率、气体、应急方案、DPV 团队';
 
   @override
   String get settings_section_diverProfile_subtitle => '当前潜水员与档案';
@@ -28330,6 +28593,13 @@ class AppLocalizationsZh extends AppLocalizations {
       '每次新的导入都会以包含来源和日期的标签开始。可以在该次导入的选项中为单次导入更改此设置。';
 
   @override
+  String get settings_downloadsFollowOwner_title => '将下载的记录添加到电脑所属的潜水员';
+
+  @override
+  String get settings_downloadsFollowOwner_subtitle =>
+      '当潜水电脑属于另一个潜水员档案时，它的潜水记录会添加到该档案的日志中。你可以在核对页面中更改。';
+
+  @override
   String get tags_manage_searchHint => '搜索标签...';
 
   @override
@@ -28399,7 +28669,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tags_manage_narrowDialog_title => '从现有项目中移除此标签？';
 
   @override
-  String get tags_manage_scopeRequired => '请至少选择一项：潜水、潜水点或装备';
+  String get tags_manage_scopeRequired => '请至少选择一项：潜水、潜水点、装备、媒体或文档';
 
   @override
   String get tags_manage_scope_dives => '潜水';
@@ -28470,27 +28740,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String tags_manage_deleteMessage_divesAndSites(
-    String tagName,
-    int diveCount,
-    int siteCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount 次潜水',
-      one: '1 次潜水',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount 个潜水点',
-      one: '1 个潜水点',
-    );
-    return '「$tagName」将从 $_temp0和 $_temp1 中移除。此操作无法撤销。';
-  }
-
-  @override
   String tags_manage_deleteMessage_equipment(String tagName, int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -28502,78 +28751,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String tags_manage_deleteMessage_divesAndEquipment(
-    String tagName,
-    int diveCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount 次潜水',
-      one: '1 次潜水',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount 件装备',
-      one: '1 件装备',
-    );
-    return '「$tagName」将从 $_temp0和 $_temp1 中移除。此操作无法撤销。';
-  }
-
-  @override
-  String tags_manage_deleteMessage_sitesAndEquipment(
-    String tagName,
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount 个潜水点',
-      one: '1 个潜水点',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount 件装备',
-      one: '1 件装备',
-    );
-    return '「$tagName」将从 $_temp0和 $_temp1 中移除。此操作无法撤销。';
-  }
-
-  @override
-  String tags_manage_deleteMessage_all(
-    String tagName,
-    int diveCount,
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount 次潜水',
-      one: '1 次潜水',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount 个潜水点',
-      one: '1 个潜水点',
-    );
-    String _temp2 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount 件装备',
-      one: '1 件装备',
-    );
-    return '「$tagName」将从 $_temp0、$_temp1和 $_temp2 中移除。此操作无法撤销。';
-  }
-
-  @override
   String tags_manage_deleteMessage_unused(String tagName) {
-    return '「$tagName」未用于任何潜水、潜水点或装备。此操作无法撤销。';
+    return '「$tagName」未在任何地方使用。此操作无法撤销。';
   }
 
   @override
@@ -28605,26 +28784,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String tags_manage_bulkDeleteMessage_divesAndSites(
-    int diveCount,
-    int siteCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount 次潜水',
-      one: '1 次潜水',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount 个潜水点',
-      one: '1 个潜水点',
-    );
-    return '这些标签将从总共 $_temp0和 $_temp1 中移除。此操作无法撤销。';
-  }
-
-  @override
   String tags_manage_bulkDeleteMessage_equipment(int equipmentCount) {
     String _temp0 = intl.Intl.pluralLogic(
       equipmentCount,
@@ -28636,75 +28795,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String tags_manage_bulkDeleteMessage_divesAndEquipment(
-    int diveCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount 次潜水',
-      one: '1 次潜水',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount 件装备',
-      one: '1 件装备',
-    );
-    return '这些标签将从总共 $_temp0和 $_temp1 中移除。此操作无法撤销。';
-  }
-
-  @override
-  String tags_manage_bulkDeleteMessage_sitesAndEquipment(
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount 个潜水点',
-      one: '1 个潜水点',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount 件装备',
-      one: '1 件装备',
-    );
-    return '这些标签将从总共 $_temp0和 $_temp1 中移除。此操作无法撤销。';
-  }
-
-  @override
-  String tags_manage_bulkDeleteMessage_all(
-    int diveCount,
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount 次潜水',
-      one: '1 次潜水',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount 个潜水点',
-      one: '1 个潜水点',
-    );
-    String _temp2 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount 件装备',
-      one: '1 件装备',
-    );
-    return '这些标签将从总共 $_temp0、$_temp1和 $_temp2 中移除。此操作无法撤销。';
-  }
-
-  @override
-  String get tags_manage_bulkDeleteMessage_unused =>
-      '这些标签未用于任何潜水、潜水点或装备。此操作无法撤销。';
+  String get tags_manage_bulkDeleteMessage_unused => '这些标签未在任何地方使用。此操作无法撤销。';
 
   @override
   String tags_manage_mergeTitle(int count) {
@@ -28741,23 +28832,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String tags_manage_mergeAffected_divesAndSites(int diveCount, int siteCount) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount 次潜水',
-      one: '1 次潜水',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount 个潜水点',
-      one: '1 个潜水点',
-    );
-    return '这将影响总共 $_temp0和 $_temp1。';
-  }
-
-  @override
   String tags_manage_mergeAffected_equipment(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -28769,74 +28843,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String tags_manage_mergeAffected_divesAndEquipment(
-    int diveCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount 次潜水',
-      one: '1 次潜水',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount 件装备',
-      one: '1 件装备',
-    );
-    return '这将影响总共 $_temp0和 $_temp1。';
-  }
-
-  @override
-  String tags_manage_mergeAffected_sitesAndEquipment(
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount 个潜水点',
-      one: '1 个潜水点',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount 件装备',
-      one: '1 件装备',
-    );
-    return '这将影响总共 $_temp0和 $_temp1。';
-  }
-
-  @override
-  String tags_manage_mergeAffected_all(
-    int diveCount,
-    int siteCount,
-    int equipmentCount,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      diveCount,
-      locale: localeName,
-      other: '$diveCount 次潜水',
-      one: '1 次潜水',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      siteCount,
-      locale: localeName,
-      other: '$siteCount 个潜水点',
-      one: '1 个潜水点',
-    );
-    String _temp2 = intl.Intl.pluralLogic(
-      equipmentCount,
-      locale: localeName,
-      other: '$equipmentCount 件装备',
-      one: '1 件装备',
-    );
-    return '这将影响总共 $_temp0、$_temp1和 $_temp2。';
-  }
-
-  @override
-  String get tags_manage_mergeAffected_unused => '这些标签未用于任何潜水、潜水点或装备。';
+  String get tags_manage_mergeAffected_unused => '这些标签未在任何地方使用。';
 
   @override
   String get tags_manage_mergeAction => '合并';
@@ -30984,6 +30991,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get universalImport_summary_newProfile => '新潜水员档案';
 
   @override
+  String get universalImport_summary_unnamedProfile => '未命名的潜水员档案';
+
+  @override
   String universalImport_summary_switchToSee(String name) {
     return '切换到 $name 以查看这些潜水';
   }
@@ -31135,6 +31145,19 @@ class AppLocalizationsZh extends AppLocalizations {
       count,
       locale: localeName,
       other: '无法列出 $count 次潜水的照片，因此这些照片未导入。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get universalImport_summary_noticePhotosWithoutLinkTitle => '部分照片没有链接';
+
+  @override
+  String universalImport_summary_noticePhotosWithoutLinkBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 张照片没有下载链接，因此未导入。',
     );
     return '$_temp0';
   }
@@ -33773,6 +33796,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get universalImport_title_importOptions => '导入选项';
 
   @override
+  String universalImport_computerOwner_notice(String owner, String chosen) {
+    return '这台电脑属于 $owner。潜水记录将添加到 $chosen 的日志中。';
+  }
+
+  @override
+  String get universalImport_computerOwner_profileLabel => '潜水员档案';
+
+  @override
   String get universalImport_label_options => '选项';
 
   @override
@@ -33830,29 +33861,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_shareByDefault_title => '默认共享新潜点和行程';
 
   @override
-  String get settings_shareAllSites_title => '共享我的所有潜点';
+  String get settings_shareAllSites_title => '共享我的所有潜点...';
 
   @override
-  String get settings_shareAllTrips_title => '共享我的所有行程';
+  String get settings_shareAllTrips_title => '共享我的所有行程...';
 
   @override
   String settings_shareAllSites_confirm(int count) {
-    return '将您的全部 $count 个潜点向此应用中的每个潜水员资料开放？您之后可以单独取消共享。';
+    return '选择谁可以看到你的全部 $count 个潜点。之后要更改某个潜点，打开它并点按“共享给”。';
   }
 
   @override
   String settings_shareAllTrips_confirm(int count) {
-    return '将您的全部 $count 个行程向此应用中的每个潜水员资料开放？您之后可以单独取消共享。';
-  }
-
-  @override
-  String settings_shareAllSites_snackbar(int count) {
-    return '已将 $count 个潜点与所有潜水员资料共享。';
-  }
-
-  @override
-  String settings_shareAllTrips_snackbar(int count) {
-    return '已将 $count 个行程与所有潜水员资料共享。';
+    return '选择谁可以看到你的全部 $count 个行程。之后要更改某个行程，打开它并点按“共享给”。';
   }
 
   @override
@@ -33887,7 +33908,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String trips_unshareConfirm_body(String name) {
-    return '此操作会将「$name」从其他潜水员资料的视图中移除。您之后可以再次共享。';
+    return '你移除的资料将不再看到“$name”。他们的潜水仍与其关联，你之后可以再次与他们共享。';
   }
 
   @override
@@ -33895,7 +33916,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String sites_unshareConfirm_body(String name) {
-    return '此操作会将「$name」从其他潜水员资料的视图中移除。您之后可以再次共享。';
+    return '你移除的资料将不再看到“$name”。他们的潜水仍与其关联，你之后可以再次与他们共享。';
   }
 
   @override
@@ -33964,6 +33985,31 @@ class AppLocalizationsZh extends AppLocalizations {
       other: '要从您的资料中移除 $count 项吗？',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get sharedItems_bulkShare_action => '共享给...';
+
+  @override
+  String sharedItems_bulkShare_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已共享 $count 项',
+      one: '已共享 $count 项',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sharedItems_bulkShare_doneSkipped(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已共享 $count 项',
+      one: '已共享 $count 项',
+    );
+    return '$_temp0，跳过 $skipped 项非你所有的内容';
   }
 
   @override
@@ -34052,6 +34098,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sharedItems_removedSnackbar => '已从您的资料中移除';
 
   @override
+  String get sharedItems_shareDialog_everyoneSubtitle => '所有潜水员资料，包括之后添加的资料';
+
+  @override
+  String get sharedItems_shareDialog_siteBody =>
+      '你选择的资料可以看到此潜点，并可在此记录自己的潜水。只有你可以删除它或更改共享对象。';
+
+  @override
+  String get sharedItems_shareDialog_title => '共享给';
+
+  @override
+  String get sharedItems_shareDialog_tripBody =>
+      '你选择的资料可以看到此行程，并可添加自己的潜水。只有你可以删除它或更改共享对象。';
+
+  @override
   String sharedItems_shareOwnerOnly(String owner) {
     return '只有 $owner 可以更改共享设置';
   }
@@ -34060,6 +34120,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String sharedItems_sharedBy(String owner) {
     return '由 $owner 共享';
   }
+
+  @override
+  String get sharedItems_sharedWith_everyone => '所有人';
+
+  @override
+  String get sharedItems_sharedWith_label => '共享给';
+
+  @override
+  String get sharedItems_sharedWith_none => '未共享';
 
   @override
   String get sharedItems_undo => '撤消';
@@ -34090,6 +34159,16 @@ class AppLocalizationsZh extends AppLocalizations {
       one: '潜点',
     );
     return '已删除潜水员。$trips 个共享$_temp0和 $sites 个共享$_temp1已重新分配给 $name。';
+  }
+
+  @override
+  String divers_delete_handedOver(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个共享的行程和潜点已转给与之共享的资料。',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -34872,30 +34951,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_sources_compareIn3d => '3D 比较';
 
   @override
-  String get settings_setup_pendingTitle => '完成此设备的设置';
-
-  @override
-  String settings_setup_mediaStoreAttach(String hint) {
-    return '连接媒体存储（$hint）';
-  }
-
-  @override
-  String settings_setup_mediaStoreReconnect(String hint) {
-    return '重新连接媒体存储（$hint）';
-  }
-
-  @override
-  String settings_setup_accountSignIn(String label) {
-    return '登录 $label';
-  }
-
-  @override
-  String get settings_setup_dismiss => '忽略';
-
-  @override
-  String get settings_photosMedia_guidedSetup => '引导设置';
-
-  @override
   String get settings_photosMedia_photoSources_subtitle => '图库、文件与导入选项';
 
   @override
@@ -34939,41 +34994,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get settings_connectedAccounts_removeConfirmBody =>
       '该账户将从所有同步设备中移除。存储在其他设备上的凭据不会被删除。';
-
-  @override
-  String get settings_setupGuide_title => '设置照片与媒体';
-
-  @override
-  String get settings_setupGuide_intro => '连接照片来源以及副本保存位置。你可以随时重新运行。';
-
-  @override
-  String get settings_setupGuide_stepSources => '照片来源';
-
-  @override
-  String get settings_setupGuide_stepSources_desc =>
-      '从照片图库、文件或 Lightroom 附加照片。';
-
-  @override
-  String get settings_setupGuide_stepStorage => '媒体存储';
-
-  @override
-  String get settings_setupGuide_stepStorage_desc =>
-      '将照片副本保存在你自己的云端，让每台设备都能显示。';
-
-  @override
-  String get settings_setupGuide_stepSync => '云同步';
-
-  @override
-  String get settings_setupGuide_stepSync_desc => '在设备之间同步潜水数据。';
-
-  @override
-  String get settings_setupGuide_statusDone => '已设置';
-
-  @override
-  String get settings_setupGuide_statusTodo => '未设置';
-
-  @override
-  String get settings_setupGuide_open => '打开';
 
   @override
   String get settings_connectedAccounts_loadError => '无法加载账户';
@@ -44743,6 +44763,37 @@ class AppLocalizationsZh extends AppLocalizations {
       '剖面图中上升速度颜色和事件所用的阈值。安全回顾使用自己固定的限值，因此修改这些值不会改变已回顾的潜水。';
 
   @override
+  String get settings_decompression_header_plannerRates => '计划器速率';
+
+  @override
+  String get settings_decompression_header_plannerRates_subtitle =>
+      '新计划开始时使用的下潜和上升速率。在计划内更改某一项仅会覆盖该计划，不会更改此默认值。';
+
+  @override
+  String get settings_decompression_header_plannerGas => '计划器气体';
+
+  @override
+  String get settings_decompression_header_plannerGas_subtitle =>
+      '新计划开始时使用的气体消耗默认值。在计划内更改某一项仅会覆盖该计划，不会更改此默认值。';
+
+  @override
+  String get settings_decompression_header_plannerContingency => '计划器应急方案';
+
+  @override
+  String get settings_decompression_header_plannerContingency_subtitle =>
+      '新计划开始时使用的假设偏差。在计划内更改仅会覆盖该计划，不会更改此默认值。';
+
+  @override
+  String get settings_decompression_header_plannerDpvTeam => '计划器 DPV 团队';
+
+  @override
+  String get settings_decompression_header_plannerDpvTeam_subtitle =>
+      '新 DPV 任务开始时使用的水下推进器电池备用量和步行速度。在任务内更改仅会覆盖该任务，不会更改此默认值。';
+
+  @override
+  String get settings_decompression_rates_finalAscent => '最终上升速率';
+
+  @override
   String get settings_decompression_ascentRateThresholds => '上升速度阈值';
 
   @override
@@ -45795,6 +45846,50 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get universalImport_cancel_discardSelections => '放弃所选内容并取消？';
+
+  @override
+  String get universalImport_leave_title => '导入仍在进行';
+
+  @override
+  String get universalImport_leave_body => '导入尚未完成。要在后台继续吗？';
+
+  @override
+  String get universalImport_leave_stay => '留在此页';
+
+  @override
+  String get universalImport_leave_continueInBackground => '在后台继续';
+
+  @override
+  String get universalImport_leave_bodyStops => '导入尚未完成。离开将取消导入。';
+
+  @override
+  String universalImport_background_finished(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '导入已完成：已导入 $count 次潜水。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String universalImport_background_stopped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '导入已停止：已导入 $count 次潜水。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get universalImport_background_failed => '导入失败。';
+
+  @override
+  String get universalImport_running_title => '仍有导入正在进行';
+
+  @override
+  String get universalImport_running_body => '请等待其完成或将其取消，然后再开始新的导入。';
 
   @override
   String get universalImport_action_importSelected => '导入所选';
@@ -49591,6 +49686,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get query_centers_city => '城市';
 
   @override
+  String get query_centers_closed => '已永久关闭';
+
+  @override
   String get query_centers_coordinates => '坐标';
 
   @override
@@ -51547,4 +51645,640 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_conflict_field_remoteStoreId => '上传至';
+
+  @override
+  String get tags_manage_scope_media => '媒体';
+
+  @override
+  String get tags_manage_scope_documents => '文档';
+
+  @override
+  String get tags_manage_useForMedia => '用于媒体';
+
+  @override
+  String get tags_manage_useForDocuments => '用于文档';
+
+  @override
+  String tags_manage_mediaCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个媒体项',
+      one: '1 个媒体项',
+      zero: '0 个媒体项',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tags_manage_documentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 份文档',
+      one: '1 份文档',
+      zero: '0 份文档',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tags_manage_narrowDialog_media(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此标签用于 $count 个媒体项。关闭“用于媒体”将从这些媒体项中移除它。',
+      one: '此标签用于 1 个媒体项。关闭“用于媒体”将从该媒体项中移除它。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tags_manage_narrowDialog_documents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此标签用于 $count 份文档。关闭“用于文档”将从这些文档中移除它。',
+      one: '此标签用于 1 份文档。关闭“用于文档”将从该文档中移除它。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tags_manage_deleteMessage_media(String tagName, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个媒体项',
+      one: '1 个媒体项',
+    );
+    return '「$tagName」将从 $_temp0 中移除。此操作无法撤销。';
+  }
+
+  @override
+  String tags_manage_deleteMessage_documents(String tagName, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 份文档',
+      one: '1 份文档',
+    );
+    return '「$tagName」将从 $_temp0 中移除。此操作无法撤销。';
+  }
+
+  @override
+  String tags_manage_bulkDeleteMessage_media(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个媒体项',
+      one: '1 个媒体项',
+    );
+    return '这些标签将从总共 $_temp0 中移除。此操作无法撤销。';
+  }
+
+  @override
+  String tags_manage_bulkDeleteMessage_documents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 份文档',
+      one: '1 份文档',
+    );
+    return '这些标签将从总共 $_temp0 中移除。此操作无法撤销。';
+  }
+
+  @override
+  String tags_manage_mergeAffected_media(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个媒体项',
+      one: '1 个媒体项',
+    );
+    return '这将影响总共 $_temp0。';
+  }
+
+  @override
+  String tags_manage_mergeAffected_documents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 份文档',
+      one: '1 份文档',
+    );
+    return '这将影响总共 $_temp0。';
+  }
+
+  @override
+  String tags_manage_deleteMessage_several(String tagName) {
+    return '「$tagName」将从以下项目中移除：';
+  }
+
+  @override
+  String get tags_manage_bulkDeleteMessage_several => '这些标签将从以下项目中移除：';
+
+  @override
+  String get tags_manage_mergeAffected_several => '这将影响：';
+
+  @override
+  String get tags_manage_cannotUndo => '此操作无法撤销。';
+
+  @override
+  String get tags_action_edit => '编辑标签';
+
+  @override
+  String get media_info_tags => '标签';
+
+  @override
+  String get media_info_noTags => '暂无标签';
+
+  @override
+  String media_info_showWithTag(String tagName) {
+    return '显示带有标签 $tagName 的媒体';
+  }
+
+  @override
+  String get media_library_filter_tags => '标签';
+
+  @override
+  String media_bulkTags_confirmAdding(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '添加到全部 $count 个媒体项',
+      one: '添加到 1 个媒体项',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String media_bulkTags_confirmRemoving(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '从全部 $count 个媒体项移除',
+      one: '从 1 个媒体项移除',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get media_bulkTags_empty => '暂无媒体标签';
+
+  @override
+  String get documents_field_tags => '标签';
+
+  @override
+  String documents_detail_showWithTag(String tagName) {
+    return '显示带有标签 $tagName 的文档';
+  }
+
+  @override
+  String tags_bulk_adding(int total) {
+    return '添加到全部 $total 件';
+  }
+
+  @override
+  String tags_bulk_applied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已更新 $count 件物品的标签',
+      one: '已更新 1 件物品的标签',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tags_bulk_confirmTitle => '应用更改？';
+
+  @override
+  String tags_bulk_failed(String error) {
+    return '无法更新标签：$error';
+  }
+
+  @override
+  String tags_bulk_onAll(int count) {
+    return '全部 $count 项';
+  }
+
+  @override
+  String tags_bulk_onSome(int count, int total) {
+    return '$count/$total 项';
+  }
+
+  @override
+  String get tags_bulk_removing => '从全部移除';
+
+  @override
+  String get tags_bulk_tagsLabel => '标签';
+
+  @override
+  String tags_bulk_title(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '编辑 $count 件物品的标签',
+      one: '编辑 1 件物品的标签',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tags_bulk_undo => '撤消';
+
+  @override
+  String get tags_bulk_undoFailed => '无法撤消标签更改。';
+
+  @override
+  String get settings_conflict_field_appliesToMedia => '可用于媒体';
+
+  @override
+  String get settings_conflict_field_appliesToDocuments => '可用于文档';
+
+  @override
+  String get documents_export_manifest_tags => '标签';
+
+  @override
+  String settings_setUpDevice_title(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': '设置此手机',
+      'tablet': '设置此平板',
+      'computer': '设置此电脑',
+      'other': '设置此设备',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_titleFinish(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': '完成此手机的设置',
+      'tablet': '完成此平板的设置',
+      'computer': '完成此电脑的设置',
+      'other': '完成此设备的设置',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_again(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': '重新设置此手机',
+      'tablet': '重新设置此平板',
+      'computer': '重新设置此电脑',
+      'other': '重新设置此设备',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_count(int done, int total) {
+    return '$done/$total';
+  }
+
+  @override
+  String settings_setUpDevice_countSemantics(int done, int total) {
+    return '已完成 $done/$total 步';
+  }
+
+  @override
+  String get settings_setUpDevice_hide => '隐藏此卡片';
+
+  @override
+  String get settings_setUpDevice_step_account => '选择数据的存放位置';
+
+  @override
+  String get settings_setUpDevice_step_sync => '让每台设备都有潜水记录';
+
+  @override
+  String get settings_setUpDevice_step_backups => '自动备份';
+
+  @override
+  String get settings_setUpDevice_step_photos => '共享照片副本（可选）';
+
+  @override
+  String get settings_setUpDevice_mark_done => '已完成';
+
+  @override
+  String get settings_setUpDevice_mark_next => '下一步';
+
+  @override
+  String get settings_setUpDevice_mark_notYet => '尚未完成';
+
+  @override
+  String get settings_setUpDevice_mark_skipped => '已跳过';
+
+  @override
+  String get settings_setUpDevice_item_signInAction => '登录';
+
+  @override
+  String get settings_setUpDevice_item_reconnectAction => '重新连接';
+
+  @override
+  String settings_setUpDevice_item_signIn(String account) {
+    return '请重新登录 $account。在此之前，同步和备份已暂停。';
+  }
+
+  @override
+  String settings_setUpDevice_item_signInShort(String account) {
+    return '请重新登录 $account。';
+  }
+
+  @override
+  String settings_setUpDevice_item_attach(String account) {
+    return '你的其他设备在 $account 中保存照片副本。';
+  }
+
+  @override
+  String settings_setUpDevice_item_reconnect(String account) {
+    return '$account 中的照片副本需要重新连接。';
+  }
+
+  @override
+  String get settings_setUpDevice_againSubtitle => '账户、同步、备份和照片';
+
+  @override
+  String settings_setUpDevice_stepSemantics(String step, String mark) {
+    return '$step：$mark';
+  }
+
+  @override
+  String settings_setUpDevice_item_signInSync(String account) {
+    return '请重新登录 $account。在此之前，同步已暂停。';
+  }
+
+  @override
+  String settings_setUpDevice_item_signInBackups(String account) {
+    return '请重新登录 $account。在此之前，备份已暂停。';
+  }
+
+  @override
+  String get settings_setUpDevice_next => '下一步';
+
+  @override
+  String get settings_setUpDevice_notNow => '以后再说';
+
+  @override
+  String get settings_setUpDevice_skip => '跳过';
+
+  @override
+  String get settings_setUpDevice_account_title => 'Submersion 应将你的数据保存在哪里？';
+
+  @override
+  String get settings_setUpDevice_account_note =>
+      '你的潜水记录只保存在你选择的账户中。Submersion 没有自己的服务器。';
+
+  @override
+  String get settings_setUpDevice_account_backupFile => '我有备份文件';
+
+  @override
+  String get settings_setUpDevice_offer_icloud => '使用你的 Apple ID，无需登录。';
+
+  @override
+  String get settings_setUpDevice_offer_googleDrive => '使用 Google 登录';
+
+  @override
+  String get settings_setUpDevice_offer_dropbox => '使用 Dropbox 登录';
+
+  @override
+  String get settings_setUpDevice_offer_ownServer => '兼容 S3 的存储或 WebDAV 服务器';
+
+  @override
+  String get settings_setUpDevice_sync_title => '让每台设备都有潜水记录';
+
+  @override
+  String settings_setUpDevice_sync_signedIn(String account) {
+    return '已登录 $account';
+  }
+
+  @override
+  String settings_setUpDevice_sync_noLibrary(String account) {
+    return '$account 中还没有 Submersion 资料库。这里的潜水记录将成为你所有设备共享的资料库。';
+  }
+
+  @override
+  String settings_setUpDevice_sync_found(
+    String account,
+    String when,
+    String device,
+  ) {
+    return '已在 $account 中找到你的资料库，最后于$when在 $device 上更改。';
+  }
+
+  @override
+  String settings_setUpDevice_sync_foundPlain(String account) {
+    return '已在 $account 中找到你的资料库。';
+  }
+
+  @override
+  String get settings_setUpDevice_sync_foundEmpty => '这里还没有潜水记录，因此只需下载资料库。';
+
+  @override
+  String get settings_setUpDevice_sync_combine => '合并';
+
+  @override
+  String get settings_setUpDevice_sync_combineDetail =>
+      '这里的潜水记录会加入资料库。在两台设备上分别记录的同一次潜水会出现两次。';
+
+  @override
+  String get settings_setUpDevice_sync_replace => '用资料库替换这里的潜水记录';
+
+  @override
+  String get settings_setUpDevice_sync_replaceDetail => '会先在“备份”中保存这里潜水记录的备份。';
+
+  @override
+  String get settings_setUpDevice_sync_keepInStepDetail =>
+      '每次更改后几秒内、启动时以及返回应用时';
+
+  @override
+  String get settings_setUpDevice_sync_turnOn => '开启同步';
+
+  @override
+  String get settings_setUpDevice_sync_download => '下载资料库';
+
+  @override
+  String get settings_setUpDevice_sync_combineAndDownload => '合并并下载';
+
+  @override
+  String get settings_setUpDevice_sync_replaceAndDownload => '替换并下载';
+
+  @override
+  String get settings_setUpDevice_sync_noAccount => '请先选择数据的存放位置。';
+
+  @override
+  String get settings_setUpDevice_replace_title => '替换这里的潜水记录？';
+
+  @override
+  String get settings_setUpDevice_replace_working => '正在搁置这里的潜水记录并下载资料库...';
+
+  @override
+  String get settings_setUpDevice_replace_doneTitle => '资料库已下载';
+
+  @override
+  String get settings_setUpDevice_replace_stillUploading =>
+      '资料库仍在从另一台设备上传。完成后再试。';
+
+  @override
+  String get settings_setUpDevice_replace_photosBusy => '照片上传仍在进行。请稍后再试。';
+
+  @override
+  String get settings_setUpDevice_replace_failed => '无法下载资料库，未做任何更改。';
+
+  @override
+  String settings_setUpDevice_sync_unreachable(String account) {
+    return '无法读取 $account。请检查连接后重试。';
+  }
+
+  @override
+  String settings_setUpDevice_replace_noLibrary(String account) {
+    return '$account 中还没有可加入的资料库。';
+  }
+
+  @override
+  String settings_setUpDevice_replace_newerSchema(String devices) {
+    return '$devices 使用的是较新版本的 Submersion。请先更新此设备。';
+  }
+
+  @override
+  String settings_setUpDevice_replace_backupNote(String date) {
+    return '加入资料库之前，$date';
+  }
+
+  @override
+  String settings_setUpDevice_replace_body(int count, String account) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '这里的 $count 条潜水记录将被 $account 中的资料库替换。会先保存备份，并保留在“备份”中。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_replace_doneBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '你的 $count 条潜水记录已搁置，资料库已下载。Submersion 将重新加载。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_backups_title(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': '丢了手机也不怕的备份',
+      'tablet': '丢了平板也不怕的备份',
+      'computer': '丢了电脑也不怕的备份',
+      'other': '丢了设备也不怕的备份',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_setUpDevice_backups_intro =>
+      '同步让各设备保持一致。备份是某一时刻的副本，你可以随时回到那一刻。';
+
+  @override
+  String settings_setUpDevice_backups_autoDetail(String frequency, int count) {
+    return '$frequency。此处保留最近 $count 份。';
+  }
+
+  @override
+  String settings_setUpDevice_backups_autoDetailDesktop(
+    String frequency,
+    int count,
+  ) {
+    return '$frequency，在 Submersion 打开时进行。此处保留最近 $count 份。';
+  }
+
+  @override
+  String settings_setUpDevice_backups_copy(String account) {
+    return '同时在 $account 中保留一份副本';
+  }
+
+  @override
+  String get settings_setUpDevice_backups_noAccount =>
+      '要在此设备之外保留副本，需要一个账户或备份文件夹。';
+
+  @override
+  String get settings_setUpDevice_backups_openBackups => '打开备份';
+
+  @override
+  String get settings_setUpDevice_backups_note => '计划、文件夹、密码保护和旧备份都在“备份”中。';
+
+  @override
+  String get settings_setUpDevice_photos_title => '让每台设备都有照片';
+
+  @override
+  String settings_setUpDevice_photos_firstIntro(String account) {
+    return '在 $account 中保留照片和视频的副本，让你的其他设备也能显示它们。原件保持原样。';
+  }
+
+  @override
+  String settings_setUpDevice_photos_keepCopies(String account) {
+    return '在 $account 中保留照片副本';
+  }
+
+  @override
+  String get settings_setUpDevice_photos_firstNote =>
+      '之后可在“照片和视频”中开启。在此之前不会上传任何内容。';
+
+  @override
+  String settings_setUpDevice_photos_secondIntro(String account) {
+    return '你的其他设备在 $account 中保存了照片和视频副本。也要在这里显示吗？';
+  }
+
+  @override
+  String settings_setUpDevice_photos_useCopies(String account) {
+    return '使用 $account 中的照片副本';
+  }
+
+  @override
+  String get settings_setUpDevice_photos_sameAccount => '同一账户，无需输入任何内容。';
+
+  @override
+  String settings_setUpDevice_photos_signInFirst(String account) {
+    return '将先登录 $account。';
+  }
+
+  @override
+  String get settings_setUpDevice_photos_autoUploadHere => '自动上传在这里添加的照片';
+
+  @override
+  String settings_setUpDevice_photos_attachedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已关联 $count 张照片和视频',
+      zero: '尚未关联照片或视频',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_done_title(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone': '这部手机已设置完成',
+      'tablet': '这台平板已设置完成',
+      'computer': '这台电脑已设置完成',
+      'other': '此设备已设置完成',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String settings_setUpDevice_done_otherDevices(String account) {
+    return '在你的其他设备上打开 Submersion，选择 $account，就会出现同一个资料库。';
+  }
+
+  @override
+  String settings_setUpDevice_sync_inStep(String account) {
+    return '此处的潜水记录已与你在 $account 中的资料库保持一致。';
+  }
+
+  @override
+  String get setup_syncPull_startFresh => '开始新的日志';
 }

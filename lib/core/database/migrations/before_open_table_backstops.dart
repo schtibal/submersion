@@ -48,6 +48,9 @@ extension TableBackstopsFromV217 on AppDatabase {
     // v248 backstop: trip_equipment and its item index (idempotent).
     await _assertTripEquipmentSchema();
 
+    // v312 backstop: dive_tanks.extra_regulator_ids (idempotent; #3375).
+    await _assertTankExtraRegulatorIds();
+
     // v297 backstop: trip_checklist_sections, trip_checklist_items.section_id
     // and the category backfill+drop (idempotent; issue #3360).
     await _assertAndBackfillTripChecklistSections();
@@ -79,6 +82,10 @@ extension TableBackstopsFromV217 on AppDatabase {
     await _assertTripHidesSchema();
     await _assertSiteHidesSchema();
 
+    // v311 backstop: trip_shares and site_shares (idempotent).
+    await _assertTripSharesSchema();
+    await _assertSiteSharesSchema();
+
     // v265 backstop: Insights observation dismissals and muted rules.
     await _assertInsightObservationsSchema();
 
@@ -106,5 +113,10 @@ extension TableBackstopsFromV217 on AppDatabase {
     // v301 backstop: the logbook rules tables and indexes (parallel-branch
     // version-collision self-heal; idempotent).
     await _assertRuleSchema();
+
+    // v309 backstop: the media and document tag junctions and their indexes
+    // (parallel-branch version-collision self-heal; all idempotent).
+    // _beforeOpen asserts the scope columns earlier.
+    await _assertMediaAndDocumentTagSchema();
   }
 }

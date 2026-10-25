@@ -497,10 +497,102 @@ extension RungsFromV231 on AppDatabase {
     if (from < 303) await _assertMediaRemoteStoreColumn();
     if (from < 303) await reportProgress();
 
-    // v304: cylinder_config_items.deco_switch_depth (issue #3567), the MOD
-    // set by hand on a saved cylinder. Column only, no backfill;
-    // re-asserted in beforeOpen.
-    if (from < 304) await _assertCylinderConfigItemModColumn();
+    // v304: diver_settings planner Setup-accordion global defaults (issue
+    // #3552). Columns only; re-asserted in beforeOpen through
+    // _assertPlannerDefaultColumns. Renumbered from 302 as #3482 shipped
+    // 302-303 first.
+    if (from < 304) {
+      await _assertPlannerDefaultColumns();
+    }
     if (from < 304) await reportProgress();
+
+    // v305: dive_plans Setup-accordion columns created NOT NULL in the
+    // initial schema drop that constraint, so a plan can store "unset,
+    // follow Settings" (issue #3552). Table rebuild; re-asserted in
+    // beforeOpen through _assertDivePlanSetupFieldsNullable. Review focus:
+    // this rewrites dive_plans' stored schema in place - see the helper's
+    // doc comment for why it is safe (transactional, additive-only
+    // substitution of the targeted NOT NULL clauses). Renumbered from 303.
+    if (from < 305) {
+      await _assertDivePlanSetupFieldsNullable();
+    }
+    if (from < 305) await reportProgress();
+
+    // v306: dive_plan_missions battery_reserve_fraction and walk_speed_mps
+    // made nullable (issue #3552) - the DPV Team counterpart of v305.
+    // Table rebuild; re-asserted in beforeOpen through
+    // _assertDivePlanMissionFieldsNullable. Renumbered from 304.
+    if (from < 306) {
+      await _assertDivePlanMissionFieldsNullable();
+    }
+    if (from < 306) await reportProgress();
+
+    // v307: diver_settings air-break/turn-pressure defaults and
+    // dive_plans.air_breaks_explicitly_off (issue #3552, follow-up to
+    // v304-306). Additive columns only, re-asserted in beforeOpen through
+    // _assertAirBreaksTurnPressureDefaultColumns. Renumbered from 305.
+    if (from < 307) {
+      await _assertAirBreaksTurnPressureDefaultColumns();
+    }
+    if (from < 307) await reportProgress();
+
+    // v308: reserve pressure and gradient factors join the live-resolve
+    // group (issue #3552, follow-up to v304-307) - dive_plans columns made
+    // nullable (table rebuild), diver_settings gains the reserve-pressure
+    // default (gfLow/gfHigh already had one). Re-asserted in beforeOpen
+    // through _assertDivePlanReserveAndGfNullable. Renumbered from 306.
+    if (from < 308) {
+      await _assertDivePlanReserveAndGfNullable();
+    }
+    if (from < 308) await reportProgress();
+
+    // v309: media and document tags (issue #1970). Column-and-table rung, no
+    // backfill: existing tags stay off media and documents. Re-asserted in
+    // beforeOpen through _assertMediaAndDocumentTagSchema.
+    if (from < 309) {
+      await _assertTagScopeColumns();
+      await _assertMediaAndDocumentTagSchema();
+    }
+    if (from < 309) await reportProgress();
+
+    // v310: diver_settings.downloads_follow_computer_owner (issue #2050).
+    // Column only, on by default; re-asserted in beforeOpen. Renumbered from
+    // 309 as #3605 shipped 309 first.
+    if (from < 310) await _assertDownloadOwnerColumn();
+    if (from < 310) await reportProgress();
+
+    // v311: the profiles a trip or site is shared with when it is not
+    // shared with everyone (issue #2151). Table-only rung, no backfill;
+    // re-asserted in beforeOpen. Renumbered from 309 and 310, which #1970
+    // and #2050 took.
+    if (from < 311) {
+      await _assertTripSharesSchema();
+      await _assertSiteSharesSchema();
+    }
+    if (from < 311) await reportProgress();
+
+    // v312: dive_tanks.extra_regulator_ids (issue #3375). Column only, no
+    // backfill: a tank's single regulator stays the first. Re-asserted in
+    // beforeOpen through _assertTankExtraRegulatorIds. Renumbered from 310
+    // and 311 as #3611 and #2151 shipped them first.
+    if (from < 312) {
+      await _assertTankExtraRegulatorIds();
+    }
+    if (from < 312) await reportProgress();
+
+    // v313: dive_centers.is_permanently_closed (issue #3379). Column only, no
+    // backfill: every existing center stays open. Re-asserted in beforeOpen
+    // through _assertDiveCenterClosedColumn. Renumbered from 310 and 312,
+    // which #2050 and #3375 took.
+    if (from < 313) {
+      await _assertDiveCenterClosedColumn();
+    }
+    if (from < 313) await reportProgress();
+
+    // v314: cylinder_config_items.deco_switch_depth (issue #3567), the MOD
+    // set by hand on a saved cylinder. Column only, no backfill;
+    // re-asserted in beforeOpen. Renumbered from 304, which #3552 took.
+    if (from < 314) await _assertCylinderConfigItemModColumn();
+    if (from < 314) await reportProgress();
   }
 }

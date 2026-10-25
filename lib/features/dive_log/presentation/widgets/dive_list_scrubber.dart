@@ -35,6 +35,7 @@ class DiveListScrubber extends ConsumerStatefulWidget {
     required this.onLand,
     required this.child,
     this.selectedDiveId,
+    this.busy = false,
   });
 
   final ScrollController controller;
@@ -42,12 +43,23 @@ class DiveListScrubber extends ConsumerStatefulWidget {
   final bool groupingEnabled;
   final Set<String> collapsedTripIds;
 
-  /// Brings [diveId], or the header of the collapsed trip holding it, to the
-  /// top of the list. [context] sits below the list's keyboard navigator.
-  final void Function(BuildContext context, String diveId) onLand;
+  /// Shows [diveId], or the header of the collapsed trip holding it: at the
+  /// top of the list when [toTop], otherwise scrolling only as far as it
+  /// takes to show it whole. [context] sits below the list's keyboard
+  /// navigator.
+  final void Function(
+    BuildContext context,
+    String diveId, {
+    required bool toTop,
+  })
+  onLand;
 
   /// The dive the detail pane shows, marked with a dot on the track.
   final String? selectedDiveId;
+
+  /// The list is loading rows for a jump of its own, like End's (#3302): the
+  /// scrubber shows its loading panel as it does for a drop's load.
+  final bool busy;
   final Widget child;
 
   @override
@@ -266,38 +278,49 @@ class _DiveListScrubberState extends ConsumerState<DiveListScrubber> {
       segments: _segments,
       contextTicks: _contextTicks,
       density: _density,
-      busyLabel: _loading ? l10n.common_label_loading : null,
+      busyLabel: _loading || widget.busy ? l10n.common_label_loading : null,
       onScrubEnd: (slot) => _land(slots[slot]),
       onActiveChanged: (active) => _scrubbing.state = active,
       child: widget.child,
     );
   }
 
-  /// Only the latest drop clears the busy state and lands.
+  /// Only the latest drop clears the busy state and lands. A drop on a loaded
+  /// row leaves the list where the drag scrolled it when the row is in full
+  /// view (#3574), and otherwise scrolls only as far as it takes to show it;
+  /// only a drop past the loaded rows, which the list could not follow,
+  /// loads and lands at the top.
   Future<void> _land(DiveScrubberSlot slot) async {
     final drop = ++_drop;
     final id = slot.entry.id;
     final needsLoad = !widget.loadedDives.any((d) => d.id == id);
     if (_loading != needsLoad) setState(() => _loading = needsLoad);
-    if (needsLoad) {
-      var loaded = false;
-      try {
-        loaded = await ref
-            .read(paginatedDiveListProvider.notifier)
-            .loadThrough(id, targetIndex: slot.entryIndex);
-      } catch (e, stackTrace) {
-        _log.error(
-          'Failed to load the dive list through a scrubber drop',
-          error: e,
-          stackTrace: stackTrace,
-        );
-      } finally {
-        if (mounted && drop == _drop) setState(() => _loading = false);
-      }
-      if (!mounted || drop != _drop || !loaded) return;
+    if (!needsLoad) {
+      _show(drop, id, toTop: false);
+      return;
     }
+    var loaded = false;
+    try {
+      loaded = await ref
+          .read(paginatedDiveListProvider.notifier)
+          .loadThrough(id, targetIndex: slot.entryIndex);
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to load the dive list through a scrubber drop',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    } finally {
+      if (mounted && drop == _drop) setState(() => _loading = false);
+    }
+    if (!mounted || drop != _drop || !loaded) return;
+    _show(drop, id, toTop: true);
+  }
+
+  /// Shows [id] after the frame, unless a later drop came in first.
+  void _show(int drop, String id, {required bool toTop}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && drop == _drop) widget.onLand(context, id);
+      if (mounted && drop == _drop) widget.onLand(context, id, toTop: toTop);
     });
   }
 }
