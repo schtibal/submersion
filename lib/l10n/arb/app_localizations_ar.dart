@@ -14922,6 +14922,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tankMod_limitDeco => 'حد تخفيف الضغط';
 
   @override
+  String get tankMod_limitDiluent => 'MOD غاز التخفيف';
+
+  @override
   String tankMod_overridden(String depth) {
     return 'حددته أنت · الافتراضي $depth';
   }

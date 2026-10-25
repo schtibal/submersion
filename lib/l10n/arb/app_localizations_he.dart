@@ -14442,6 +14442,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get tankMod_limitDeco => 'מגבלת דקו';
 
   @override
+  String get tankMod_limitDiluent => 'MOD מדלל';
+
+  @override
   String tankMod_overridden(String depth) {
     return 'הוגדר על ידך · ברירת מחדל $depth';
   }
