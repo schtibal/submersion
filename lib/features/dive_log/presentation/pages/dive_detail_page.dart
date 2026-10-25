@@ -26,6 +26,9 @@ import 'package:submersion/features/equipment/presentation/widgets/equipment_arr
 import 'package:submersion/features/equipment/domain/services/gear_tree.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_course_rows.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_gear_with_figure.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/inline_edit/dive_notes_card.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/inline_edit/inline_edit_session.dart';
+import 'package:submersion/shared/widgets/forms/confirm_discard_dialog.dart';
 import 'package:submersion/features/data_quality/data/services/quality_scan_service.dart';
 import 'package:submersion/features/data_quality/presentation/providers/quality_inbox_providers.dart';
 import 'package:submersion/core/constants/gas_consumption_display.dart';
@@ -281,13 +284,31 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
   /// The list lights the row it opened through [highlightedDiveIdProvider] as
   /// well as the selected param, so the highlight moves with the pane. Left
   /// behind, it keeps the first dive lit next to the one on show (#2345).
-  void _navigateToDive(String neighborId) {
+  Future<void> _navigateToDive(String neighborId) async {
+    if (!await _confirmLeaveInlineEdit() || !mounted) return;
     ref.read(highlightedDiveIdProvider.notifier).state = neighborId;
     if (widget.embedded) {
       context.goInPlace('/dives?selected=$neighborId');
     } else {
       context.replace('/dives/$neighborId');
     }
+  }
+
+  /// True when nothing is lost by leaving: no detail card holds an unsaved
+  /// draft (issue #2976), or the diver chose to discard it.
+  Future<bool> _confirmLeaveInlineEdit() async {
+    final session = ref.read(inlineEditNotifierProvider(diveId));
+    if (session == null || !session.dirty) return true;
+    final discard = await confirmDiscardChanges(context);
+    if (discard && mounted) {
+      ref.read(inlineEditNotifierProvider(diveId).notifier).end(session.card);
+    }
+    return discard && mounted;
+  }
+
+  Future<void> _openEditor() async {
+    if (!await _confirmLeaveInlineEdit() || !mounted) return;
+    context.push('/dives/$diveId/edit');
   }
 
   /// Wraps [child] with Left/Right arrow-key bindings for previous/next dive.
@@ -355,7 +376,24 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     });
 
     final diveAsync = ref.watch(diveProvider(diveId));
+    // A detail card holding an unsaved draft (issue #2976) asks before the
+    // page is left with it.
+    final inlineDraftDirty = ref.watch(
+      inlineEditNotifierProvider(diveId).select((s) => s?.dirty ?? false),
+    );
 
+    return PopScope(
+      canPop: !inlineDraftDirty,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _confirmLeaveInlineEdit()) navigator.pop();
+      },
+      child: _buildForDive(context, diveAsync),
+    );
+  }
+
+  Widget _buildForDive(BuildContext context, AsyncValue<Dive?> diveAsync) {
     return diveAsync.when(
       data: (dive) {
         if (dive == null) {
@@ -560,7 +598,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         return [_buildTagsSection(context, dive)];
       },
       DiveDetailSectionId.notes: (_) {
-        return [_buildNotesSection(context, dive)];
+        return [DiveNotesCard(dive: dive)];
       },
       DiveDetailSectionId.documents: (_) {
         return [
@@ -1254,7 +1292,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
           IconButton(
             icon: const Icon(Icons.edit),
             tooltip: context.l10n.diveLog_detail_tooltip_editDive,
-            onPressed: () => context.push('/dives/$diveId/edit'),
+            onPressed: _openEditor,
           ),
           DiveDetailPropertiesMenu(
             isGauge: dive.isGauge,
@@ -1515,9 +1553,11 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 icon: const Icon(Icons.edit, size: 20),
                 visualDensity: VisualDensity.compact,
                 tooltip: context.l10n.diveLog_detail_tooltip_edit,
-                onPressed: () {
-                  final state = GoRouterState.of(context);
-                  final currentPath = state.uri.path;
+                onPressed: () async {
+                  final currentPath = GoRouterState.of(context).uri.path;
+                  if (!await _confirmLeaveInlineEdit() || !context.mounted) {
+                    return;
+                  }
                   context.goInPlace('$currentPath?selected=$diveId&mode=edit');
                 },
               ),
@@ -4919,37 +4959,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         );
       }
     }
-  }
-
-  Widget _buildNotesSection(BuildContext context, Dive dive) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.diveLog_detail_section_notes,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const Divider(),
-            if (dive.notes.isNotEmpty)
-              SelectableText(
-                dive.notes,
-                style: Theme.of(context).textTheme.bodyMedium,
-              )
-            else
-              Text(
-                context.l10n.diveLog_detail_noNotes,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildCustomFieldsSection(BuildContext context, Dive dive) {
