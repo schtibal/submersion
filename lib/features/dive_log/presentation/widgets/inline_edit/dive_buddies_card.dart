@@ -51,6 +51,11 @@ class _DiveBuddiesCardState extends ConsumerState<DiveBuddiesCard> {
   /// The diver's roles just saved, shown until the refreshed dive arrives.
   List<String>? _savedRoleIds;
 
+  /// The buddies just saved, shown until the reloaded list arrives: while
+  /// it reloads the provider still holds the old list, which would flash
+  /// back for a few frames.
+  List<BuddyWithRole>? _savedBuddies;
+
   bool get _editing => _draftBuddies != null;
 
   List<String> get _diverRoleIds => _savedRoleIds ?? widget.dive.diverRoleIds;
@@ -113,6 +118,7 @@ class _DiveBuddiesCardState extends ConsumerState<DiveBuddiesCard> {
     List<BuddyWithRole> after,
   ) async {
     await ref.read(buddyRepositoryProvider).setBuddiesForDive(_diveId, after);
+    if (mounted) setState(() => _savedBuddies = after);
     invalidateDiveBuddyLinks(ref, _diveId, {
       for (final b in before) b.buddy.id,
       for (final b in after) b.buddy.id,
@@ -199,8 +205,14 @@ class _DiveBuddiesCardState extends ConsumerState<DiveBuddiesCard> {
   Widget build(BuildContext context) {
     // Kept loaded for the role selectors, which read it.
     ref.watch(allDiveRolesProvider);
+    // The reloaded list has arrived once the provider settles on data.
+    ref.listen(buddiesForDiveProvider(_diveId), (previous, next) {
+      if (_savedBuddies != null && next.hasValue && !next.isLoading) {
+        setState(() => _savedBuddies = null);
+      }
+    });
     final buddiesAsync = ref.watch(buddiesForDiveProvider(_diveId));
-    final linked = buddiesAsync.valueOrNull;
+    final linked = _savedBuddies ?? buddiesAsync.valueOrNull;
     if (linked == null && !_editing) {
       if (buddiesAsync.hasError) return const SizedBox.shrink();
       return const Card(

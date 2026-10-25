@@ -60,11 +60,14 @@ void main() {
   Future<void> pump(
     WidgetTester tester, {
     List<EquipmentItem> gear = const [_mask, _fins],
+    // False hands the card the dive as created and never refreshes it, the
+    // moment between a save and the reloaded dive, held open.
+    bool liveDive = true,
   }) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
-    await repository.createDive(
+    final created = await repository.createDive(
       Dive(id: 'd1', dateTime: DateTime(2026, 3, 28), gear: looseGear(gear)),
     );
     final base = await getBaseOverrides();
@@ -84,13 +87,15 @@ void main() {
           home: Scaffold(
             body: SingleChildScrollView(
               // The card refreshes through the dive, as on the page.
-              child: Consumer(
-                builder: (context, ref, _) {
-                  final dive = ref.watch(diveProvider('d1')).value;
-                  if (dive == null) return const SizedBox.shrink();
-                  return DiveEquipmentCard(dive: dive);
-                },
-              ),
+              child: liveDive
+                  ? Consumer(
+                      builder: (context, ref, _) {
+                        final dive = ref.watch(diveProvider('d1')).value;
+                        if (dive == null) return const SizedBox.shrink();
+                        return DiveEquipmentCard(dive: dive);
+                      },
+                    )
+                  : DiveEquipmentCard(dive: created),
             ),
           ),
         ),
@@ -98,6 +103,43 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets(
+    'after Save the removed gear never shows while the dive reloads',
+    (tester) async {
+      await pump(tester, liveDive: false);
+      await tester.tap(_edit);
+      await tester.pumpAndSettle();
+      final jetsRow = find.ancestor(
+        of: find.text('Jets'),
+        matching: find.byType(ListTile),
+      );
+      await tester.tap(find.descendant(of: jetsRow, matching: _remove));
+      await tester.pumpAndSettle();
+
+      await tester.tap(_save);
+      await tester.pumpAndSettle();
+
+      expect(_save, findsNothing);
+      expect(find.text('Jets'), findsNothing);
+      expect(find.text('Cressi mask'), findsOneWidget);
+    },
+  );
+
+  testWidgets('after a view-mode Add the new gear shows before the reload', (
+    tester,
+  ) async {
+    await pump(tester, liveDive: false);
+
+    await tester.tap(_add);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cold water reg'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_en.equipment_components_pickerConfirm(1)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cold water reg'), findsOneWidget);
+  });
 
   testWidgets('view mode shows Add and Edit beside the gear', (tester) async {
     await pump(tester);

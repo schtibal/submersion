@@ -54,8 +54,29 @@ class _DiveEquipmentCardState extends ConsumerState<DiveEquipmentCard> {
   InlineEditNotifier get _session =>
       ref.read(inlineEditNotifierProvider(_diveId).notifier);
 
+  /// The gear just saved, shown until the refreshed dive arrives: until
+  /// then [widget]'s dive still holds the old gear, which would flash back
+  /// for a few frames.
+  _Gear? _justSaved;
+
   _Gear get _saved =>
+      _justSaved ??
       (items: widget.dive.equipment, rows: widget.dive.gearProvenance);
+
+  /// The dive as the card shows it, carrying [_justSaved] when there is one.
+  Dive get _shownDive {
+    final saved = _justSaved;
+    if (saved == null) return widget.dive;
+    return widget.dive.copyWith(gear: gearLinksFor(saved.items, saved.rows));
+  }
+
+  @override
+  void didUpdateWidget(DiveEquipmentCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_sameRows(widget.dive.gearProvenance, oldWidget.dive.gearProvenance)) {
+      _justSaved = null;
+    }
+  }
 
   static bool _sameRows(List<GearProvenance> a, List<GearProvenance> b) {
     if (a.length != b.length) return false;
@@ -99,16 +120,17 @@ class _DiveEquipmentCardState extends ConsumerState<DiveEquipmentCard> {
     _session.end(InlineEditCard.equipment);
   }
 
-  Future<void> _write(List<GearProvenance> rows) async {
-    await ref.read(diveRepositoryProvider).setDiveGear(_diveId, rows);
+  Future<void> _write(_Gear gear) async {
+    await ref.read(diveRepositoryProvider).setDiveGear(_diveId, gear.rows);
+    if (mounted) setState(() => _justSaved = gear);
     ref.invalidate(diveProvider(_diveId));
   }
 
   Future<void> _save() async {
-    final rows = _draft!.rows;
+    final draft = _draft!;
     setState(() => _saving = true);
     try {
-      if (!_sameRows(rows, _saved.rows)) await _write(rows);
+      if (!_sameRows(draft.rows, _saved.rows)) await _write(draft);
       if (mounted) _close();
     } catch (e) {
       if (mounted) showInlineSaveFailed(context, e);
@@ -161,7 +183,7 @@ class _DiveEquipmentCardState extends ConsumerState<DiveEquipmentCard> {
       // Confirming in the picker is the confirmation, so a view-mode add
       // saves.
       final next = await _withAdded(_saved, picked);
-      await _write(next.rows);
+      await _write(next);
     } catch (e) {
       if (mounted) showInlineSaveFailed(context, e);
     }
@@ -209,7 +231,7 @@ class _DiveEquipmentCardState extends ConsumerState<DiveEquipmentCard> {
     // places it: an assembly's parts sit inside its row, and an orphaned
     // row is promoted, so the count matches what expands below (#1487).
     final collapsedSubtitle = l10n.diveLog_detail_equipmentCount(
-      GearTree.topLevelCount(widget.dive.gearProvenance),
+      GearTree.topLevelCount(_saved.rows),
     );
 
     return CollapsibleCardSection(
@@ -259,7 +281,7 @@ class _DiveEquipmentCardState extends ConsumerState<DiveEquipmentCard> {
   }
 
   Widget _viewContent(BuildContext context) {
-    final dive = widget.dive;
+    final dive = _shownDive;
     if (dive.equipment.isEmpty) {
       return _emptyText(context, context.l10n.diveLog_detail_noEquipment);
     }

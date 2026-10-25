@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/providers/provider.dart';
@@ -26,11 +28,21 @@ final _bob = Buddy(id: 'b2', name: 'Bob', createdAt: _now, updatedAt: _now);
 class _RecordingBuddyRepository extends Fake implements BuddyRepository {
   final saved = <List<BuddyWithRole>>[];
 
+  /// The dive's buddies as last saved; what the provider reloads.
+  List<BuddyWithRole>? stored;
+
+  /// When set, the provider's reload waits for it, so a test can look at
+  /// the card between the save and the refreshed list.
+  Completer<void>? reloadGate;
+
   @override
   Future<void> setBuddiesForDive(
     String diveId,
     List<BuddyWithRole> buddies,
-  ) async => saved.add(buddies);
+  ) async {
+    saved.add(buddies);
+    stored = buddies;
+  }
 }
 
 class _RecordingDiveRepository extends Fake implements DiveRepository {
@@ -67,13 +79,14 @@ Future<void> _pump(
         validatedCurrentDiverIdProvider.overrideWith((ref) async => 'diver-1'),
         buddyRepositoryProvider.overrideWithValue(buddies),
         diveRepositoryProvider.overrideWithValue(dives),
-        buddiesForDiveProvider('d1').overrideWith(
-          (ref) async =>
+        buddiesForDiveProvider('d1').overrideWith((ref) async {
+          await buddies.reloadGate?.future;
+          return buddies.stored ??
               linked ??
               [
                 BuddyWithRole(buddy: _alice, roles: [DiveRole.builtInBuddy()]),
-              ],
-        ),
+              ];
+        }),
         allBuddiesWithDiveCountProvider.overrideWith(
           (ref) async => [
             BuddyWithDiveCount(buddy: _alice, diveCount: 3),
@@ -211,6 +224,60 @@ void main() {
     expect(buddies.saved, isEmpty);
     expect(dives.savedRoles, isEmpty);
     expect(find.text('Alice'), findsOneWidget);
+  });
+
+  testWidgets('after Save the old list never shows while the list reloads', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      linked: [
+        BuddyWithRole(buddy: _alice, roles: [DiveRole.builtInBuddy()]),
+        BuddyWithRole(buddy: _bob, roles: [DiveRole.builtInBuddy()]),
+      ],
+    );
+    await enterEdit(tester);
+    await tester.tap(_remove.first);
+    await tester.pumpAndSettle();
+
+    buddies.reloadGate = Completer<void>();
+    await tester.tap(_save);
+    // Frame by frame while the provider is still reloading: the removed
+    // buddy must not come back, even for one frame.
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(_save, findsNothing);
+      expect(find.text('Alice'), findsNothing);
+      expect(find.text('Bob'), findsOneWidget);
+    }
+
+    buddies.reloadGate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Alice'), findsNothing);
+    expect(find.text('Bob'), findsOneWidget);
+  });
+
+  testWidgets('after a view-mode Add the new buddy shows at once', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    await tester.tap(_add);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bob'));
+    await tester.pumpAndSettle();
+    await pickOnlyRole(tester, 'Buddy');
+    buddies.reloadGate = Completer<void>();
+    await tester.tap(find.text(_en.buddies_picker_done));
+    // Long enough for the sheet to close; the reload is still held.
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('Bob'), findsOneWidget);
+
+    buddies.reloadGate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Bob'), findsOneWidget);
   });
 
   testWidgets('removing a buddy and saving writes only the buddy list', (
