@@ -57,7 +57,7 @@ class CylinderConfigItems extends Table {
   RealColumn get hePercent => real().withDefault(const Constant(0.0))();
   RealColumn get defaultStartPressureBar => real().nullable()();
 
-  /// MOD in metres set by hand (v304, issue #3567); null means the default
+  /// MOD in metres set by hand (v314, issue #3567); null means the default
   /// for the cylinder's role. Named after dive_plan_tanks.deco_switch_depth,
   /// where a plan tank picked from it carries it.
   RealColumn get decoSwitchDepth => real().nullable()();

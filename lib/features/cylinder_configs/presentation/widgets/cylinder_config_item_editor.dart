@@ -83,10 +83,11 @@ class _CylinderConfigItemEditorState extends State<CylinderConfigItemEditor> {
   /// cylinder records its size, not the preset it came from.
   String? _presetName;
 
-  /// MODs set by hand that a role change put aside this session, keyed by
-  /// which limit they were set against (issue #3567). A role on a different
-  /// limit takes its default; changing back restores the MOD, so a slip of
-  /// the dropdown loses nothing. What is saved is only the MOD in effect, so
+  /// MODs set by hand that a role or mix change put aside this session,
+  /// keyed by which limit they were set against (issue #3567). A cylinder
+  /// moved onto a different limit takes its default; changing back restores
+  /// the MOD, so a slip of the dropdown loses nothing. The mix counts too: a
+  /// bailout richer than air follows the deco limit, leaner the bottom one. What is saved is only the MOD in effect, so
   /// this goes with the page.
   final Map<ModLimitClass, double> _setAsideMods = {};
 
@@ -220,28 +221,32 @@ class _CylinderConfigItemEditorState extends State<CylinderConfigItemEditor> {
 
   // ---------------------------------------------------------------- role
 
-  void _onRole(TankRole role) {
-    final item = _item;
-    final fromClass = modLimitClassFor(item.tankRole, _gas);
-    final toClass = modLimitClassFor(role, _gas);
+  void _onRole(TankRole role) => _emitOnLimit(_item.copyWith(tankRole: role));
+
+  /// Emits [next], a role or mix change, with the MOD for the limit it
+  /// follows: a MOD set by hand moves to [_setAsideMods] when [next] is on a
+  /// different limit, and one set aside for [next]'s limit comes back.
+  void _emitOnLimit(CylinderConfigItem next) {
+    final fromClass = modLimitClassFor(_item.tankRole, _gas);
+    final toClass = modLimitClassFor(
+      next.tankRole,
+      GasMix(o2: next.o2Percent, he: next.hePercent),
+    );
     if (fromClass == toClass) {
-      _emit(item.copyWith(tankRole: role));
+      _emit(next);
       return;
     }
-    if (item.decoSwitchDepth case final mod?) _setAsideMods[fromClass] = mod;
+    if (_item.decoSwitchDepth case final mod?) _setAsideMods[fromClass] = mod;
     _emit(switch (_setAsideMods.remove(toClass)) {
-      final restored? => item.copyWith(
-        tankRole: role,
-        decoSwitchDepth: restored,
-      ),
-      null => item.copyWith(tankRole: role, clearDecoSwitchDepth: true),
+      final restored? => next.copyWith(decoSwitchDepth: restored),
+      null => next.copyWith(clearDecoSwitchDepth: true),
     });
   }
 
   // ----------------------------------------------------------------- gas
 
   void _setGas(double o2, double he) {
-    _emit(_item.copyWith(o2Percent: o2, hePercent: he));
+    _emitOnLimit(_item.copyWith(o2Percent: o2, hePercent: he));
     setState(() {
       _o2.text = _trim(o2);
       _he.text = _trim(he);
@@ -466,7 +471,7 @@ class _CylinderConfigItemEditorState extends State<CylinderConfigItemEditor> {
                     // not clobber the stored mix; the field says why.
                     onChanged: (read) {
                       if (read case NumberValue(:final value)) {
-                        _emit(item.copyWith(o2Percent: value));
+                        _emitOnLimit(item.copyWith(o2Percent: value));
                       }
                     },
                   ),

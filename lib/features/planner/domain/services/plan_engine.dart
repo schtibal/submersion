@@ -1682,7 +1682,7 @@ class PlanEngine {
       );
     }
 
-    issues.addAll(_modOverrideIssues(plan.tanks));
+    issues.addAll(_modOverrideIssues(plan.tanks, environment));
     issues.sort((a, b) => b.severity.index.compareTo(a.severity.index));
     return issues;
   }
@@ -1757,14 +1757,20 @@ class PlanEngine {
 
   /// A MOD set by hand deeper than its cylinder's limit allows is the
   /// diver's call, and the plan uses it, but it is reported (issue #3567):
-  /// critical above the deco limit, a warning above the bottom limit.
-  List<PlanIssue> _modOverrideIssues(List<DiveTank> tanks) => [
+  /// critical above the deco limit, a warning above the bottom limit. The
+  /// ppO2 is measured in [environment], as the schedule's is, so the issue
+  /// agrees with the table line the gas is breathed on.
+  List<PlanIssue> _modOverrideIssues(
+    List<DiveTank> tanks,
+    DiveEnvironment environment,
+  ) => [
     for (final tank in tanks)
       if (modOverrideCheck(
             tank,
             bottomPpO2: config.ppO2Working,
             decoPpO2: config.ppO2Deco,
             diluentPpO2: config.ccrDiluentModPpO2,
+            environment: environment,
           )
           case (:final ppO2, :final limitPpO2, exceedsLimit: true))
         PlanIssue(

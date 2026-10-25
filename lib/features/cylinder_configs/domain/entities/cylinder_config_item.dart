@@ -32,8 +32,10 @@ class CylinderConfigItem extends Equatable {
   final double? defaultStartPressureBar;
 
   /// The MOD in metres the diver set on this cylinder, or null to use the
-  /// default for its role (issue #3567). Maps to dive_tanks and plan tanks'
-  /// deco_switch_depth when the cylinder is applied or picked.
+  /// default for its role (issue #3567). Carried to a plan tank's
+  /// deco_switch_depth when the cylinder is picked in the planner. A logged
+  /// dive's tanks have no such column, so applying a configuration to a
+  /// dive does not keep it past the dive's save.
   final double? decoSwitchDepth;
   final DateTime createdAt;
   final DateTime updatedAt;

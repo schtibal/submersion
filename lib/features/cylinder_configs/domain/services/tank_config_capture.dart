@@ -8,7 +8,8 @@ import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 /// Mapping is field for field. `endPressure`, `computerId`, `presetName` and
 /// `isTravelGas` are not part of a configuration - they describe one dive or
 /// one plan, not the cylinder - and are dropped. `decoSwitchDepth` is kept:
-/// a MOD the diver set belongs to the cylinder (issue #3567).
+/// a MOD the diver set belongs to the cylinder (issue #3567). Only plan
+/// tanks carry one; a logged dive's tanks never store it.
 ///
 /// Pure: [newId] mints item ids and [now] stamps them, so this stays
 /// testable. An empty id is also acceptable, since the repository mints one

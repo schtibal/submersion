@@ -1,9 +1,3 @@
-import 'package:submersion/core/constants/enums.dart';
-import 'package:submersion/core/deco/ascent/ascent_gas_plan.dart';
-import 'package:submersion/core/deco/entities/dive_environment.dart';
-import 'package:submersion/core/deco/max_operating_depth.dart';
-import 'package:submersion/features/dive_log/domain/entities/dive.dart';
-
 /// A cylinder's maximum operating depth (issue #3567).
 ///
 /// Every cylinder has a default MOD, worked out from its O2 fraction and the
@@ -14,6 +8,13 @@ import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 ///
 /// The planner switches to each gas at its MOD, so what a cylinder shows is
 /// where the plan breathes it from.
+library;
+
+import 'package:submersion/core/constants/enums.dart';
+import 'package:submersion/core/deco/ascent/ascent_gas_plan.dart';
+import 'package:submersion/core/deco/entities/dive_environment.dart';
+import 'package:submersion/core/deco/max_operating_depth.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 
 /// O2 percentage above which a bailout cylinder counts as a deco gas. A
 /// bailout richer than air is carried for the ascent; air or anything
@@ -109,26 +110,60 @@ double ppO2AtDepth(GasMix gas, double depthMeters) =>
     gas.o2 / 100.0 * (depthMeters / 10.0 + 1.0);
 
 /// What a MOD set by hand means for [tank]: the ppO2 it reaches there and
-/// the limit its role calls for. Null when [tank] has no override.
+/// the limit its role calls for. Null when [tank] has no override. See
+/// [modOverrideCheckFor] for [environment].
 ({double ppO2, double limitPpO2, bool exceedsLimit})? modOverrideCheck(
   DiveTank tank, {
   required double bottomPpO2,
   required double decoPpO2,
   double? diluentPpO2,
-}) {
-  final override = tank.decoSwitchDepth;
-  if (override == null) return null;
-  final ppO2 = ppO2AtDepth(tank.gasMix, override);
-  final limit = modPpO2For(
+  DiveEnvironment? environment,
+}) => switch (tank.decoSwitchDepth) {
+  final override? => modOverrideCheckFor(
     tank.role,
     tank.gasMix,
+    override,
+    bottomPpO2: bottomPpO2,
+    decoPpO2: decoPpO2,
+    diluentPpO2: diluentPpO2,
+    environment: environment,
+  ),
+  null => null,
+};
+
+/// What [overrideMeters] set by hand on a cylinder of [role] with [gas]
+/// means: the ppO2 it reaches there and the limit the role calls for.
+///
+/// Without [environment] the ppO2 is on the flat 10 m per bar model a MOD
+/// table uses, as the cylinder editors show it. The planner passes the
+/// plan's water, the one its schedule's ppO2 is computed in, so a reported
+/// ppO2 matches the table line and an override at the flat default (EAN40
+/// at 30 m in seawater, 1.61) is caught the way a default switch is (issue
+/// #3566, see [gasSwitchDepthMeters]).
+({double ppO2, double limitPpO2, bool exceedsLimit}) modOverrideCheckFor(
+  TankRole role,
+  GasMix gas,
+  double overrideMeters, {
+  required double bottomPpO2,
+  required double decoPpO2,
+  double? diluentPpO2,
+  DiveEnvironment? environment,
+}) {
+  final ppO2 = environment == null
+      ? ppO2AtDepth(gas, overrideMeters)
+      : gas.o2 / 100.0 * environment.pressureAtDepth(overrideMeters);
+  final limit = modPpO2For(
+    role,
+    gas,
     bottomPpO2: bottomPpO2,
     decoPpO2: decoPpO2,
     diluentPpO2: diluentPpO2,
   );
-  // A hair of slack: an override typed at exactly the default MOD lands on
-  // the limit, give or take float noise, and is not "above" it.
-  return (ppO2: ppO2, limitPpO2: limit, exceedsLimit: ppO2 > limit + 1e-9);
+  // On the flat model, a hair of slack: an override typed at exactly the
+  // default MOD lands on the limit, give or take float noise, and is not
+  // "above" it. In the plan's water, the slack a default switch gets.
+  final slack = environment == null ? 1e-9 : gasSwitchPpO2Tolerance;
+  return (ppO2: ppO2, limitPpO2: limit, exceedsLimit: ppO2 > limit + slack);
 }
 
 /// The gases an open-circuit ascent can breathe, one per tank, each eligible

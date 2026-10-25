@@ -233,6 +233,49 @@ void main() {
       );
     });
 
+    test('in the plan water, an override at the flat default is caught', () {
+      // EAN40 at 30 m is 1.60 on the flat model the editor shows, but 1.61
+      // in seawater, where the schedule breathes it (issue #3566).
+      const seawater = DiveEnvironment(
+        waterDensityKgM3: DiveEnvironment.saltWaterDensity,
+      );
+      final flat = modOverrideCheckFor(
+        TankRole.deco,
+        ean40,
+        30,
+        bottomPpO2: bottom,
+        decoPpO2: deco,
+      );
+      final inWater = modOverrideCheckFor(
+        TankRole.deco,
+        ean40,
+        30,
+        bottomPpO2: bottom,
+        decoPpO2: deco,
+        environment: seawater,
+      );
+      expect(flat.exceedsLimit, isFalse);
+      expect(inWater.exceedsLimit, isTrue);
+      expect(inWater.ppO2, closeTo(0.40 * seawater.pressureAtDepth(30), 1e-9));
+    });
+
+    test('in the plan water, the default switch depth is not flagged', () {
+      // The same slack a default switch gets: an override typed at the
+      // depth the plan would have switched at anyway raises nothing.
+      const seawater = DiveEnvironment(
+        waterDensityKgM3: DiveEnvironment.saltWaterDensity,
+      );
+      final check = modOverrideCheckFor(
+        TankRole.deco,
+        ean40,
+        gasSwitchDepthMeters(0.40, maxPpO2: deco, environment: seawater),
+        bottomPpO2: bottom,
+        decoPpO2: deco,
+        environment: seawater,
+      );
+      expect(check.exceedsLimit, isFalse);
+    });
+
     test('a diluent override is checked against the Dil MOD limit', () {
       final check = modOverrideCheck(
         tank(ean40, role: TankRole.diluent, override: 25),

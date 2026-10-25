@@ -86,8 +86,17 @@ class _TankModFieldState extends State<TankModField> {
     // typed depth: the default it went back to must show at once.
     final resetElsewhere =
         widget.overrideMeters == null &&
-        readNumber(_controller.text, allowNegative: false) is NumberValue;
-    if (!_focus.hasFocus || resetElsewhere) _syncText();
+        switch (readNumber(_controller.text, allowNegative: false)) {
+          NumberValue(:final value) => value >= _minMod,
+          NumberBlank() || NumberInvalid() => false,
+        };
+    if (!_focus.hasFocus || resetElsewhere) {
+      // After the frame: the field is a form field, and a controller change
+      // now would mark the enclosing Form dirty in the middle of its build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _syncText();
+      });
+    }
   }
 
   @override
@@ -117,17 +126,21 @@ class _TankModFieldState extends State<TankModField> {
     return '${shownDefaultMod(widget.gas, widget.role, widget.bottomPpO2, widget.decoPpO2, widget.diluentPpO2, widget.units)}';
   }
 
-  void _onText(String text) {
-    switch (readNumber(text, allowNegative: false)) {
+  /// The shallowest MOD the field takes, in the diver's depth unit: a gas
+  /// never breathed below the surface has no MOD worth planning on.
+  static const double _minMod = 1;
+
+  void _onText(NumberRead read) {
+    switch (read) {
       case NumberBlank():
         widget.onChanged(null);
-      case NumberValue(:final value):
+      case NumberValue(:final value) when value >= _minMod:
         widget.onChanged(widget.units.depthToMeters(value));
-      case NumberInvalid():
-        // Nothing to store; the field says why.
+      case NumberValue() || NumberInvalid():
+        // Nothing to store; the field says why, and an enclosing Form
+        // refuses to save until it is fixed.
         break;
     }
-    setState(() {});
   }
 
   void _reset() {
@@ -140,21 +153,23 @@ class _TankModFieldState extends State<TankModField> {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final override = widget.overrideMeters;
-    final exceeds = _exceeds(
-      widget.gas,
-      widget.role,
-      override,
-      widget.bottomPpO2,
-      widget.decoPpO2,
-      widget.diluentPpO2,
-    );
+    final exceeds = switch (override) {
+      final meters? => modOverrideCheckFor(
+        widget.role,
+        widget.gas,
+        meters,
+        bottomPpO2: widget.bottomPpO2,
+        decoPpO2: widget.decoPpO2,
+        diluentPpO2: widget.diluentPpO2,
+      ).exceedsLimit,
+      null => false,
+    };
 
-    final field = TextField(
+    final field = NumberField(
       key: TankModField.fieldKey,
       controller: _controller,
       focusNode: _focus,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: numberInputFormatters(),
+      check: (value) => value < _minMod ? l10n.numberInput_atLeastOne : null,
       // A default is shown muted, so it reads as "not set by you".
       style: override == null
           ? TextStyle(color: scheme.onSurfaceVariant)
@@ -169,12 +184,6 @@ class _TankModFieldState extends State<TankModField> {
         enabledBorder: exceeds
             ? UnderlineInputBorder(borderSide: BorderSide(color: scheme.error))
             : null,
-        errorText: invalidNumberText(
-          context,
-          _controller.text,
-          allowNegative: false,
-        ),
-        errorMaxLines: 3,
       ),
       onChanged: _onText,
     );
@@ -262,12 +271,14 @@ class TankModDetails extends StatelessWidget {
       );
     }
 
-    final check = modOverrideCheck(
-      DiveTank(id: '', gasMix: gas, role: role, decoSwitchDepth: override),
+    final check = modOverrideCheckFor(
+      role,
+      gas,
+      override,
       bottomPpO2: bottomPpO2,
       decoPpO2: decoPpO2,
       diluentPpO2: diluentPpO2,
-    )!;
+    );
     final defaultMeters = defaultModMeters(
       role,
       gas,
@@ -343,22 +354,4 @@ int shownDefaultMod(
     diluentPpO2: diluentPpO2,
   );
   return (units.convertDepth(meters) + 1e-6).floor();
-}
-
-bool _exceeds(
-  GasMix gas,
-  TankRole role,
-  double? override,
-  double bottomPpO2,
-  double decoPpO2,
-  double diluentPpO2,
-) {
-  if (override == null) return false;
-  return modOverrideCheck(
-        DiveTank(id: '', gasMix: gas, role: role, decoSwitchDepth: override),
-        bottomPpO2: bottomPpO2,
-        decoPpO2: decoPpO2,
-        diluentPpO2: diluentPpO2,
-      )?.exceedsLimit ??
-      false;
 }

@@ -12,6 +12,7 @@ import 'package:submersion/features/planner/presentation/widgets/tank_mod_field.
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/tank_presets/domain/entities/tank_preset_entity.dart';
 import 'package:submersion/features/tank_presets/presentation/providers/tank_preset_providers.dart';
+import 'package:submersion/shared/widgets/forms/number_field.dart';
 
 import '../../../helpers/test_app.dart';
 
@@ -322,6 +323,28 @@ void main() {
         expect(current.decoSwitchDepth, 12);
       });
 
+      testWidgets(
+        'a mix that moves a bailout to the other limit sets it aside',
+        (tester) async {
+          // A bailout richer than air follows the deco limit, leaner the
+          // bottom one, so the mix moves it between limits as a role does.
+          await tester.pumpWidget(
+            host(item: seed(role: TankRole.bailout, o2: 21, mod: 50)),
+          );
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.widgetWithText(FilterChip, 'EAN50'));
+          await tester.pumpAndSettle();
+          expect(current.o2Percent, 50);
+          expect(current.decoSwitchDepth, isNull);
+
+          await tester.tap(find.widgetWithText(FilterChip, 'Air'));
+          await tester.pumpAndSettle();
+          expect(current.o2Percent, 21);
+          expect(current.decoSwitchDepth, 50);
+        },
+      );
+
       testWidgets('stays on a role with the same limit', (tester) async {
         await tester.pumpWidget(
           host(item: seed(role: TankRole.backGas, o2: 32, mod: 30)),
@@ -528,8 +551,8 @@ void main() {
       expect(find.byType(TankModField), findsOneWidget);
       expect(
         tester
-            .widget<TextField>(find.byKey(TankModField.fieldKey))
-            .controller!
+            .widget<NumberField>(find.byKey(TankModField.fieldKey))
+            .controller
             .text,
         '22',
       );

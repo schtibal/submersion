@@ -116,8 +116,10 @@ void main() {
       (i) => i.type == PlanIssueType.ppO2Critical,
     );
     expect(critical, isNotEmpty);
-    // 0.40 x 4.3 bar.
-    expect(critical.first.value, closeTo(1.72, 1e-9));
+    // 0.40 x the ambient pressure at 33 m in the plan's own water, as the
+    // schedule measures it.
+    final ambient = PlanEngine.environmentFor(_plan()).pressureAtDepth(33);
+    expect(critical.first.value, closeTo(0.40 * ambient, 1e-9));
     expect(critical.first.atDepth, 33);
     expect(critical.first.threshold, 1.6);
   });
@@ -137,6 +139,21 @@ void main() {
       severities,
       [...severities]..sort((a, b) => b.index.compareTo(a.index)),
     );
+  });
+
+  test('an override at the flat default is reported in the plan water', () {
+    // The editor shows EAN40's default as 30 m (1.60 on a MOD table), but
+    // the schedule's ppO2 at 30 m in the plan's water is higher; typing 30
+    // must not switch there unreported (issue #3566).
+    final plan = _plan(ean40Mod: 30);
+    final ppO2 = 0.40 * PlanEngine.environmentFor(plan).pressureAtDepth(30);
+    expect(ppO2, greaterThan(1.605), reason: 'the plan water must be salty');
+    final reported = engine
+        .compute(plan)
+        .issues
+        .where((i) => i.type == PlanIssueType.ppO2Critical);
+    expect(reported, isNotEmpty);
+    expect(reported.first.value, closeTo(ppO2, 1e-9));
   });
 
   test('an override within the limit raises nothing', () {

@@ -7,6 +7,7 @@ import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/planner/presentation/widgets/tank_mod_field.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
+import 'package:submersion/shared/widgets/forms/number_field.dart';
 
 import '../../../../helpers/test_app.dart';
 
@@ -64,7 +65,7 @@ void main() {
   Finder field() => find.byKey(TankModField.fieldKey);
 
   String fieldText(WidgetTester tester) =>
-      tester.widget<TextField>(field()).controller!.text;
+      tester.widget<NumberField>(field()).controller.text;
 
   testWidgets('shows the default for the role, and where it comes from', (
     tester,
@@ -141,6 +142,48 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(reported, 18);
+  });
+
+  testWidgets('a MOD under one unit is refused, not stored', (tester) async {
+    await tester.pumpWidget(host(override: 18));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(field(), '0');
+    await tester.pumpAndSettle();
+
+    expect(reported, 18);
+    expect(find.text('Enter 1 or more'), findsOneWidget);
+  });
+
+  testWidgets('unreadable text makes an enclosing form refuse to save', (
+    tester,
+  ) async {
+    final formKey = GlobalKey<FormState>();
+    await tester.pumpWidget(
+      testApp(
+        locale: const Locale('en'),
+        child: Form(
+          key: formKey,
+          child: TankModField(
+            gas: ean50,
+            role: TankRole.deco,
+            overrideMeters: 18,
+            bottomPpO2: 1.4,
+            decoPpO2: 1.6,
+            diluentPpO2: 1.6,
+            units: metric,
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(formKey.currentState!.validate(), isTrue);
+
+    await tester.enterText(field(), '1.2.');
+    await tester.pumpAndSettle();
+
+    expect(formKey.currentState!.validate(), isFalse);
   });
 
   testWidgets('an override deeper than the limit is flagged in red', (
