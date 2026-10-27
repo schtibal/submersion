@@ -748,8 +748,9 @@ class PlanEngine {
 
     var state = startState ?? model.initial();
     var runtime = 0;
-    var cns = 0.0;
-    var otu = 0.0;
+    // A repetitive dive starts with the exposure earlier dives left behind.
+    var cns = plan.startCns;
+    var otu = plan.startOtu;
     var maxPpO2 = 0.0;
     int? ndlAtBottom;
     var authoredDecoSeconds = 0;
