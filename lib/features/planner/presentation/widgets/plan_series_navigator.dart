@@ -6,6 +6,7 @@ import 'package:submersion/features/planner/domain/entities/plan_outcome.dart';
 import 'package:submersion/features/planner/domain/entities/plan_series.dart';
 import 'package:submersion/features/planner/domain/utils/hours_minutes.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_series_providers.dart';
+import 'package:submersion/features/planner/presentation/widgets/plan_status_chips.dart';
 import 'package:submersion/features/planner/presentation/widgets/planned_dive_icon.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -18,8 +19,8 @@ import 'package:submersion/l10n/l10n_extension.dart';
 /// Each planned dive is an outlined diver and its name, or its letter while
 /// it has none; each surface interval is its time above two waves. Tapping a
 /// dive selects it; + adds a dive after the last one. The selected dive can
-/// be removed from its chip. A dot marks a dive with a warning. Wider than
-/// the screen, the dives scroll by touch or mouse drag behind faded edges,
+/// be removed from its chip. A dot marks a dive with a warning: red when
+/// any is critical, orange otherwise. Wider than the screen, the dives scroll by touch or mouse drag behind faded edges,
 /// keeping the selected dive in view.
 class PlanSeriesNavigator extends ConsumerStatefulWidget {
   const PlanSeriesNavigator({super.key});
@@ -108,18 +109,18 @@ class _PlanSeriesNavigatorState extends ConsumerState<PlanSeriesNavigator> {
           ),
         );
       }
-      final hasIssues =
-          i < results.length &&
-          results[i].outcome.issues.any(
-            (issue) => issue.severity != PlanIssueSeverity.info,
-          );
+      final worst = i < results.length
+          ? _worstWarning(results[i].outcome.issues)
+          : null;
       items.add(
         _DiveChip(
           key: _keyFor(dive.state.id),
           letter: seriesDiveLetter(i),
           name: dive.name,
           selected: i == selected,
-          hasIssues: hasIssues,
+          issueColor: worst == null
+              ? null
+              : planIssueSeverityColor(theme.colorScheme, worst),
           onSelected: () => notifier.select(i),
           onRemove: i == selected && series.isSeries
               ? () => _confirmRemove(i)
@@ -179,7 +180,7 @@ class _DiveChip extends StatelessWidget {
     required this.letter,
     this.name,
     required this.selected,
-    required this.hasIssues,
+    this.issueColor,
     required this.onSelected,
     this.onRemove,
   });
@@ -187,7 +188,9 @@ class _DiveChip extends StatelessWidget {
   final String letter;
   final String? name;
   final bool selected;
-  final bool hasIssues;
+
+  /// The dot's colour, from the dive's worst warning; null = no dot.
+  final Color? issueColor;
   final VoidCallback onSelected;
   final VoidCallback? onRemove;
 
@@ -197,14 +200,14 @@ class _DiveChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
     final name = this.name;
+    final issueColor = this.issueColor;
     return Semantics(
-      label: hasIssues ? l10n.plannerSeries_hasIssues(letter) : null,
+      label: issueColor != null ? l10n.plannerSeries_hasIssues(letter) : null,
       child: Badge(
-        isLabelVisible: hasIssues,
+        isLabelVisible: issueColor != null,
         smallSize: 8,
-        backgroundColor: theme.colorScheme.error,
+        backgroundColor: issueColor,
         child: InputChip(
           avatar: const PlannedDiveIcon(),
           // A named dive goes by its name alone; the letter stays in the
@@ -229,6 +232,19 @@ class _DiveChip extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The most serious of [issues] worth a dot: red for a critical one, orange
+/// for a warning or alert. Info-level notes raise none.
+PlanIssueSeverity? _worstWarning(List<PlanIssue> issues) {
+  PlanIssueSeverity? worst;
+  for (final issue in issues) {
+    if (issue.severity == PlanIssueSeverity.info) continue;
+    if (worst == null || issue.severity.index > worst.index) {
+      worst = issue.severity;
+    }
+  }
+  return worst;
 }
 
 /// The surface interval between two dives, as dive computers show it: the

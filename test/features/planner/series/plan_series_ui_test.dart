@@ -7,6 +7,7 @@ import 'package:submersion/features/dive_planner/presentation/providers/dive_pla
 import 'package:submersion/features/dive_planner/presentation/widgets/plan_tank_list.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_environment_section.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
+import 'package:submersion/features/planner/domain/entities/plan_outcome.dart';
 import 'package:submersion/features/planner/presentation/pages/plan_canvas_page.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_series_providers.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_series_navigator.dart';
@@ -332,5 +333,31 @@ void main() {
     await tester.tap(find.byTooltip('Dive A: Wreck'));
     await tester.pumpAndSettle();
     expect(field().controller!.text, 'Wreck');
+  });
+
+  testWidgets("a dive's dot takes the colour of its worst warning", (
+    tester,
+  ) async {
+    await pumpPlan(tester, const Size(1400, 900));
+    await addDive(tester);
+    final c = containerOf(tester);
+    final results = c.read(planSeriesResultsProvider);
+    PlanIssueSeverity worst(int i) => results[i].outcome.issues
+        .map((issue) => issue.severity)
+        .reduce((a, b) => a.index >= b.index ? a : b);
+    // The fixture: A raises warnings only; B, on A's leftover gas, runs
+    // its tank empty, which is critical.
+    expect(worst(0), isNot(PlanIssueSeverity.critical));
+    expect(worst(1), PlanIssueSeverity.critical);
+
+    Badge badge(String tooltip) => tester.widget<Badge>(
+      find.ancestor(of: find.byTooltip(tooltip), matching: find.byType(Badge)),
+    );
+    final scheme = Theme.of(
+      tester.element(find.byType(PlanSeriesNavigator)),
+    ).colorScheme;
+    expect(badge('Dive A').isLabelVisible, isTrue);
+    expect(badge('Dive A').backgroundColor, Colors.orange);
+    expect(badge('Dive B').backgroundColor, scheme.error);
   });
 }
