@@ -1,0 +1,230 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:submersion/core/constants/map_style.dart';
+import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/features/dive_planner/domain/entities/plan_result.dart';
+import 'package:submersion/features/dive_planner/domain/entities/plan_segment.dart';
+import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
+import 'package:submersion/features/planner/presentation/providers/plan_canvas_providers.dart';
+import 'package:submersion/features/planner/presentation/providers/plan_series_providers.dart';
+import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
+
+class _TestSettingsNotifier extends StateNotifier<AppSettings>
+    implements SettingsNotifier {
+  _TestSettingsNotifier() : super(const AppSettings());
+
+  @override
+  Future<void> setMapStyle(MapStyle style) async =>
+      state = state.copyWith(mapStyle: style);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  Future<ProviderContainer> makeContainer() async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        settingsProvider.overrideWith((ref) => _TestSettingsNotifier()),
+      ],
+    );
+    addTearDown(container.dispose);
+    container
+        .read(divePlanNotifierProvider.notifier)
+        .addSimplePlan(maxDepth: 30, bottomTimeMinutes: 25);
+    return container;
+  }
+
+  DivePlanState editor(ProviderContainer c) => c.read(divePlanNotifierProvider);
+  PlanSeriesNotifier series(ProviderContainer c) =>
+      c.read(planSeriesNotifierProvider.notifier);
+
+  test('a plan starts as a one-dive series of the plan being edited', () async {
+    final c = await makeContainer();
+    final s = c.read(planSeriesNotifierProvider);
+    expect(s.dives, hasLength(1));
+    expect(s.isSeries, isFalse);
+    expect(s.selected.state, editor(c));
+  });
+
+  test('editing the plan updates its dive in the series', () async {
+    final c = await makeContainer();
+    c.read(planSeriesNotifierProvider);
+    c.read(divePlanNotifierProvider.notifier).updateGradientFactors(30, 70);
+    expect(c.read(planSeriesNotifierProvider).selected.state.gfLow, 30);
+  });
+
+  group('adding a dive', () {
+    test('selects it in the editor, seeded from the dive before', () async {
+      final c = await makeContainer();
+      final first = editor(c);
+      series(c).addDive();
+
+      final s = c.read(planSeriesNotifierProvider);
+      final results = c.read(planSeriesResultsProvider);
+      final added = editor(c);
+      expect(s.dives, hasLength(2));
+      expect(s.selectedIndex, 1);
+      expect(added.id, isNot(first.id));
+      expect(added.surfaceInterval, const Duration(hours: 1));
+      expect(added.initialTissueState, isNotNull);
+      expect(added.initialCns, results[0].outcome.cnsEnd);
+      final backUsage = results[0].outcome.tankUsages.first;
+      expect(
+        added.tanks.first.startPressure,
+        closeTo(backUsage.remainingPressure!, 1e-9),
+      );
+    });
+
+    test('the live outcome agrees with the series result', () async {
+      final c = await makeContainer();
+      series(c).addDive();
+      final live = c.read(planOutcomeProvider);
+      final result = c.read(planSeriesResultsProvider)[1].outcome;
+      expect(live.cnsEnd, closeTo(result.cnsEnd, 1e-9));
+      expect(live.runtimeSeconds, result.runtimeSeconds);
+    });
+
+    test('is not offered for a DPV mission plan', () async {
+      final c = await makeContainer();
+      expect(c.read(canAddSeriesDiveProvider), isTrue);
+    });
+  });
+
+  group('moving between dives', () {
+    test('keeps each dive\'s edits', () async {
+      final c = await makeContainer();
+      final notifier = series(c);
+      notifier.addDive();
+      c.read(divePlanNotifierProvider.notifier).updateGradientFactors(30, 70);
+
+      notifier.previous();
+      expect(editor(c).gfLow, isNot(30));
+      notifier.next();
+      expect(editor(c).gfLow, 30);
+    });
+
+    test('a deeper first dive loads more into the next one', () async {
+      final c = await makeContainer();
+      final notifier = series(c);
+      notifier.addDive();
+      final before = editor(c).initialCns!;
+
+      notifier.select(0);
+      final plan = c.read(divePlanNotifierProvider.notifier);
+      final bottom = editor(c).segments.last;
+      plan.updateSegment(
+        bottom.id,
+        bottom.copyWith(durationSeconds: bottom.durationSeconds * 2),
+      );
+      notifier.select(1);
+
+      expect(editor(c).initialCns, greaterThan(before));
+    });
+
+    test('previous and next stop at the ends', () async {
+      final c = await makeContainer();
+      final notifier = series(c);
+      notifier.addDive();
+      notifier.next();
+      expect(c.read(planSeriesNotifierProvider).selectedIndex, 1);
+      notifier.previous();
+      notifier.previous();
+      expect(c.read(planSeriesNotifierProvider).selectedIndex, 0);
+    });
+  });
+
+  group('removing a dive', () {
+    test('removing the selected dive loads the one before it', () async {
+      final c = await makeContainer();
+      final first = editor(c).id;
+      final notifier = series(c);
+      notifier.addDive();
+      notifier.removeDive(1);
+
+      expect(c.read(planSeriesNotifierProvider).isSeries, isFalse);
+      expect(editor(c).id, first);
+    });
+  });
+
+  group('tanks', () {
+    test('typing a start pressure pins the tank', () async {
+      final c = await makeContainer();
+      series(c).addDive();
+      final tank = editor(c).tanks.first;
+      c
+          .read(divePlanNotifierProvider.notifier)
+          .updateTank(tank.id, tank.copyWith(startPressure: 150));
+
+      expect(c.read(planSeriesNotifierProvider).selected.pinnedTankIds, {
+        tank.id,
+      });
+      series(c).previous();
+      series(c).next();
+      expect(editor(c).tanks.first.startPressure, 150);
+    });
+
+    test('Fill fills the tank to its first-dive pressure', () async {
+      final c = await makeContainer();
+      final full = editor(c).tanks.first.startPressure;
+      series(c).addDive();
+      final tank = editor(c).tanks.first;
+      expect(tank.startPressure, lessThan(full!));
+
+      series(c).fillTank(tank.id);
+      expect(editor(c).tanks.first.startPressure, full);
+    });
+
+    test('Fill all tanks fills every tank', () async {
+      final c = await makeContainer();
+      final full = editor(c).tanks.map((t) => t.startPressure).toList();
+      series(c).addDive();
+      series(c).fillAllTanks();
+      expect(editor(c).tanks.map((t) => t.startPressure), full);
+    });
+  });
+
+  test('a 24 hour surface interval drops the carried OTU', () async {
+    final c = await makeContainer();
+    series(c).addDive();
+    expect(editor(c).initialOtu, greaterThan(0));
+
+    c
+        .read(divePlanNotifierProvider.notifier)
+        .setSurfaceInterval(const Duration(hours: 24));
+    expect(editor(c).initialOtu, 0);
+  });
+
+  test('starting a new plan starts a new series', () async {
+    final c = await makeContainer();
+    series(c).addDive();
+    c.read(divePlanNotifierProvider.notifier).newPlan();
+
+    final s = c.read(planSeriesNotifierProvider);
+    expect(s.isSeries, isFalse);
+    expect(s.selected.state, editor(c));
+  });
+
+  test('a series cannot be saved yet; a single dive can', () async {
+    final c = await makeContainer();
+    expect(c.read(planSaveAllowedProvider), isTrue);
+    series(c).addDive();
+    expect(c.read(planSaveAllowedProvider), isFalse);
+  });
+
+  test('segments keep their own tank after a dive is added', () async {
+    final c = await makeContainer();
+    series(c).addDive();
+    final state = editor(c);
+    final tankIds = state.tanks.map((t) => t.id).toSet();
+    expect(state.segments, isNotEmpty);
+    for (final PlanSegment segment in state.segments) {
+      expect(tankIds, contains(segment.tankId));
+    }
+  });
+}
