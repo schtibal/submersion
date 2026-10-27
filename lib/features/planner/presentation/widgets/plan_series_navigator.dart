@@ -12,11 +12,11 @@ import 'package:submersion/l10n/l10n_extension.dart';
 /// The bar across the top of the dive profile that moves between the dives
 /// of a repetitive series (issue #3565):
 ///
-///               1:00               1:30
-///   [(diver) A Wreck]  ~~  [(diver) B]  ~~  [(diver) C]   (+)
+///                    1:00               1:30
+///   [(diver) Morning dive]  ~~  [(diver) B]  ~~  [(diver) C]   (+)
 ///
-/// Each planned dive is an outlined diver, its letter and any name the diver
-/// gave it; each surface interval is its time above two waves. Tapping a
+/// Each planned dive is an outlined diver and its name, or its letter while
+/// it has none; each surface interval is its time above two waves. Tapping a
 /// dive selects it; + adds a dive after the last one. The selected dive can
 /// be removed from its chip. A dot marks a dive with a warning. Wider than
 /// the screen, the dives scroll by touch or mouse drag behind faded edges,
@@ -207,31 +207,15 @@ class _DiveChip extends StatelessWidget {
         backgroundColor: theme.colorScheme.error,
         child: InputChip(
           avatar: const PlannedDiveIcon(),
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                letter,
-                style: const TextStyle(
-                  fontFeatures: [FontFeature.tabularFigures()],
-                ),
-              ),
-              if (name != null) ...[
-                const SizedBox(width: 6),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: _maxNameWidth),
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ],
+          // A named dive goes by its name alone; the letter stays in the
+          // tooltip, which the warnings and the remove dialog also use.
+          label: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _maxNameWidth),
+            child: Text(
+              name ?? letter,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           tooltip: name == null
               ? l10n.plannerSeries_dive(letter)

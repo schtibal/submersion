@@ -4,6 +4,7 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/plan_gear_weights_section.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_deco_section.dart';
+import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_environment_section.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_gas_section.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_rates_section.dart';
 import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
@@ -18,8 +19,7 @@ import 'package:submersion/l10n/l10n_extension.dart';
 /// The Plan Setup accordion: every plan-level setting grouped by topic.
 /// Sized for the full parity control set - later phases add controls into
 /// the existing sections (deco-model radio into Deco, rate bands into a new
-/// Rates tile) without relayout. Water type and altitude are per dive, so
-/// they sit in the Dive details card instead (issue #3565).
+/// Rates tile, water type into Environment) without relayout.
 class PlanSetupAccordion extends ConsumerStatefulWidget {
   const PlanSetupAccordion({super.key});
 
@@ -83,6 +83,11 @@ class _PlanSetupAccordionState extends ConsumerState<PlanSetupAccordion> {
         const PlanRatesSection(),
       ),
       ('gas', context.l10n.diveField_category_gas, const PlanGasSection()),
+      (
+        'environment',
+        context.l10n.diveDetailSection_environment_name,
+        const PlanEnvironmentSection(),
+      ),
       if (mode == domain.PlanMode.ccr)
         ('ccr', 'CCR', const CcrSettingsSection()),
       if (mode == domain.PlanMode.pscr)

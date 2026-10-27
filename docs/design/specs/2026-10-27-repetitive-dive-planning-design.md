@@ -41,7 +41,7 @@ is the only phase built so far.
   Removing Dive A makes Dive B a fresh first dive.
 - The navigator shows each planned dive as the main menu's diver
   (`Icons.scuba_diving`) filled white and outlined in the primary colour,
-  then its letter and any name the diver gave it (cut short past 160 px);
+  then its name, or its letter while it has none (cut short past 160 px);
   Material has no outlined diver, so the glyph is painted twice, filled and
   stroked. Each surface interval is its time above two waves (the top two
   lines of `Icons.waves`). There are no step arrows: the bar scrolls by
@@ -51,16 +51,16 @@ is the only phase built so far.
   `sourceDiveId` names both a followed dive and the dive a "What if" plan
   replans, so the bar cannot yet tell which it is.
 - The **Dive details** card sits above Tanks in the editor pane and at the
-  top of the phone Tanks tab, on every dive. It holds what sets the dive
-  apart:
+  top of the phone Tanks tab, on every dive. It holds:
   - **Dive name**, optional, up to 40 characters, with the dive's letter as
-    its hint. It belongs to the series (`PlanSeriesDive.name`), not to the
-    plan, whose name stays the title of the whole; a new dive starts
-    unnamed.
-  - **Surface interval** (h:mm, 15-minute steppers), hidden on a first dive
-    that follows no logged dive.
-  - **Water type and altitude**, moved here from Plan settings, since they
-    are per dive. The altitude chip in the header opens this card.
+    its hint. A named dive's chip shows the name in place of the letter;
+    the letter stays in its tooltip. The name belongs to the series
+    (`PlanSeriesDive.name`), not to the plan, whose name stays the title of
+    the whole; a new dive starts unnamed.
+  - **Surface interval** (h:mm, 15-minute steppers). On a first dive that
+    follows no logged dive it is empty and greyed out rather than hidden,
+    so the panels below keep their place when the diver changes dives.
+  - Water type and altitude stay in Plan settings.
 - DPV mission plans stay single dives: `+` is disabled for them.
 
 ### What carries into the next dive

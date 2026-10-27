@@ -190,7 +190,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
               PlanChip(
                 label:
                     '${units.convertAltitude(planState.altitude ?? 0).toStringAsFixed(0)} ${units.altitudeSymbol}',
-                onTap: _focusDiveDetails,
+                onTap: () => _focusSetup('environment'),
               ),
             ],
           ],
@@ -346,17 +346,6 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
   }
 
   /// Reveal a Setup accordion section in whatever layout mode is active.
-  /// Water type and altitude live in the Dive details card, at the top of
-  /// the editor pane and of the phone's Tanks tab.
-  void _focusDiveDetails() {
-    if (MediaQuery.sizeOf(context).width < 760) {
-      ref.read(plannerPhoneTabProvider.notifier).state = 0;
-    } else {
-      ref.read(editorPaneCollapsedProvider.notifier).state = false;
-    }
-    ref.read(diveDetailsFocusProvider.notifier).state = true;
-  }
-
   void _focusSetup(String section) {
     if (MediaQuery.sizeOf(context).width < 760) {
       ref.read(plannerPhoneTabProvider.notifier).state = 2;

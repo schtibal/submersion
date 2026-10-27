@@ -10,9 +10,13 @@ import 'package:submersion/l10n/l10n_extension.dart';
 /// 15-minute steppers.
 ///
 /// The interval is the source of truth for when the dive starts: the end
-/// of the dive before it plus this.
+/// of the dive before it plus this. Not [enabled] on a first dive that
+/// follows no logged dive, where there is no interval to set: shown empty
+/// and greyed out, so the panels below keep their place from dive to dive.
 class PlanSurfaceIntervalField extends ConsumerStatefulWidget {
-  const PlanSurfaceIntervalField({super.key});
+  const PlanSurfaceIntervalField({super.key, this.enabled = true});
+
+  final bool enabled;
 
   @override
   ConsumerState<PlanSurfaceIntervalField> createState() =>
@@ -30,10 +34,22 @@ class _PlanSurfaceIntervalFieldState
   @override
   void initState() {
     super.initState();
-    _show(_interval);
+    if (widget.enabled) _show(_interval);
     _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) _commit();
+      if (!_focusNode.hasFocus && widget.enabled) _commit();
     });
+  }
+
+  @override
+  void didUpdateWidget(PlanSurfaceIntervalField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enabled == widget.enabled) return;
+    _invalid = false;
+    if (widget.enabled) {
+      _show(_interval);
+    } else {
+      _controller.clear();
+    }
   }
 
   @override
@@ -82,23 +98,29 @@ class _PlanSurfaceIntervalFieldState
       _,
       next,
     ) {
-      if (_focusNode.hasFocus) return;
+      if (_focusNode.hasFocus || !widget.enabled) return;
       if (_invalid) setState(() => _invalid = false);
       _show(next ?? defaultSeriesSurfaceInterval);
     });
 
     final l10n = context.l10n;
+    final enabled = widget.enabled;
+    // Greyed out like the disabled controls below it.
+    final labelColor = enabled ? null : Theme.of(context).disabledColor;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const ExcludeSemantics(child: Icon(Icons.timer_outlined, size: 18)),
+            ExcludeSemantics(
+              child: Icon(Icons.timer_outlined, size: 18, color: labelColor),
+            ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 l10n.plannerSeries_surfaceInterval,
                 overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: labelColor),
               ),
             ),
           ],
@@ -110,13 +132,14 @@ class _PlanSurfaceIntervalFieldState
             IconButton(
               icon: const Icon(Icons.remove),
               tooltip: l10n.plannerSeries_surfaceInterval_decrease,
-              onPressed: () => _stepBy(-_step),
+              onPressed: enabled ? () => _stepBy(-_step) : null,
             ),
             Expanded(
               child: TextField(
                 key: const Key('surfaceIntervalField'),
                 controller: _controller,
                 focusNode: _focusNode,
+                enabled: enabled,
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.datetime,
                 decoration: InputDecoration(
@@ -136,7 +159,7 @@ class _PlanSurfaceIntervalFieldState
             IconButton(
               icon: const Icon(Icons.add),
               tooltip: l10n.plannerSeries_surfaceInterval_increase,
-              onPressed: () => _stepBy(_step),
+              onPressed: enabled ? () => _stepBy(_step) : null,
             ),
           ],
         ),

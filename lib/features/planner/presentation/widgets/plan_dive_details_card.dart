@@ -3,19 +3,17 @@ import 'package:flutter/services.dart';
 
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
-import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_environment_section.dart';
 import 'package:submersion/features/planner/domain/entities/plan_series.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_series_providers.dart';
-import 'package:submersion/features/planner/presentation/providers/planner_layout_providers.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_surface_interval_field.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// What sets the selected dive apart from the others in its series (issue
-/// #3565): its name, the surface interval before it, and its water and
-/// altitude.
+/// #3565): its name and the surface interval before it.
 ///
-/// The interval is hidden on a first dive that follows no logged dive, where
-/// there is no interval to set.
+/// On a first dive that follows no logged dive there is no interval to set,
+/// so the interval is greyed out rather than hidden: the card keeps its
+/// height and nothing below it moves when the diver changes dives.
 class PlanDiveDetailsCard extends ConsumerStatefulWidget {
   const PlanDiveDetailsCard({super.key});
 
@@ -43,18 +41,6 @@ class _PlanDiveDetailsCardState extends ConsumerState<PlanDiveDetailsCard> {
     super.dispose();
   }
 
-  void _reveal() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(diveDetailsFocusProvider.notifier).state = false;
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 250),
-        alignment: 0.1,
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     // Show the selected dive's own name whenever another dive is selected.
@@ -65,7 +51,6 @@ class _PlanDiveDetailsCardState extends ConsumerState<PlanDiveDetailsCard> {
       final name = ref.read(planSeriesNotifierProvider).selected.name ?? '';
       if (_nameController.text != name) _nameController.text = name;
     });
-    if (ref.watch(diveDetailsFocusProvider)) _reveal();
 
     final index = ref.watch(
       planSeriesNotifierProvider.select((s) => s.selectedIndex),
@@ -73,7 +58,7 @@ class _PlanDiveDetailsCardState extends ConsumerState<PlanDiveDetailsCard> {
     final followsDive = ref.watch(
       divePlanNotifierProvider.select((s) => s.sourceDiveId != null),
     );
-    final showInterval = index > 0 || followsDive;
+    final hasInterval = index > 0 || followsDive;
 
     final l10n = context.l10n;
     final theme = Theme.of(context);
@@ -117,19 +102,16 @@ class _PlanDiveDetailsCardState extends ConsumerState<PlanDiveDetailsCard> {
                 isDense: true,
                 border: const OutlineInputBorder(),
                 labelText: l10n.plannerSeries_diveName,
-                hintText: l10n.plannerSeries_dive(seriesDiveLetter(index)),
+                // What the dive's chip shows while it has no name.
+                hintText: seriesDiveLetter(index),
                 floatingLabelBehavior: FloatingLabelBehavior.always,
               ),
               onChanged: ref
                   .read(planSeriesNotifierProvider.notifier)
                   .renameSelected,
             ),
-            if (showInterval) ...[
-              const SizedBox(height: 16),
-              const PlanSurfaceIntervalField(),
-            ],
             const SizedBox(height: 16),
-            const PlanEnvironmentSection(),
+            PlanSurfaceIntervalField(enabled: hasInterval),
           ],
         ),
       ),

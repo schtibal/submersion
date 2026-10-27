@@ -4,11 +4,11 @@ import 'package:submersion/core/constants/map_style.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
+import 'package:submersion/features/dive_planner/presentation/widgets/plan_tank_list.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_environment_section.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/planner/presentation/pages/plan_canvas_page.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_series_providers.dart';
-import 'package:submersion/features/planner/presentation/providers/planner_layout_providers.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_series_navigator.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_dive_details_card.dart';
 import 'package:submersion/features/planner/presentation/widgets/planned_dive_icon.dart';
@@ -119,22 +119,45 @@ void main() {
         expect(series.selectedIndex, 1);
       });
 
-      testWidgets('Dive details always shows; its interval only after A', (
+      testWidgets('the interval is greyed out on Dive A, live after it', (
         tester,
       ) async {
+        bool siEnabled() => tester.widget<TextField>(siField()).enabled!;
+        IconButton stepper(String tooltip) => tester.widget<IconButton>(
+          find.ancestor(
+            of: find.byTooltip(tooltip),
+            matching: find.byType(IconButton),
+          ),
+        );
+
         await pumpPlan(tester, size);
         expect(find.text('Dive details'), findsOneWidget);
-        expect(siField(), findsNothing);
+        expect(siEnabled(), isFalse);
+        expect(stepper('15 minutes more').onPressed, isNull);
+        expect(stepper('15 minutes less').onPressed, isNull);
 
         await addDive(tester);
-        expect(siField(), findsOneWidget);
+        expect(siEnabled(), isTrue);
+        expect(stepper('15 minutes more').onPressed, isNotNull);
 
         await tester.tap(find.byTooltip('Dive A'));
         await tester.pumpAndSettle();
-        expect(siField(), findsNothing);
+        expect(siEnabled(), isFalse);
       });
 
-      testWidgets('Dive details holds the water type and altitude', (
+      testWidgets('moving between dives leaves the panels where they are', (
+        tester,
+      ) async {
+        await pumpPlan(tester, size);
+        await addDive(tester);
+        final onB = tester.getTopLeft(find.byType(PlanTankList));
+
+        await tester.tap(find.byTooltip('Dive A'));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.byType(PlanTankList)), onB);
+      });
+
+      testWidgets('Dive details holds only the name and interval', (
         tester,
       ) async {
         await pumpPlan(tester, size);
@@ -143,22 +166,24 @@ void main() {
             of: find.byType(PlanDiveDetailsCard),
             matching: find.byType(PlanEnvironmentSection),
           ),
-          findsOneWidget,
+          findsNothing,
         );
       });
 
-      testWidgets('a named dive shows its name beside its letter', (
+      testWidgets('a named dive shows its name instead of its letter', (
         tester,
       ) async {
         await pumpPlan(tester, size);
-        await tester.enterText(nameField(), 'Wreck');
+        expect(navigatorText('A'), findsOneWidget);
+        await tester.enterText(nameField(), 'Morning dive');
         await tester.pumpAndSettle();
 
-        expect(navigatorText('Wreck'), findsOneWidget);
-        expect(find.byTooltip('Dive A: Wreck'), findsOneWidget);
+        expect(navigatorText('Morning dive'), findsOneWidget);
+        expect(navigatorText('A'), findsNothing);
+        expect(find.byTooltip('Dive A: Morning dive'), findsOneWidget);
         expect(
           containerOf(tester).read(planSeriesNotifierProvider).selected.name,
-          'Wreck',
+          'Morning dive',
         );
       });
 
@@ -302,30 +327,10 @@ void main() {
 
     TextField field() => tester.widget<TextField>(nameField());
     expect(field().controller!.text, isEmpty);
-    expect(field().decoration!.hintText, 'Dive B');
+    expect(field().decoration!.hintText, 'B');
 
     await tester.tap(find.byTooltip('Dive A: Wreck'));
     await tester.pumpAndSettle();
     expect(field().controller!.text, 'Wreck');
-  });
-
-  testWidgets('the altitude chip opens Dive details', (tester) async {
-    await pumpPlan(tester, const Size(1400, 900));
-    final c = containerOf(tester);
-    c.read(editorPaneCollapsedProvider.notifier).state = true;
-    await tester.pumpAndSettle();
-    expect(find.byType(PlanDiveDetailsCard), findsNothing);
-
-    await tester.tap(find.text('0 m'));
-    await tester.pumpAndSettle();
-    expect(c.read(editorPaneCollapsedProvider), isFalse);
-    expect(find.byType(PlanDiveDetailsCard), findsOneWidget);
-  });
-
-  testWidgets('Plan settings no longer has an Environment section', (
-    tester,
-  ) async {
-    await pumpPlan(tester, const Size(1400, 900));
-    expect(find.byKey(const ValueKey('planSetup_environment')), findsNothing);
   });
 }
