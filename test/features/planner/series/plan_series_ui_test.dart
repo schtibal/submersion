@@ -4,11 +4,14 @@ import 'package:submersion/core/constants/map_style.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
+import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_environment_section.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/planner/presentation/pages/plan_canvas_page.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_series_providers.dart';
+import 'package:submersion/features/planner/presentation/providers/planner_layout_providers.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_series_navigator.dart';
-import 'package:submersion/features/planner/presentation/widgets/plan_surface_interval_card.dart';
+import 'package:submersion/features/planner/presentation/widgets/plan_dive_details_card.dart';
+import 'package:submersion/features/planner/presentation/widgets/planned_dive_icon.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 
 import '../../../helpers/mock_providers.dart';
@@ -78,6 +81,14 @@ void main() {
     matching: find.text(text),
   );
 
+  Finder siField() => find.byKey(const Key('surfaceIntervalField'));
+  Finder nameField() => find.byKey(const Key('diveNameField'));
+
+  Finder plannedIcons() => find.descendant(
+    of: find.byType(PlanSeriesNavigator),
+    matching: find.byType(PlannedDiveIcon),
+  );
+
   for (final (name, size) in [
     ('desktop', const Size(1400, 900)),
     ('phone', const Size(420, 900)),
@@ -85,8 +96,12 @@ void main() {
     group('on $name', () {
       testWidgets('a new plan shows Dive A and the add button', (tester) async {
         await pumpPlan(tester, size);
-        expect(navigatorText('Dive A'), findsOneWidget);
+        expect(navigatorText('A'), findsOneWidget);
+        expect(find.byTooltip('Dive A'), findsOneWidget);
+        expect(plannedIcons(), findsOneWidget);
         expect(find.byTooltip('Add a dive'), findsOneWidget);
+        expect(find.byTooltip('Previous dive'), findsNothing);
+        expect(find.byTooltip('Next dive'), findsNothing);
       });
 
       testWidgets('+ adds Dive B after a 1:00 surface interval', (
@@ -95,24 +110,56 @@ void main() {
         await pumpPlan(tester, size);
         await addDive(tester);
 
-        expect(navigatorText('Dive B'), findsOneWidget);
-        expect(navigatorText('— 1:00 —'), findsOneWidget);
+        expect(navigatorText('B'), findsOneWidget);
+        expect(find.byTooltip('Dive B'), findsOneWidget);
+        expect(plannedIcons(), findsNWidgets(2));
+        expect(navigatorText('1:00'), findsOneWidget);
+        expect(find.byTooltip('Surface interval 1:00'), findsOneWidget);
         final series = containerOf(tester).read(planSeriesNotifierProvider);
         expect(series.selectedIndex, 1);
       });
 
-      testWidgets('the surface interval card shows only after Dive A', (
+      testWidgets('Dive details always shows; its interval only after A', (
         tester,
       ) async {
         await pumpPlan(tester, size);
-        expect(find.text('Surface interval'), findsNothing);
+        expect(find.text('Dive details'), findsOneWidget);
+        expect(siField(), findsNothing);
 
         await addDive(tester);
-        expect(find.text('Surface interval'), findsOneWidget);
+        expect(siField(), findsOneWidget);
 
-        await tester.tap(navigatorText('Dive A'));
+        await tester.tap(find.byTooltip('Dive A'));
         await tester.pumpAndSettle();
-        expect(find.text('Surface interval'), findsNothing);
+        expect(siField(), findsNothing);
+      });
+
+      testWidgets('Dive details holds the water type and altitude', (
+        tester,
+      ) async {
+        await pumpPlan(tester, size);
+        expect(
+          find.descendant(
+            of: find.byType(PlanDiveDetailsCard),
+            matching: find.byType(PlanEnvironmentSection),
+          ),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('a named dive shows its name beside its letter', (
+        tester,
+      ) async {
+        await pumpPlan(tester, size);
+        await tester.enterText(nameField(), 'Wreck');
+        await tester.pumpAndSettle();
+
+        expect(navigatorText('Wreck'), findsOneWidget);
+        expect(find.byTooltip('Dive A: Wreck'), findsOneWidget);
+        expect(
+          containerOf(tester).read(planSeriesNotifierProvider).selected.name,
+          'Wreck',
+        );
       });
 
       testWidgets('Save is held back while the plan is a series', (
@@ -163,7 +210,7 @@ void main() {
       c.read(divePlanNotifierProvider).surfaceInterval,
       const Duration(hours: 2, minutes: 30),
     );
-    expect(navigatorText('— 2:30 —'), findsOneWidget);
+    expect(navigatorText('2:30'), findsOneWidget);
   });
 
   testWidgets('an invalid surface interval is flagged, not applied', (
@@ -198,7 +245,7 @@ void main() {
       containerOf(tester).read(divePlanNotifierProvider).surfaceInterval,
       const Duration(hours: 1, minutes: 15),
     );
-    expect(find.byType(PlanSurfaceIntervalCard), findsOneWidget);
+    expect(find.byType(PlanDiveDetailsCard), findsOneWidget);
   });
 
   testWidgets('Fill all tanks refills the carried tanks', (tester) async {
@@ -241,24 +288,44 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Remove'));
     await tester.pumpAndSettle();
 
-    expect(navigatorText('Dive B'), findsNothing);
+    expect(find.byTooltip('Dive B'), findsNothing);
     expect(
       containerOf(tester).read(planSeriesNotifierProvider).isSeries,
       isFalse,
     );
   });
 
-  testWidgets('the arrows step between dives', (tester) async {
+  testWidgets('the name field follows the selected dive', (tester) async {
     await pumpPlan(tester, const Size(1400, 900));
+    await tester.enterText(nameField(), 'Wreck');
     await addDive(tester);
+
+    TextField field() => tester.widget<TextField>(nameField());
+    expect(field().controller!.text, isEmpty);
+    expect(field().decoration!.hintText, 'Dive B');
+
+    await tester.tap(find.byTooltip('Dive A: Wreck'));
+    await tester.pumpAndSettle();
+    expect(field().controller!.text, 'Wreck');
+  });
+
+  testWidgets('the altitude chip opens Dive details', (tester) async {
+    await pumpPlan(tester, const Size(1400, 900));
     final c = containerOf(tester);
-
-    await tester.tap(find.byTooltip('Previous dive'));
+    c.read(editorPaneCollapsedProvider.notifier).state = true;
     await tester.pumpAndSettle();
-    expect(c.read(planSeriesNotifierProvider).selectedIndex, 0);
+    expect(find.byType(PlanDiveDetailsCard), findsNothing);
 
-    await tester.tap(find.byTooltip('Next dive'));
+    await tester.tap(find.text('0 m'));
     await tester.pumpAndSettle();
-    expect(c.read(planSeriesNotifierProvider).selectedIndex, 1);
+    expect(c.read(editorPaneCollapsedProvider), isFalse);
+    expect(find.byType(PlanDiveDetailsCard), findsOneWidget);
+  });
+
+  testWidgets('Plan settings no longer has an Environment section', (
+    tester,
+  ) async {
+    await pumpPlan(tester, const Size(1400, 900));
+    expect(find.byKey(const ValueKey('planSetup_environment')), findsNothing);
   });
 }

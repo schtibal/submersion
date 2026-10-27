@@ -20471,12 +20471,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get plannerSeries_addDive => 'Ajouter une plongée';
 
   @override
-  String get plannerSeries_previousDive => 'Plongée précédente';
-
-  @override
-  String get plannerSeries_nextDive => 'Plongée suivante';
-
-  @override
   String plannerSeries_removeDive(String letter) {
     return 'Supprimer la plongée $letter';
   }
@@ -20492,7 +20486,23 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get plannerSeries_diveDetails => 'Détails de la plongée';
+
+  @override
+  String get plannerSeries_diveName => 'Nom de la plongée';
+
+  @override
+  String plannerSeries_diveNamed(String letter, String name) {
+    return 'Plongée $letter : $name';
+  }
+
+  @override
   String get plannerSeries_surfaceInterval => 'Intervalle de surface';
+
+  @override
+  String plannerSeries_surfaceIntervalValue(String time) {
+    return 'Intervalle de surface $time';
+  }
 
   @override
   String get plannerSeries_surfaceInterval_invalid =>

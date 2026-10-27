@@ -20391,12 +20391,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get plannerSeries_addDive => 'Tauchgang hinzufügen';
 
   @override
-  String get plannerSeries_previousDive => 'Vorheriger Tauchgang';
-
-  @override
-  String get plannerSeries_nextDive => 'Nächster Tauchgang';
-
-  @override
   String plannerSeries_removeDive(String letter) {
     return 'Tauchgang $letter entfernen';
   }
@@ -20412,7 +20406,23 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get plannerSeries_diveDetails => 'Tauchgangsdetails';
+
+  @override
+  String get plannerSeries_diveName => 'Name des Tauchgangs';
+
+  @override
+  String plannerSeries_diveNamed(String letter, String name) {
+    return 'Tauchgang $letter: $name';
+  }
+
+  @override
   String get plannerSeries_surfaceInterval => 'Oberflächenpause';
+
+  @override
+  String plannerSeries_surfaceIntervalValue(String time) {
+    return 'Oberflächenpause $time';
+  }
 
   @override
   String get plannerSeries_surfaceInterval_invalid => 'Zeit als h:mm eingeben';

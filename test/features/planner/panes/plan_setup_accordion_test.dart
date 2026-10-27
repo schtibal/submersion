@@ -4,12 +4,12 @@ import 'package:submersion/core/constants/map_style.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_deco_section.dart';
-import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_environment_section.dart';
 import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
     as domain;
 import 'package:submersion/features/planner/presentation/panes/plan_setup_accordion.dart';
 import 'package:submersion/features/planner/presentation/providers/planner_layout_providers.dart';
 import 'package:submersion/features/planner/presentation/widgets/ccr_settings_section.dart';
+import 'package:submersion/features/planner/presentation/widgets/contingency_settings_section.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 
 import '../../../helpers/test_app.dart';
@@ -38,7 +38,9 @@ void main() {
   ) async {
     await tester.pumpWidget(_harness());
     await tester.pumpAndSettle();
-    expect(find.byType(ExpansionTile), findsNWidgets(6));
+    expect(find.byType(ExpansionTile), findsNWidgets(5));
+    // Environment lives in the Dive details card (issue #3565).
+    expect(find.text('Environment'), findsNothing);
     expect(find.byType(CcrSettingsSection), findsNothing);
     expect(find.byType(PlanDecoSection), findsNothing);
   });
@@ -63,15 +65,15 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(TextField), findsWidgets);
 
-    // Expanding Gas pushes the Environment header below the fold, so the tap
-    // derived an offset that hit nothing and the section never opened.
-    await tester.ensureVisible(find.text('Environment'));
-    await tester.tap(find.text('Environment'));
+    // Expanding Gas pushes the Contingencies header below the fold, so the
+    // tap derived an offset that hit nothing and the section never opened.
+    await tester.ensureVisible(find.text('Contingencies'));
+    await tester.tap(find.text('Contingencies'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     // A collapsed ExpansionTile builds no children, so this fails if the tap
     // above is a no-op and the section never opened.
-    expect(find.byType(PlanEnvironmentSection), findsOneWidget);
+    expect(find.byType(ContingencySettingsSection), findsOneWidget);
   });
 
   testWidgets('CCR section appears for CCR plans', (tester) async {
@@ -83,7 +85,7 @@ void main() {
         .read(divePlanNotifierProvider.notifier)
         .updateMode(domain.PlanMode.ccr);
     await tester.pumpAndSettle();
-    expect(find.byType(ExpansionTile), findsNWidgets(7));
+    expect(find.byType(ExpansionTile), findsNWidgets(6));
     expect(find.text('CCR'), findsOneWidget);
   });
 

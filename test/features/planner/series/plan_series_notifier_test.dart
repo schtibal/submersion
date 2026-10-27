@@ -227,4 +227,39 @@ void main() {
       expect(tankIds, contains(segment.tankId));
     }
   });
+
+  group('naming a dive', () {
+    test('names the selected dive without touching the editor', () async {
+      final c = await makeContainer();
+      series(c).addDive();
+      final before = editor(c);
+
+      series(c).renameSelected('Wreck');
+
+      final s = c.read(planSeriesNotifierProvider);
+      expect(s.dives[1].name, 'Wreck');
+      expect(s.dives[0].name, isNull);
+      expect(editor(c), before);
+    });
+
+    test("keeps each dive's name while moving between them", () async {
+      final c = await makeContainer();
+      series(c).renameSelected('Wreck');
+      series(c).addDive();
+      series(c).renameSelected('Reef');
+
+      series(c).previous();
+      series(c).next();
+
+      final s = c.read(planSeriesNotifierProvider);
+      expect(s.dives.map((d) => d.name), ['Wreck', 'Reef']);
+    });
+
+    test('starting a new plan drops the names', () async {
+      final c = await makeContainer();
+      series(c).renameSelected('Wreck');
+      c.read(divePlanNotifierProvider.notifier).newPlan();
+      expect(c.read(planSeriesNotifierProvider).selected.name, isNull);
+    });
+  });
 }

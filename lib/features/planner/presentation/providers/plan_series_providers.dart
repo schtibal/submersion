@@ -91,6 +91,12 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
     if (!identical(before, state)) _loadSelected();
   }
 
+  /// Names the selected dive; a blank name clears it. The name is the
+  /// series' own, so the editor is left alone.
+  void renameSelected(String name) {
+    state = edits.renameDive(state, state.selectedIndex, name);
+  }
+
   /// Fills one tank of the selected dive.
   void fillTank(String tankId) {
     state = edits.fillTank(state, state.selectedIndex, tankId);

@@ -19423,12 +19423,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerSeries_addDive => '添加潜水';
 
   @override
-  String get plannerSeries_previousDive => '上一次潜水';
-
-  @override
-  String get plannerSeries_nextDive => '下一次潜水';
-
-  @override
   String plannerSeries_removeDive(String letter) {
     return '移除潜水 $letter';
   }
@@ -19444,7 +19438,23 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get plannerSeries_diveDetails => '潜水详情';
+
+  @override
+  String get plannerSeries_diveName => '潜水名称';
+
+  @override
+  String plannerSeries_diveNamed(String letter, String name) {
+    return '潜水 $letter：$name';
+  }
+
+  @override
   String get plannerSeries_surfaceInterval => '水面间隔';
+
+  @override
+  String plannerSeries_surfaceIntervalValue(String time) {
+    return '水面间隔 $time';
+  }
 
   @override
   String get plannerSeries_surfaceInterval_invalid => '请按 h:mm 输入时长';

@@ -20707,12 +20707,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get plannerSeries_addDive => 'إضافة غطسة';
 
   @override
-  String get plannerSeries_previousDive => 'الغطسة السابقة';
-
-  @override
-  String get plannerSeries_nextDive => 'الغطسة التالية';
-
-  @override
   String plannerSeries_removeDive(String letter) {
     return 'إزالة الغطسة $letter';
   }
@@ -20728,7 +20722,23 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get plannerSeries_diveDetails => 'تفاصيل الغطسة';
+
+  @override
+  String get plannerSeries_diveName => 'اسم الغطسة';
+
+  @override
+  String plannerSeries_diveNamed(String letter, String name) {
+    return 'الغطسة $letter: $name';
+  }
+
+  @override
   String get plannerSeries_surfaceInterval => 'الفاصل السطحي';
+
+  @override
+  String plannerSeries_surfaceIntervalValue(String time) {
+    return 'الفاصل السطحي $time';
+  }
 
   @override
   String get plannerSeries_surfaceInterval_invalid => 'أدخل المدة بصيغة س:دد';

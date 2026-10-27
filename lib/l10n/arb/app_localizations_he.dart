@@ -19963,12 +19963,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get plannerSeries_addDive => 'הוספת צלילה';
 
   @override
-  String get plannerSeries_previousDive => 'הצלילה הקודמת';
-
-  @override
-  String get plannerSeries_nextDive => 'הצלילה הבאה';
-
-  @override
   String plannerSeries_removeDive(String letter) {
     return 'הסרת צלילה $letter';
   }
@@ -19984,7 +19978,23 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get plannerSeries_diveDetails => 'פרטי הצלילה';
+
+  @override
+  String get plannerSeries_diveName => 'שם הצלילה';
+
+  @override
+  String plannerSeries_diveNamed(String letter, String name) {
+    return 'צלילה $letter: $name';
+  }
+
+  @override
   String get plannerSeries_surfaceInterval => 'מרווח שטח';
+
+  @override
+  String plannerSeries_surfaceIntervalValue(String time) {
+    return 'מרווח שטח $time';
+  }
 
   @override
   String get plannerSeries_surfaceInterval_invalid =>

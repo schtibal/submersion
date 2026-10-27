@@ -6,18 +6,21 @@ import 'package:submersion/features/planner/domain/entities/plan_outcome.dart';
 import 'package:submersion/features/planner/domain/entities/plan_series.dart';
 import 'package:submersion/features/planner/domain/utils/hours_minutes.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_series_providers.dart';
+import 'package:submersion/features/planner/presentation/widgets/planned_dive_icon.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// The bar across the top of the dive profile that moves between the dives
 /// of a repetitive series (issue #3565):
 ///
-///   <  [Dive A] -1:00- [Dive B] -1:00- [Dive C]  >  (+)
+///               1:00               1:30
+///   [(diver) A Wreck]  ~~  [(diver) B]  ~~  [(diver) C]   (+)
 ///
-/// Tapping a dive selects it; the arrows step through the dives; + adds a
-/// dive after the last one. The selected dive can be removed from its chip.
-/// A dot marks a dive with a warning. Wider than the screen, the dives
-/// scroll by touch or mouse drag behind faded edges, keeping the selected
-/// dive in view.
+/// Each planned dive is an outlined diver, its letter and any name the diver
+/// gave it; each surface interval is its time above two waves. Tapping a
+/// dive selects it; + adds a dive after the last one. The selected dive can
+/// be removed from its chip. A dot marks a dive with a warning. Wider than
+/// the screen, the dives scroll by touch or mouse drag behind faded edges,
+/// keeping the selected dive in view.
 class PlanSeriesNavigator extends ConsumerStatefulWidget {
   const PlanSeriesNavigator({super.key});
 
@@ -114,6 +117,7 @@ class _PlanSeriesNavigatorState extends ConsumerState<PlanSeriesNavigator> {
         _DiveChip(
           key: _keyFor(dive.state.id),
           letter: seriesDiveLetter(i),
+          name: dive.name,
           selected: i == selected,
           hasIssues: hasIssues,
           onSelected: () => notifier.select(i),
@@ -126,11 +130,6 @@ class _PlanSeriesNavigatorState extends ConsumerState<PlanSeriesNavigator> {
 
     return Row(
       children: [
-        IconButton(
-          icon: const Icon(Icons.chevron_left),
-          tooltip: l10n.plannerSeries_previousDive,
-          onPressed: selected > 0 ? notifier.previous : null,
-        ),
         Expanded(
           child: ShaderMask(
             blendMode: BlendMode.dstIn,
@@ -162,11 +161,6 @@ class _PlanSeriesNavigatorState extends ConsumerState<PlanSeriesNavigator> {
             ),
           ),
         ),
-        IconButton(
-          icon: const Icon(Icons.chevron_right),
-          tooltip: l10n.plannerSeries_nextDive,
-          onPressed: selected < series.dives.length - 1 ? notifier.next : null,
-        ),
         IconButton.filledTonal(
           icon: const Icon(Icons.add),
           tooltip: l10n.plannerSeries_addDive,
@@ -183,6 +177,7 @@ class _DiveChip extends StatelessWidget {
   const _DiveChip({
     super.key,
     required this.letter,
+    this.name,
     required this.selected,
     required this.hasIssues,
     required this.onSelected,
@@ -190,23 +185,57 @@ class _DiveChip extends StatelessWidget {
   });
 
   final String letter;
+  final String? name;
   final bool selected;
   final bool hasIssues;
   final VoidCallback onSelected;
   final VoidCallback? onRemove;
 
+  /// Widest a dive's name runs on its chip before it is cut short.
+  static const _maxNameWidth = 160.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final label = l10n.plannerSeries_dive(letter);
+    final theme = Theme.of(context);
+    final name = this.name;
     return Semantics(
       label: hasIssues ? l10n.plannerSeries_hasIssues(letter) : null,
       child: Badge(
         isLabelVisible: hasIssues,
         smallSize: 8,
-        backgroundColor: Theme.of(context).colorScheme.error,
+        backgroundColor: theme.colorScheme.error,
         child: InputChip(
-          label: Text(label),
+          avatar: const PlannedDiveIcon(),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                letter,
+                style: const TextStyle(
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
+              ),
+              if (name != null) ...[
+                const SizedBox(width: 6),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: _maxNameWidth),
+                  child: Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          tooltip: name == null
+              ? l10n.plannerSeries_dive(letter)
+              : l10n.plannerSeries_diveNamed(letter, name),
           selected: selected,
           showCheckmark: false,
           onSelected: (_) => onSelected(),
@@ -218,7 +247,8 @@ class _DiveChip extends StatelessWidget {
   }
 }
 
-/// The surface interval between two dives: a passive separator.
+/// The surface interval between two dives, as dive computers show it: the
+/// time above the sea. A passive separator.
 class _SurfaceIntervalMark extends StatelessWidget {
   const _SurfaceIntervalMark({required this.interval});
 
@@ -227,13 +257,51 @@ class _SurfaceIntervalMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Text(
-        '— ${formatHoursMinutes(interval)} —',
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.outline,
+    final time = formatHoursMinutes(interval);
+    return Tooltip(
+      message: context.l10n.plannerSeries_surfaceIntervalValue(time),
+      excludeFromSemantics: true,
+      child: Semantics(
+        label: context.l10n.plannerSeries_surfaceIntervalValue(time),
+        excludeSemantics: true,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                time,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              const SizedBox(height: 2),
+              _TwoWaves(color: theme.colorScheme.primary),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+/// The top two of [Icons.waves]' four lines: the surface, not the deep.
+class _TwoWaves extends StatelessWidget {
+  const _TwoWaves({required this.color});
+
+  final Color color;
+
+  static const _size = 28.0;
+
+  @override
+  Widget build(BuildContext context) {
+    // The glyph's lines sit at 16-28% and 34-47% of its height; the window
+    // shows 12-51%, stopping short of the third line at 52%.
+    return ClipRect(
+      child: Align(
+        alignment: const Alignment(0, -0.6),
+        heightFactor: 0.39,
+        child: Icon(Icons.waves, size: _size, color: color),
       ),
     );
   }

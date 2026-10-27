@@ -12742,8 +12742,6 @@
     }
   },
   "plannerSeries_addDive": "Add a dive",
-  "plannerSeries_previousDive": "Previous dive",
-  "plannerSeries_nextDive": "Next dive",
   "plannerSeries_removeDive": "Remove Dive {letter}",
   "@plannerSeries_removeDive": {
     "placeholders": {
@@ -12768,7 +12766,31 @@
       }
     }
   },
+  "plannerSeries_diveDetails": "Dive details",
+  "plannerSeries_diveName": "Dive name",
+  "plannerSeries_diveNamed": "Dive {letter}: {name}",
+  "@plannerSeries_diveNamed": {
+    "description": "A named planned dive: its letter in the series, then the diver's name for it",
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "plannerSeries_surfaceInterval": "Surface interval",
+  "plannerSeries_surfaceIntervalValue": "Surface interval {time}",
+  "@plannerSeries_surfaceIntervalValue": {
+    "description": "Tooltip on the surface interval mark between two planned dives; time is h:mm",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "1:30"
+      }
+    }
+  },
   "plannerSeries_surfaceInterval_invalid": "Enter a time as h:mm",
   "plannerSeries_surfaceInterval_decrease": "15 minutes less",
   "plannerSeries_surfaceInterval_increase": "15 minutes more",

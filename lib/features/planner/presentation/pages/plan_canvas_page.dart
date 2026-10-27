@@ -34,7 +34,7 @@ import 'package:submersion/features/planner/presentation/widgets/plan_export_fil
 import 'package:submersion/features/planner/presentation/widgets/plan_name_dialog.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_series_navigator.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_status_chips.dart';
-import 'package:submersion/features/planner/presentation/widgets/plan_surface_interval_card.dart';
+import 'package:submersion/features/planner/presentation/widgets/plan_dive_details_card.dart';
 import 'package:submersion/features/planner/presentation/widgets/saved_plans_sheet.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -190,7 +190,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
               PlanChip(
                 label:
                     '${units.convertAltitude(planState.altitude ?? 0).toStringAsFixed(0)} ${units.altitudeSymbol}',
-                onTap: () => _focusSetup('environment'),
+                onTap: _focusDiveDetails,
               ),
             ],
           ],
@@ -346,6 +346,17 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
   }
 
   /// Reveal a Setup accordion section in whatever layout mode is active.
+  /// Water type and altitude live in the Dive details card, at the top of
+  /// the editor pane and of the phone's Tanks tab.
+  void _focusDiveDetails() {
+    if (MediaQuery.sizeOf(context).width < 760) {
+      ref.read(plannerPhoneTabProvider.notifier).state = 0;
+    } else {
+      ref.read(editorPaneCollapsedProvider.notifier).state = false;
+    }
+    ref.read(diveDetailsFocusProvider.notifier).state = true;
+  }
+
   void _focusSetup(String section) {
     if (MediaQuery.sizeOf(context).width < 760) {
       ref.read(plannerPhoneTabProvider.notifier).state = 2;
@@ -574,7 +585,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
       case 0:
         return const Padding(
           padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
-          child: Column(children: [PlanSurfaceIntervalCard(), PlanTankList()]),
+          child: Column(children: [PlanDiveDetailsCard(), PlanTankList()]),
         );
       case 1:
         return const Padding(

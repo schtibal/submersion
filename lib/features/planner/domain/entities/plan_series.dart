@@ -22,26 +22,35 @@ class PlanSeriesDive extends Equatable {
   /// previous dive's end pressure is not carried into them.
   final Set<String> pinnedTankIds;
 
+  /// The diver's own name for the dive, such as its site; null = unnamed,
+  /// shown by its letter alone. Kept here rather than on [state], whose
+  /// name is the whole plan's.
+  final String? name;
+
   const PlanSeriesDive({
     required this.state,
     this.sourceTankIds = const {},
     this.pinnedTankIds = const {},
+    this.name,
   });
 
   PlanSeriesDive copyWith({
     DivePlanState? state,
     Map<String, String>? sourceTankIds,
     Set<String>? pinnedTankIds,
+    String? name,
+    bool clearName = false,
   }) {
     return PlanSeriesDive(
       state: state ?? this.state,
       sourceTankIds: sourceTankIds ?? this.sourceTankIds,
       pinnedTankIds: pinnedTankIds ?? this.pinnedTankIds,
+      name: clearName ? null : (name ?? this.name),
     );
   }
 
   @override
-  List<Object?> get props => [state, sourceTankIds, pinnedTankIds];
+  List<Object?> get props => [state, sourceTankIds, pinnedTankIds, name];
 }
 
 /// An ordered series of planned dives and the one being edited.

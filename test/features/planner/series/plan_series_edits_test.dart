@@ -209,4 +209,39 @@ void main() {
       expect(fullPressureFor(series, 1, 'unknown'), isNull);
     });
   });
+
+  group('renameDive', () {
+    PlanSeries twoDives() =>
+        appendDive(PlanSeries.single(seriesDiveState()), newId: idSequence());
+
+    test('names the dive, trimmed, and only that dive', () {
+      final named = renameDive(twoDives(), 0, '  Wreck  ');
+      expect(named.dives[0].name, 'Wreck');
+      expect(named.dives[1].name, isNull);
+    });
+
+    test('a blank name clears it', () {
+      final named = renameDive(twoDives(), 1, 'Reef');
+      expect(renameDive(named, 1, '   ').dives[1].name, isNull);
+    });
+
+    test('a new dive starts unnamed', () {
+      final named = renameDive(
+        PlanSeries.single(seriesDiveState()),
+        0,
+        'Wreck',
+      );
+      final added = appendDive(named, newId: idSequence());
+      expect(added.dives[0].name, 'Wreck');
+      expect(added.dives[1].name, isNull);
+    });
+
+    test('names stay with their dives when one is removed', () {
+      var series = appendDive(twoDives(), newId: idSequence('more'));
+      series = renameDive(series, 0, 'Wreck');
+      series = renameDive(series, 2, 'Reef');
+      final removed = removeDive(series, 1);
+      expect(removed.dives.map((d) => d.name), ['Wreck', 'Reef']);
+    });
+  });
 }

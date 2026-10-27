@@ -32478,18 +32478,6 @@ abstract class AppLocalizations {
   /// **'Add a dive'**
   String get plannerSeries_addDive;
 
-  /// No description provided for @plannerSeries_previousDive.
-  ///
-  /// In en, this message translates to:
-  /// **'Previous dive'**
-  String get plannerSeries_previousDive;
-
-  /// No description provided for @plannerSeries_nextDive.
-  ///
-  /// In en, this message translates to:
-  /// **'Next dive'**
-  String get plannerSeries_nextDive;
-
   /// No description provided for @plannerSeries_removeDive.
   ///
   /// In en, this message translates to:
@@ -32508,11 +32496,35 @@ abstract class AppLocalizations {
   /// **'Dive {letter} has warnings'**
   String plannerSeries_hasIssues(String letter);
 
+  /// No description provided for @plannerSeries_diveDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Dive details'**
+  String get plannerSeries_diveDetails;
+
+  /// No description provided for @plannerSeries_diveName.
+  ///
+  /// In en, this message translates to:
+  /// **'Dive name'**
+  String get plannerSeries_diveName;
+
+  /// A named planned dive: its letter in the series, then the diver's name for it
+  ///
+  /// In en, this message translates to:
+  /// **'Dive {letter}: {name}'**
+  String plannerSeries_diveNamed(String letter, String name);
+
   /// No description provided for @plannerSeries_surfaceInterval.
   ///
   /// In en, this message translates to:
   /// **'Surface interval'**
   String get plannerSeries_surfaceInterval;
+
+  /// Tooltip on the surface interval mark between two planned dives; time is h:mm
+  ///
+  /// In en, this message translates to:
+  /// **'Surface interval {time}'**
+  String plannerSeries_surfaceIntervalValue(String time);
 
   /// No description provided for @plannerSeries_surfaceInterval_invalid.
   ///

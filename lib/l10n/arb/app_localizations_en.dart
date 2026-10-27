@@ -20112,12 +20112,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plannerSeries_addDive => 'Add a dive';
 
   @override
-  String get plannerSeries_previousDive => 'Previous dive';
-
-  @override
-  String get plannerSeries_nextDive => 'Next dive';
-
-  @override
   String plannerSeries_removeDive(String letter) {
     return 'Remove Dive $letter';
   }
@@ -20133,7 +20127,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get plannerSeries_diveDetails => 'Dive details';
+
+  @override
+  String get plannerSeries_diveName => 'Dive name';
+
+  @override
+  String plannerSeries_diveNamed(String letter, String name) {
+    return 'Dive $letter: $name';
+  }
+
+  @override
   String get plannerSeries_surfaceInterval => 'Surface interval';
+
+  @override
+  String plannerSeries_surfaceIntervalValue(String time) {
+    return 'Surface interval $time';
+  }
 
   @override
   String get plannerSeries_surfaceInterval_invalid => 'Enter a time as h:mm';

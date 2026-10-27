@@ -103,6 +103,19 @@ PlanSeries removeDive(PlanSeries series, int index) {
 PlanSeries selectDive(PlanSeries series, int index) =>
     series.copyWith(selectedIndex: index.clamp(0, series.dives.length - 1));
 
+/// Names the dive at [index]. The name is trimmed; a blank one clears it.
+PlanSeries renameDive(PlanSeries series, int index, String name) {
+  final dive = series.dives[index];
+  final trimmed = name.trim();
+  return _replace(
+    series,
+    index,
+    trimmed.isEmpty
+        ? dive.copyWith(clearName: true)
+        : dive.copyWith(name: trimmed),
+  );
+}
+
 /// Replaces the inputs of the dive at [index] with an edited [state].
 ///
 /// With [pinTypedPressures], a tank whose start pressure the edit changed is

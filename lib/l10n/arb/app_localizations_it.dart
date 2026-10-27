@@ -20414,12 +20414,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get plannerSeries_addDive => 'Aggiungi un\'immersione';
 
   @override
-  String get plannerSeries_previousDive => 'Immersione precedente';
-
-  @override
-  String get plannerSeries_nextDive => 'Immersione successiva';
-
-  @override
   String plannerSeries_removeDive(String letter) {
     return 'Rimuovi l\'immersione $letter';
   }
@@ -20435,7 +20429,23 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get plannerSeries_diveDetails => 'Dettagli dell\'immersione';
+
+  @override
+  String get plannerSeries_diveName => 'Nome dell\'immersione';
+
+  @override
+  String plannerSeries_diveNamed(String letter, String name) {
+    return 'Immersione $letter: $name';
+  }
+
+  @override
   String get plannerSeries_surfaceInterval => 'Intervallo di superficie';
+
+  @override
+  String plannerSeries_surfaceIntervalValue(String time) {
+    return 'Intervallo di superficie $time';
+  }
 
   @override
   String get plannerSeries_surfaceInterval_invalid =>

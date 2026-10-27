@@ -25,7 +25,11 @@ final plannerPhoneTabProvider = StateProvider<int>((_) => 0);
 final setupExpandedSectionsProvider = StateProvider<Set<String>>((_) => {});
 
 /// Setup-accordion section to reveal (header chip deep-links). Keys:
-/// 'deco' | 'rates' | 'gas' | 'environment' | 'contingencies' | 'gear'
-/// always, plus 'ccr' (CCR mode) and 'pscr' (pSCR mode).
+/// 'deco' | 'rates' | 'gas' | 'contingencies' | 'gear' always, plus 'ccr'
+/// (CCR mode) and 'pscr' (pSCR mode).
 /// Consumed and cleared by the accordion after expanding the section.
 final setupFocusSectionProvider = StateProvider<String?>((_) => null);
+
+/// Set to reveal the Dive details card (the altitude header chip's deep
+/// link, issue #3565). Consumed and cleared by the card once on screen.
+final diveDetailsFocusProvider = StateProvider<bool>((_) => false);

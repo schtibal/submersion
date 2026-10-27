@@ -18,7 +18,8 @@ Each step is test-first and lands as its own commit.
    `planSaveAllowedProvider`, `seriesFillPressuresProvider`. Tests:
    `plan_series_notifier_test.dart`.
 4. **UI.** `PlanSeriesNavigator` above the chart (desktop chart column and
-   phone), `PlanSurfaceIntervalCard` above Tanks, Fill and Fill all tanks in
+   phone), `PlanDiveDetailsCard` (dive name, surface interval, water type
+   and altitude) above Tanks, Fill and Fill all tanks in
    `PlanTankList`, Save and Convert to dive disabled for a series. Strings in
    every locale. Tests: `plan_series_ui_test.dart`, `hours_minutes_test.dart`.
 5. **Finish.** This record, screenshots (phone and desktop, light and dark),

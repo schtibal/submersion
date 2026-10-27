@@ -20341,12 +20341,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get plannerSeries_addDive => 'Merülés hozzáadása';
 
   @override
-  String get plannerSeries_previousDive => 'Előző merülés';
-
-  @override
-  String get plannerSeries_nextDive => 'Következő merülés';
-
-  @override
   String plannerSeries_removeDive(String letter) {
     return '$letter merülés eltávolítása';
   }
@@ -20362,7 +20356,23 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get plannerSeries_diveDetails => 'Merülés adatai';
+
+  @override
+  String get plannerSeries_diveName => 'Merülés neve';
+
+  @override
+  String plannerSeries_diveNamed(String letter, String name) {
+    return '$letter merülés: $name';
+  }
+
+  @override
   String get plannerSeries_surfaceInterval => 'Felszíni idő';
+
+  @override
+  String plannerSeries_surfaceIntervalValue(String time) {
+    return 'Felszíni idő: $time';
+  }
 
   @override
   String get plannerSeries_surfaceInterval_invalid =>

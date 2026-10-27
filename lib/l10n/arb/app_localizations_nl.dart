@@ -20284,12 +20284,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get plannerSeries_addDive => 'Duik toevoegen';
 
   @override
-  String get plannerSeries_previousDive => 'Vorige duik';
-
-  @override
-  String get plannerSeries_nextDive => 'Volgende duik';
-
-  @override
   String plannerSeries_removeDive(String letter) {
     return 'Duik $letter verwijderen';
   }
@@ -20305,7 +20299,23 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get plannerSeries_diveDetails => 'Duikgegevens';
+
+  @override
+  String get plannerSeries_diveName => 'Naam van de duik';
+
+  @override
+  String plannerSeries_diveNamed(String letter, String name) {
+    return 'Duik $letter: $name';
+  }
+
+  @override
   String get plannerSeries_surfaceInterval => 'Oppervlakte-interval';
+
+  @override
+  String plannerSeries_surfaceIntervalValue(String time) {
+    return 'Oppervlakte-interval $time';
+  }
 
   @override
   String get plannerSeries_surfaceInterval_invalid =>
