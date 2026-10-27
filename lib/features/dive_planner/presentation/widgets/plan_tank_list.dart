@@ -226,6 +226,9 @@ class PlanTankList extends ConsumerWidget {
           children: [
             Flexible(child: chip),
             IconButton(
+              // Compact, so a typical tank chip keeps its full detail line
+              // beside it in the 320 px editor pane.
+              visualDensity: VisualDensity.compact,
               icon: const Icon(Icons.local_gas_station_outlined),
               tooltip: context.l10n.plannerSeries_fill(
                 tank.name ?? tank.gasMix.name,
