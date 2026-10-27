@@ -19955,6 +19955,59 @@ class AppLocalizationsHe extends AppLocalizations {
       'אין נתוני פרופיל לצלילה זו — מרווח הפנים נקבע ללא העמסת רקמות';
 
   @override
+  String plannerSeries_dive(String letter) {
+    return 'צלילה $letter';
+  }
+
+  @override
+  String get plannerSeries_addDive => 'הוספת צלילה';
+
+  @override
+  String get plannerSeries_previousDive => 'הצלילה הקודמת';
+
+  @override
+  String get plannerSeries_nextDive => 'הצלילה הבאה';
+
+  @override
+  String plannerSeries_removeDive(String letter) {
+    return 'הסרת צלילה $letter';
+  }
+
+  @override
+  String plannerSeries_removeDive_message(String letter) {
+    return 'צלילה $letter והשינויים בה יוסרו מהסדרה.';
+  }
+
+  @override
+  String plannerSeries_hasIssues(String letter) {
+    return 'בצלילה $letter יש אזהרות';
+  }
+
+  @override
+  String get plannerSeries_surfaceInterval => 'מרווח שטח';
+
+  @override
+  String get plannerSeries_surfaceInterval_invalid =>
+      'יש להזין זמן בתבנית ש:דד';
+
+  @override
+  String get plannerSeries_surfaceInterval_decrease => '15 דקות פחות';
+
+  @override
+  String get plannerSeries_surfaceInterval_increase => '15 דקות יותר';
+
+  @override
+  String plannerSeries_fill(String tank) {
+    return 'מילוי $tank';
+  }
+
+  @override
+  String get plannerSeries_fillAll => 'מילוי כל המכלים';
+
+  @override
+  String get plannerSeries_saveUnavailable => 'עדיין לא ניתן לשמור סדרת צלילות';
+
+  @override
   String get plannerCanvas_follow_title => 'עקוב אחרי צלילה';
 
   @override

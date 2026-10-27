@@ -20276,6 +20276,60 @@ class AppLocalizationsNl extends AppLocalizations {
       'Geen profielgegevens voor die duik — oppervlakte-interval ingesteld zonder weefselverzadiging';
 
   @override
+  String plannerSeries_dive(String letter) {
+    return 'Duik $letter';
+  }
+
+  @override
+  String get plannerSeries_addDive => 'Duik toevoegen';
+
+  @override
+  String get plannerSeries_previousDive => 'Vorige duik';
+
+  @override
+  String get plannerSeries_nextDive => 'Volgende duik';
+
+  @override
+  String plannerSeries_removeDive(String letter) {
+    return 'Duik $letter verwijderen';
+  }
+
+  @override
+  String plannerSeries_removeDive_message(String letter) {
+    return 'Duik $letter en de wijzigingen daarin worden uit de reeks verwijderd.';
+  }
+
+  @override
+  String plannerSeries_hasIssues(String letter) {
+    return 'Duik $letter heeft waarschuwingen';
+  }
+
+  @override
+  String get plannerSeries_surfaceInterval => 'Oppervlakte-interval';
+
+  @override
+  String get plannerSeries_surfaceInterval_invalid =>
+      'Voer een tijd in als u:mm';
+
+  @override
+  String get plannerSeries_surfaceInterval_decrease => '15 minuten minder';
+
+  @override
+  String get plannerSeries_surfaceInterval_increase => '15 minuten meer';
+
+  @override
+  String plannerSeries_fill(String tank) {
+    return '$tank vullen';
+  }
+
+  @override
+  String get plannerSeries_fillAll => 'Alle flessen vullen';
+
+  @override
+  String get plannerSeries_saveUnavailable =>
+      'Een reeks duiken kan nog niet worden opgeslagen';
+
+  @override
   String get plannerCanvas_follow_title => 'Volg een duik';
 
   @override

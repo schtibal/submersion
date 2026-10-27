@@ -173,3 +173,17 @@ final canAddSeriesDiveProvider = Provider<bool>(
 final planSaveAllowedProvider = Provider<bool>(
   (ref) => !ref.watch(planSeriesNotifierProvider).isSeries,
 );
+
+/// The tanks of the selected dive that Fill would top up, with the pressure
+/// it fills each to. Empty on the first dive, where nothing is carried in.
+final seriesFillPressuresProvider = Provider<Map<String, double>>((ref) {
+  final series = ref.watch(planSeriesNotifierProvider);
+  final index = series.selectedIndex;
+  if (index == 0) return const {};
+  return {
+    for (final tank in series.selected.state.tanks)
+      if (edits.fullPressureFor(series, index, tank.id) case final full?
+          when (tank.startPressure ?? 0) < full)
+        tank.id: full,
+  };
+});

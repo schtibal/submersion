@@ -20699,6 +20699,58 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا توجد بيانات ملف تعريف لهذه الغطسة — تم ضبط الفاصل السطحي دون تحميل الأنسجة';
 
   @override
+  String plannerSeries_dive(String letter) {
+    return 'الغطسة $letter';
+  }
+
+  @override
+  String get plannerSeries_addDive => 'إضافة غطسة';
+
+  @override
+  String get plannerSeries_previousDive => 'الغطسة السابقة';
+
+  @override
+  String get plannerSeries_nextDive => 'الغطسة التالية';
+
+  @override
+  String plannerSeries_removeDive(String letter) {
+    return 'إزالة الغطسة $letter';
+  }
+
+  @override
+  String plannerSeries_removeDive_message(String letter) {
+    return 'ستُزال الغطسة $letter وتغييراتها من السلسلة.';
+  }
+
+  @override
+  String plannerSeries_hasIssues(String letter) {
+    return 'الغطسة $letter بها تحذيرات';
+  }
+
+  @override
+  String get plannerSeries_surfaceInterval => 'الفاصل السطحي';
+
+  @override
+  String get plannerSeries_surfaceInterval_invalid => 'أدخل المدة بصيغة س:دد';
+
+  @override
+  String get plannerSeries_surfaceInterval_decrease => 'أقل بـ 15 دقيقة';
+
+  @override
+  String get plannerSeries_surfaceInterval_increase => 'أكثر بـ 15 دقيقة';
+
+  @override
+  String plannerSeries_fill(String tank) {
+    return 'ملء $tank';
+  }
+
+  @override
+  String get plannerSeries_fillAll => 'ملء كل الأسطوانات';
+
+  @override
+  String get plannerSeries_saveUnavailable => 'لا يمكن حفظ سلسلة غطسات بعد';
+
+  @override
   String get plannerCanvas_follow_title => 'اتباع غطسة';
 
   @override

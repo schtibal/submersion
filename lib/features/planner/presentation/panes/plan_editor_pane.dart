@@ -9,6 +9,7 @@ import 'package:submersion/features/planner/presentation/mission/mission_toggle_
 import 'package:submersion/features/planner/presentation/panes/plan_setup_accordion.dart';
 import 'package:submersion/features/planner/presentation/providers/planner_layout_providers.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_kit.dart';
+import 'package:submersion/features/planner/presentation/widgets/plan_surface_interval_card.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// The editing column of Mission Control: tanks and segments always visible,
@@ -59,6 +60,7 @@ class _PlanEditorPaneState extends ConsumerState<PlanEditorPane> {
       controller: _scrollController,
       padding: const EdgeInsets.all(12),
       children: [
+        const PlanSurfaceIntervalCard(),
         const PlanTankList(),
         const SizedBox(height: 12),
         const MissionToggleRow(),

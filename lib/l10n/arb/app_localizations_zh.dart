@@ -19415,6 +19415,58 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerCanvas_follow_noTissues => '该潜水没有剖面数据 — 已设置水面间隔但未载入组织饱和度';
 
   @override
+  String plannerSeries_dive(String letter) {
+    return '潜水 $letter';
+  }
+
+  @override
+  String get plannerSeries_addDive => '添加潜水';
+
+  @override
+  String get plannerSeries_previousDive => '上一次潜水';
+
+  @override
+  String get plannerSeries_nextDive => '下一次潜水';
+
+  @override
+  String plannerSeries_removeDive(String letter) {
+    return '移除潜水 $letter';
+  }
+
+  @override
+  String plannerSeries_removeDive_message(String letter) {
+    return '潜水 $letter 及其更改将从系列中移除。';
+  }
+
+  @override
+  String plannerSeries_hasIssues(String letter) {
+    return '潜水 $letter 有警告';
+  }
+
+  @override
+  String get plannerSeries_surfaceInterval => '水面间隔';
+
+  @override
+  String get plannerSeries_surfaceInterval_invalid => '请按 h:mm 输入时长';
+
+  @override
+  String get plannerSeries_surfaceInterval_decrease => '减少 15 分钟';
+
+  @override
+  String get plannerSeries_surfaceInterval_increase => '增加 15 分钟';
+
+  @override
+  String plannerSeries_fill(String tank) {
+    return '加满 $tank';
+  }
+
+  @override
+  String get plannerSeries_fillAll => '加满所有气瓶';
+
+  @override
+  String get plannerSeries_saveUnavailable => '暂时无法保存潜水系列';
+
+  @override
   String get plannerCanvas_follow_title => '跟随一次潜水';
 
   @override

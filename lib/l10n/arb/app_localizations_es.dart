@@ -20398,6 +20398,60 @@ class AppLocalizationsEs extends AppLocalizations {
       'Sin datos de perfil en esa inmersión — intervalo en superficie establecido sin saturación de tejidos';
 
   @override
+  String plannerSeries_dive(String letter) {
+    return 'Inmersión $letter';
+  }
+
+  @override
+  String get plannerSeries_addDive => 'Añadir una inmersión';
+
+  @override
+  String get plannerSeries_previousDive => 'Inmersión anterior';
+
+  @override
+  String get plannerSeries_nextDive => 'Inmersión siguiente';
+
+  @override
+  String plannerSeries_removeDive(String letter) {
+    return 'Eliminar la inmersión $letter';
+  }
+
+  @override
+  String plannerSeries_removeDive_message(String letter) {
+    return 'La inmersión $letter y sus cambios se eliminarán de la serie.';
+  }
+
+  @override
+  String plannerSeries_hasIssues(String letter) {
+    return 'La inmersión $letter tiene advertencias';
+  }
+
+  @override
+  String get plannerSeries_surfaceInterval => 'Intervalo en superficie';
+
+  @override
+  String get plannerSeries_surfaceInterval_invalid =>
+      'Introduce una duración como h:mm';
+
+  @override
+  String get plannerSeries_surfaceInterval_decrease => '15 minutos menos';
+
+  @override
+  String get plannerSeries_surfaceInterval_increase => '15 minutos más';
+
+  @override
+  String plannerSeries_fill(String tank) {
+    return 'Llenar $tank';
+  }
+
+  @override
+  String get plannerSeries_fillAll => 'Llenar todas las botellas';
+
+  @override
+  String get plannerSeries_saveUnavailable =>
+      'Todavía no se puede guardar una serie de inmersiones';
+
+  @override
   String get plannerCanvas_follow_title => 'Seguir una inmersión';
 
   @override

@@ -20104,6 +20104,59 @@ class AppLocalizationsEn extends AppLocalizations {
       'No profile data on that dive — surface interval set without tissue seeding';
 
   @override
+  String plannerSeries_dive(String letter) {
+    return 'Dive $letter';
+  }
+
+  @override
+  String get plannerSeries_addDive => 'Add a dive';
+
+  @override
+  String get plannerSeries_previousDive => 'Previous dive';
+
+  @override
+  String get plannerSeries_nextDive => 'Next dive';
+
+  @override
+  String plannerSeries_removeDive(String letter) {
+    return 'Remove Dive $letter';
+  }
+
+  @override
+  String plannerSeries_removeDive_message(String letter) {
+    return 'Dive $letter and its changes will be removed from the series.';
+  }
+
+  @override
+  String plannerSeries_hasIssues(String letter) {
+    return 'Dive $letter has warnings';
+  }
+
+  @override
+  String get plannerSeries_surfaceInterval => 'Surface interval';
+
+  @override
+  String get plannerSeries_surfaceInterval_invalid => 'Enter a time as h:mm';
+
+  @override
+  String get plannerSeries_surfaceInterval_decrease => '15 minutes less';
+
+  @override
+  String get plannerSeries_surfaceInterval_increase => '15 minutes more';
+
+  @override
+  String plannerSeries_fill(String tank) {
+    return 'Fill $tank';
+  }
+
+  @override
+  String get plannerSeries_fillAll => 'Fill all tanks';
+
+  @override
+  String get plannerSeries_saveUnavailable =>
+      'A series of dives can\'t be saved yet';
+
+  @override
   String get plannerCanvas_follow_title => 'Follow a dive';
 
   @override

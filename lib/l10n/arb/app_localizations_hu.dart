@@ -20333,6 +20333,60 @@ class AppLocalizationsHu extends AppLocalizations {
       'Nincs profiladat ehhez a merüléshez — a felszíni intervallum szövettelítés nélkül lett beállítva';
 
   @override
+  String plannerSeries_dive(String letter) {
+    return '$letter merülés';
+  }
+
+  @override
+  String get plannerSeries_addDive => 'Merülés hozzáadása';
+
+  @override
+  String get plannerSeries_previousDive => 'Előző merülés';
+
+  @override
+  String get plannerSeries_nextDive => 'Következő merülés';
+
+  @override
+  String plannerSeries_removeDive(String letter) {
+    return '$letter merülés eltávolítása';
+  }
+
+  @override
+  String plannerSeries_removeDive_message(String letter) {
+    return 'A(z) $letter merülés és a módosításai kikerülnek a sorozatból.';
+  }
+
+  @override
+  String plannerSeries_hasIssues(String letter) {
+    return 'A(z) $letter merülésnél figyelmeztetések vannak';
+  }
+
+  @override
+  String get plannerSeries_surfaceInterval => 'Felszíni idő';
+
+  @override
+  String get plannerSeries_surfaceInterval_invalid =>
+      'Adja meg az időt ó:pp formában';
+
+  @override
+  String get plannerSeries_surfaceInterval_decrease => '15 perccel kevesebb';
+
+  @override
+  String get plannerSeries_surfaceInterval_increase => '15 perccel több';
+
+  @override
+  String plannerSeries_fill(String tank) {
+    return '$tank töltése';
+  }
+
+  @override
+  String get plannerSeries_fillAll => 'Minden palack töltése';
+
+  @override
+  String get plannerSeries_saveUnavailable =>
+      'Merülések sorozata még nem menthető';
+
+  @override
   String get plannerCanvas_follow_title => 'Merülés követése';
 
   @override
