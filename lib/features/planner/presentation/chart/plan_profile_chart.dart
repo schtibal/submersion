@@ -472,7 +472,15 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
             position: event.localPosition,
           );
           if (hit != _hoverVertex) setState(() => _hoverVertex = hit);
-          if (hit == null) _scrubTo(geometry, event.localPosition);
+          // Within reach of a waypoint the line locks onto it, so its own
+          // time and depth can be read; left where the cursor last was, it
+          // stopped short of the waypoint (#3775).
+          if (hit == null) {
+            _scrubTo(geometry, event.localPosition);
+          } else {
+            ref.read(scrubTimeProvider.notifier).state =
+                vertices[hit].timeSeconds;
+          }
         }
 
         return Focus(

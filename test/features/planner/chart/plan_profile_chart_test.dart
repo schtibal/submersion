@@ -172,6 +172,60 @@ void main() {
     expect(container.read(selectedSegmentIdProvider), bottom.id);
   });
 
+  testWidgets(
+    'hovering within reach of a waypoint locks the scrub onto it (#3775)',
+    (tester) async {
+      await tester.pumpWidget(harness());
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(PlanProfileChart)),
+      );
+      container
+          .read(divePlanNotifierProvider.notifier)
+          .addSimplePlan(maxDepth: 30, bottomTimeMinutes: 20);
+      await tester.pumpAndSettle();
+
+      final series = container.read(planCanvasSeriesProvider);
+      final rect = tester.getRect(find.byKey(const Key('planChartOverlay')));
+      final geometry = PlanChartGeometry(
+        size: rect.size,
+        maxTimeSeconds: series.maxTimeSeconds,
+        maxDepthMeters: series.maxDepth,
+        depthUnitScale: 1,
+      );
+      // The end of the descent.
+      final waypoint = planVertices(
+        container.read(divePlanNotifierProvider).segments,
+      ).firstWhere((v) => v.draggable);
+      final handle =
+          rect.topLeft + geometry.toPixel(waypoint.timeSeconds, waypoint.depth);
+
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+
+      // From either side, inside the reach that highlights the handle, the
+      // line sits on the waypoint rather than where the cursor last was.
+      for (final offset in const [Offset(-12, 0), Offset(12, 0)]) {
+        await gesture.moveTo(handle + offset * 3);
+        await tester.pump();
+        await gesture.moveTo(handle + offset);
+        await tester.pump();
+        expect(
+          container.read(scrubTimeProvider),
+          closeTo(waypoint.timeSeconds, 0.001),
+        );
+      }
+
+      // Out of reach again, the line follows the cursor.
+      await gesture.moveTo(handle + const Offset(40, 0));
+      await tester.pump();
+      expect(
+        container.read(scrubTimeProvider),
+        closeTo(geometry.timeAtDx(geometry.xFor(waypoint.timeSeconds) + 40), 1),
+      );
+    },
+  );
+
   testWidgets('mouse hover scrubs and exit clears', (tester) async {
     await tester.pumpWidget(harness());
     final container = ProviderScope.containerOf(
