@@ -3,7 +3,6 @@ import 'package:uuid/uuid.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/constants/tank_presets.dart';
 import 'package:submersion/core/deco/entities/dive_environment.dart';
-import 'package:submersion/core/deco/entities/tissue_compartment.dart';
 import 'package:submersion/core/deco/schedule_policy.dart' show AirBreakPolicy;
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/services/logger_service.dart';
@@ -1106,39 +1105,6 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
     );
   }
 
-  /// Follow a logged dive: seed tissues from its end-of-dive compartments
-  /// and set the surface interval separating it from this plan. Any CNS or
-  /// OTU carried in from an earlier planned dive goes: the plan now follows
-  /// the logged dive instead.
-  void setFollowedDive({
-    required String diveId,
-    List<TissueCompartment>? compartments,
-    required Duration surfaceInterval,
-  }) {
-    state = state.copyWith(
-      sourceDiveId: diveId,
-      initialTissueState: compartments,
-      clearInitialTissueState: compartments == null,
-      clearInitialExposure: true,
-      surfaceInterval: surfaceInterval,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
-  }
-
-  /// Stop following a dive: drop the seed tissues, the surface interval and
-  /// any carried CNS and OTU.
-  void clearFollowedDive() {
-    state = state.copyWith(
-      clearSourceDiveId: true,
-      clearSurfaceInterval: true,
-      clearInitialTissueState: true,
-      clearInitialExposure: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
-  }
-
   /// Record (or clear) the dive created from this plan via convert-to-dive.
   void setLinkedDive(String? diveId) {
     state = state.copyWith(
@@ -1187,13 +1153,12 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
         stored.sourceDiveId == null && state.sourceDiveId == plan.sourceDiveId;
     final linkedDiveWentAway =
         stored.linkedDiveId == null && state.linkedDiveId == plan.linkedDiveId;
-    // A dropped source dive takes the context it seeded, as clearFollowedDive
-    // does, carried CNS and OTU included. The tissues are never stored, so
-    // leaving them would keep seeding deco for a plan that no longer follows a
-    // dive, and the schedule would change silently on the next reload. The
-    // repository drops the surface interval with the dive. Each keeps the same
-    // guard: tissues or an interval the diver set during the async gap are a
-    // newer choice.
+    // A dropped source dive takes the context it seeded with it, carried CNS
+    // and OTU included. The tissues are never stored, so leaving them would
+    // keep seeding deco for a plan that no longer has that dive, and the
+    // schedule would change silently on the next reload. The repository drops
+    // the surface interval with the dive. Each keeps the same guard: tissues
+    // or an interval the diver set during the async gap are a newer choice.
     final tissuesWentAway =
         sourceDiveWentAway &&
         identical(state.initialTissueState, submitted.initialTissueState);
