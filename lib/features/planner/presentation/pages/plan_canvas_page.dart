@@ -245,6 +245,9 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
                   Icons.scuba_diving,
                   context.l10n.divePlanner_action_convertToDive,
                   enabled: saveAllowed,
+                  tooltip: saveAllowed
+                      ? null
+                      : context.l10n.plannerSeries_convertUnavailable,
                 ),
                 _menuItem(
                   'slate',

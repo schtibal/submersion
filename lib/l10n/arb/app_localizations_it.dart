@@ -20470,6 +20470,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Non è ancora possibile salvare una serie di immersioni';
 
   @override
+  String get plannerSeries_convertUnavailable =>
+      'Non è ancora possibile convertire una serie di immersioni in immersioni registrate';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'Solo la prima immersione di una serie può seguire un\'immersione registrata';
 

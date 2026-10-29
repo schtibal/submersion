@@ -20446,6 +20446,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Eine Tauchgangsserie kann noch nicht gespeichert werden';
 
   @override
+  String get plannerSeries_convertUnavailable =>
+      'Eine Tauchgangsserie kann noch nicht in geloggte Tauchgänge umgewandelt werden';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'Nur der erste Tauchgang einer Serie kann einem geloggten Tauchgang folgen';
 

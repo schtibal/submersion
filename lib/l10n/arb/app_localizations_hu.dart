@@ -20397,6 +20397,10 @@ class AppLocalizationsHu extends AppLocalizations {
       'Merülések sorozata még nem menthető';
 
   @override
+  String get plannerSeries_convertUnavailable =>
+      'Merülések sorozata még nem alakítható naplózott merülésekké';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'Csak a sorozat első merülése követhet egy naplózott merülést';
 

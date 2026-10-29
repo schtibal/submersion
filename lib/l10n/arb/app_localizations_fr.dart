@@ -20527,6 +20527,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une série de plongées ne peut pas encore être enregistrée';
 
   @override
+  String get plannerSeries_convertUnavailable =>
+      'Une série de plongées ne peut pas encore être convertie en plongées enregistrées';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'Seule la première plongée d\'une série peut suivre une plongée enregistrée';
 

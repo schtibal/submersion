@@ -20761,6 +20761,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get plannerSeries_saveUnavailable => 'لا يمكن حفظ سلسلة غطسات بعد';
 
   @override
+  String get plannerSeries_convertUnavailable =>
+      'لا يمكن تحويل سلسلة غطسات إلى غطسات مسجلة بعد';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'يمكن للغطسة الأولى فقط في السلسلة اتباع غطسة مسجلة';
 

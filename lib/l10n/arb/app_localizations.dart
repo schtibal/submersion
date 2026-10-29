@@ -32562,6 +32562,12 @@ abstract class AppLocalizations {
   /// **'A series of dives can\'t be saved yet'**
   String get plannerSeries_saveUnavailable;
 
+  /// No description provided for @plannerSeries_convertUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A series of dives can\'t be converted to logged dives yet'**
+  String get plannerSeries_convertUnavailable;
+
   /// No description provided for @plannerSeries_followFirstDiveOnly.
   ///
   /// In en, this message translates to:

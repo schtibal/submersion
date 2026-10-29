@@ -19477,6 +19477,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerSeries_saveUnavailable => '暂时无法保存潜水系列';
 
   @override
+  String get plannerSeries_convertUnavailable => '暂时无法将潜水系列转换为已记录的潜水';
+
+  @override
   String get plannerSeries_followFirstDiveOnly => '只有系列中的第一次潜水可以跟随已记录的潜水';
 
   @override

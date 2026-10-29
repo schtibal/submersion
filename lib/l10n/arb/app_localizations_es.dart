@@ -20462,6 +20462,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Todavía no se puede guardar una serie de inmersiones';
 
   @override
+  String get plannerSeries_convertUnavailable =>
+      'Todavía no se puede convertir una serie de inmersiones en inmersiones registradas';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'Solo la primera inmersión de una serie puede seguir una inmersión registrada';
 

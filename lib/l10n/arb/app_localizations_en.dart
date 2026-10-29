@@ -20167,6 +20167,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A series of dives can\'t be saved yet';
 
   @override
+  String get plannerSeries_convertUnavailable =>
+      'A series of dives can\'t be converted to logged dives yet';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'Only the first dive of a series can follow a logged dive';
 

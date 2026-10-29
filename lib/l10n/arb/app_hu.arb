@@ -5772,6 +5772,7 @@
   "plannerSeries_fill": "{tank} töltése",
   "plannerSeries_fillAll": "Minden palack töltése",
   "plannerSeries_saveUnavailable": "Merülések sorozata még nem menthető",
+  "plannerSeries_convertUnavailable": "Merülések sorozata még nem alakítható naplózott merülésekké",
   "plannerSeries_followFirstDiveOnly": "Csak a sorozat első merülése követhet egy naplózott merülést",
   "plannerCanvas_follow_title": "Merülés követése",
   "plannerCanvas_gas_minGas": "min. gáz {pressure}",
