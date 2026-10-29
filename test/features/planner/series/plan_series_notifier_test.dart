@@ -5,6 +5,7 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_planner/domain/entities/plan_result.dart';
 import 'package:submersion/features/dive_planner/domain/entities/plan_segment.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
+import 'package:submersion/features/planner/domain/entities/mission/dpv_mission.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_canvas_providers.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_series_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
@@ -90,9 +91,21 @@ void main() {
       expect(live.runtimeSeconds, result.runtimeSeconds);
     });
 
-    test('is not offered for a DPV mission plan', () async {
+    test('is offered for an ordinary plan', () async {
       final c = await makeContainer();
       expect(c.read(canAddSeriesDiveProvider), isTrue);
+    });
+
+    test('is not offered for a DPV mission plan', () async {
+      final c = await makeContainer();
+      c.read(planSeriesNotifierProvider);
+      c
+          .read(divePlanNotifierProvider.notifier)
+          .enableMission(const DpvMission());
+
+      expect(c.read(canAddSeriesDiveProvider), isFalse);
+      series(c).addDive();
+      expect(c.read(planSeriesNotifierProvider).dives, hasLength(1));
     });
   });
 
