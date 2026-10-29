@@ -5873,6 +5873,7 @@
   "plannerSeries_fill": "Llenar {tank}",
   "plannerSeries_fillAll": "Llenar todas las botellas",
   "plannerSeries_saveUnavailable": "Todavía no se puede guardar una serie de inmersiones",
+  "plannerSeries_followFirstDiveOnly": "Solo la primera inmersión de una serie puede seguir una inmersión registrada",
   "plannerCanvas_follow_title": "Seguir una inmersión",
   "plannerCanvas_gas_minGas": "gas mínimo {pressure}",
   "plannerCanvas_gas_turnAt": "retorno a {pressure}",

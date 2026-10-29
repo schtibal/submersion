@@ -32562,6 +32562,12 @@ abstract class AppLocalizations {
   /// **'A series of dives can\'t be saved yet'**
   String get plannerSeries_saveUnavailable;
 
+  /// No description provided for @plannerSeries_followFirstDiveOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the first dive of a series can follow a logged dive'**
+  String get plannerSeries_followFirstDiveOnly;
+
   /// No description provided for @plannerCanvas_follow_title.
   ///
   /// In en, this message translates to:

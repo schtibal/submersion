@@ -20018,6 +20018,10 @@ class AppLocalizationsHe extends AppLocalizations {
   String get plannerSeries_saveUnavailable => 'עדיין לא ניתן לשמור סדרת צלילות';
 
   @override
+  String get plannerSeries_followFirstDiveOnly =>
+      'רק הצלילה הראשונה בסדרה יכולה לעקוב אחרי צלילה מתועדת';
+
+  @override
   String get plannerCanvas_follow_title => 'עקוב אחרי צלילה';
 
   @override

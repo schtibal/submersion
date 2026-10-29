@@ -20527,6 +20527,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une série de plongées ne peut pas encore être enregistrée';
 
   @override
+  String get plannerSeries_followFirstDiveOnly =>
+      'Seule la première plongée d\'une série peut suivre une plongée enregistrée';
+
+  @override
   String get plannerCanvas_follow_title => 'Suivre une plongée';
 
   @override

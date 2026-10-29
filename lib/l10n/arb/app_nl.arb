@@ -5873,6 +5873,7 @@
   "plannerSeries_fill": "{tank} vullen",
   "plannerSeries_fillAll": "Alle flessen vullen",
   "plannerSeries_saveUnavailable": "Een reeks duiken kan nog niet worden opgeslagen",
+  "plannerSeries_followFirstDiveOnly": "Alleen de eerste duik van een reeks kan een gelogde duik volgen",
   "plannerCanvas_follow_title": "Volg een duik",
   "plannerCanvas_gas_minGas": "min. gas {pressure}",
   "plannerCanvas_gas_turnAt": "keer om bij {pressure}",

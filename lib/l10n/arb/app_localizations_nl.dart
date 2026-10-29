@@ -20340,6 +20340,10 @@ class AppLocalizationsNl extends AppLocalizations {
       'Een reeks duiken kan nog niet worden opgeslagen';
 
   @override
+  String get plannerSeries_followFirstDiveOnly =>
+      'Alleen de eerste duik van een reeks kan een gelogde duik volgen';
+
+  @override
   String get plannerCanvas_follow_title => 'Volg een duik';
 
   @override

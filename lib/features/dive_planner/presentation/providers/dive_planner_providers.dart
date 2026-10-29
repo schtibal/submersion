@@ -1104,7 +1104,9 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
   }
 
   /// Follow a logged dive: seed tissues from its end-of-dive compartments
-  /// and set the surface interval separating it from this plan.
+  /// and set the surface interval separating it from this plan. Any CNS or
+  /// OTU carried in from an earlier planned dive goes: the plan now follows
+  /// the logged dive instead.
   void setFollowedDive({
     required String diveId,
     List<TissueCompartment>? compartments,
@@ -1114,18 +1116,21 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
       sourceDiveId: diveId,
       initialTissueState: compartments,
       clearInitialTissueState: compartments == null,
+      clearInitialExposure: true,
       surfaceInterval: surfaceInterval,
       isDirty: true,
       updatedAt: DateTime.now(),
     );
   }
 
-  /// Stop following a dive: drop the seed tissues and surface interval.
+  /// Stop following a dive: drop the seed tissues, the surface interval and
+  /// any carried CNS and OTU.
   void clearFollowedDive() {
     state = state.copyWith(
       clearSourceDiveId: true,
       clearSurfaceInterval: true,
       clearInitialTissueState: true,
+      clearInitialExposure: true,
       isDirty: true,
       updatedAt: DateTime.now(),
     );
@@ -1146,6 +1151,7 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
     state = state.copyWith(
       clearSurfaceInterval: true,
       clearInitialTissueState: true,
+      clearInitialExposure: true,
       isDirty: true,
       updatedAt: DateTime.now(),
     );
@@ -1179,7 +1185,7 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
     final linkedDiveWentAway =
         stored.linkedDiveId == null && state.linkedDiveId == plan.linkedDiveId;
     // A dropped source dive takes the context it seeded, as clearFollowedDive
-    // does. The tissues are never stored, so leaving them would keep seeding
+    // does, carried CNS and OTU included. The tissues are never stored, so leaving them would keep seeding
     // deco for a plan that no longer follows a dive, and the schedule would
     // change silently on the next reload. The repository drops the surface
     // interval with the dive. Each keeps the same guard: tissues or an
@@ -1202,6 +1208,7 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
       clearSiteId: siteWentAway,
       clearSourceDiveId: sourceDiveWentAway,
       clearInitialTissueState: tissuesWentAway,
+      clearInitialExposure: tissuesWentAway,
       clearSurfaceInterval: surfaceIntervalWentAway,
       clearLinkedDiveId: linkedDiveWentAway,
     );

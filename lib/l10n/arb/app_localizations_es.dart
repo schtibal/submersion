@@ -20462,6 +20462,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Todavía no se puede guardar una serie de inmersiones';
 
   @override
+  String get plannerSeries_followFirstDiveOnly =>
+      'Solo la primera inmersión de una serie puede seguir una inmersión registrada';
+
+  @override
   String get plannerCanvas_follow_title => 'Seguir una inmersión';
 
   @override

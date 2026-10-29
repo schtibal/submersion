@@ -77,6 +77,27 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> openMenu(WidgetTester tester) async {
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> closeMenu(WidgetTester tester) async {
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+  }
+
+  PopupMenuItem<String> menuItem(WidgetTester tester, String label) =>
+      tester.widget<PopupMenuItem<String>>(
+        find.ancestor(
+          of: find.text(label),
+          matching: find.byType(PopupMenuItem<String>),
+        ),
+      );
+
+  Finder tooltipOn(String label) =>
+      find.ancestor(of: find.text(label), matching: find.byType(Tooltip));
+
   Finder navigatorText(String text) => find.descendant(
     of: find.byType(PlanSeriesNavigator),
     matching: find.text(text),
@@ -216,6 +237,26 @@ void main() {
         );
         expect(save().onPressed, isNull);
         expect(save().tooltip, "A series of dives can't be saved yet");
+      });
+
+      testWidgets('Follow a dive is offered on the first dive only', (
+        tester,
+      ) async {
+        await pumpPlan(tester, size);
+        await addDive(tester);
+        await openMenu(tester);
+        expect(menuItem(tester, 'Follow a dive').enabled, isFalse);
+        expect(
+          tester.widget<Tooltip>(tooltipOn('Follow a dive')).message,
+          'Only the first dive of a series can follow a logged dive',
+        );
+        await closeMenu(tester);
+
+        await tester.tap(find.byTooltip('Dive A'));
+        await tester.pumpAndSettle();
+        await openMenu(tester);
+        expect(menuItem(tester, 'Follow a dive').enabled, isTrue);
+        expect(tooltipOn('Follow a dive'), findsNothing);
       });
     });
   }

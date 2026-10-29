@@ -5772,6 +5772,7 @@
   "plannerSeries_fill": "מילוי {tank}",
   "plannerSeries_fillAll": "מילוי כל המכלים",
   "plannerSeries_saveUnavailable": "עדיין לא ניתן לשמור סדרת צלילות",
+  "plannerSeries_followFirstDiveOnly": "רק הצלילה הראשונה בסדרה יכולה לעקוב אחרי צלילה מתועדת",
   "plannerCanvas_follow_title": "עקוב אחרי צלילה",
   "plannerCanvas_gas_minGas": "גז מינימלי {pressure}",
   "plannerCanvas_gas_turnAt": "פנייה ב-{pressure}",

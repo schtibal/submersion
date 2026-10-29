@@ -189,6 +189,13 @@ final planSaveAllowedProvider = Provider<bool>(
   (ref) => !ref.watch(planSeriesNotifierProvider).isSeries,
 );
 
+/// Whether the selected dive can follow a logged dive. Only the first dive
+/// of a series can: every later one starts from the dive before it.
+final followAllowedProvider = Provider<bool>(
+  (ref) =>
+      ref.watch(planSeriesNotifierProvider.select((s) => s.selectedIndex)) == 0,
+);
+
 /// The tanks of the selected dive that Fill would top up, with the pressure
 /// it fills each to. Empty on the first dive, where nothing is carried in.
 final seriesFillPressuresProvider = Provider<Map<String, double>>((ref) {

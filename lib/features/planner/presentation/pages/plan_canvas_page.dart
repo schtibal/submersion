@@ -118,6 +118,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     // A series of dives cannot be saved, or logged, until series
     // persistence lands (issue #3565).
     final saveAllowed = ref.watch(planSaveAllowedProvider);
+    final followAllowed = ref.watch(followAllowedProvider);
     // A plan opened via the :planId route is known-persisted, so short-circuit
     // before watching the (DB-backed) summaries provider; that avoids an
     // avoidable subscription/fetch in the common edit-a-saved-plan case. The
@@ -229,6 +230,10 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
                   'follow',
                   Icons.history,
                   context.l10n.plannerCanvas_follow_title,
+                  enabled: followAllowed,
+                  tooltip: followAllowed
+                      ? null
+                      : context.l10n.plannerSeries_followFirstDiveOnly,
                 ),
                 _menuItem(
                   'settings',
@@ -279,20 +284,24 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     domain.PlanMode.pscr => domain.PlanMode.oc,
   };
 
+  /// An overflow menu entry. [tooltip] says why a disabled entry is not
+  /// available.
   PopupMenuItem<String> _menuItem(
     String value,
     IconData icon,
     String label, {
     bool enabled = true,
+    String? tooltip,
   }) {
+    final tile = ListTile(
+      leading: Icon(icon),
+      title: Text(label),
+      contentPadding: EdgeInsets.zero,
+    );
     return PopupMenuItem(
       value: value,
       enabled: enabled,
-      child: ListTile(
-        leading: Icon(icon),
-        title: Text(label),
-        contentPadding: EdgeInsets.zero,
-      ),
+      child: tooltip == null ? tile : Tooltip(message: tooltip, child: tile),
     );
   }
 

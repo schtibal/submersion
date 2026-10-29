@@ -20472,6 +20472,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Ainda não é possível guardar uma série de mergulhos';
 
   @override
+  String get plannerSeries_followFirstDiveOnly =>
+      'Só o primeiro mergulho de uma série pode seguir um mergulho registado';
+
+  @override
   String get plannerCanvas_follow_title => 'Seguir um mergulho';
 
   @override

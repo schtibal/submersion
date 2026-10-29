@@ -19477,6 +19477,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerSeries_saveUnavailable => '暂时无法保存潜水系列';
 
   @override
+  String get plannerSeries_followFirstDiveOnly => '只有系列中的第一次潜水可以跟随已记录的潜水';
+
+  @override
   String get plannerCanvas_follow_title => '跟随一次潜水';
 
   @override
