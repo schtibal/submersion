@@ -20510,8 +20510,8 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não é possível planear uma série de mergulhos como missão DPV';
 
   @override
-  String get plannerSeries_followFirstDiveOnly =>
-      'Só o primeiro mergulho de uma série pode seguir um mergulho registado';
+  String get plannerSeries_followUnavailableInReplan =>
+      'Um replanejamento não pode seguir outro mergulho';
 
   @override
   String get plannerCanvas_follow_title => 'Seguir um mergulho';

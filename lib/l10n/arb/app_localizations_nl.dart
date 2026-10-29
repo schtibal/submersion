@@ -20378,8 +20378,8 @@ class AppLocalizationsNl extends AppLocalizations {
       'Een reeks duiken kan niet als DPV-missie worden gepland';
 
   @override
-  String get plannerSeries_followFirstDiveOnly =>
-      'Alleen de eerste duik van een reeks kan een gelogde duik volgen';
+  String get plannerSeries_followUnavailableInReplan =>
+      'Een herplanning kan geen andere duik volgen';
 
   @override
   String get plannerCanvas_follow_title => 'Volg een duik';

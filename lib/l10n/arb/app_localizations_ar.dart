@@ -20799,8 +20799,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يمكن تخطيط سلسلة غطسات كمهمة DPV';
 
   @override
-  String get plannerSeries_followFirstDiveOnly =>
-      'يمكن للغطسة الأولى فقط في السلسلة اتباع غطسة مسجلة';
+  String get plannerSeries_followUnavailableInReplan =>
+      'لا يمكن لإعادة التخطيط اتباع غطسة أخرى';
 
   @override
   String get plannerCanvas_follow_title => 'اتباع غطسة';

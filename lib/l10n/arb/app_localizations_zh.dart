@@ -19513,7 +19513,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerSeries_missionUnavailable => '潜水系列无法规划为 DPV 任务';
 
   @override
-  String get plannerSeries_followFirstDiveOnly => '只有系列中的第一次潜水可以跟随已记录的潜水';
+  String get plannerSeries_followUnavailableInReplan => '重新规划无法跟随另一次潜水';
 
   @override
   String get plannerCanvas_follow_title => '跟随一次潜水';

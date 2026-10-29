@@ -20484,8 +20484,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'Eine Tauchgangsserie kann nicht als DPV-Mission geplant werden';
 
   @override
-  String get plannerSeries_followFirstDiveOnly =>
-      'Nur der erste Tauchgang einer Serie kann einem geloggten Tauchgang folgen';
+  String get plannerSeries_followUnavailableInReplan =>
+      'Eine Neuplanung kann keinem anderen Tauchgang folgen';
 
   @override
   String get plannerCanvas_follow_title => 'Einem Tauchgang folgen';

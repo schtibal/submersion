@@ -20500,8 +20500,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Una serie de inmersiones no se puede planificar como misión DPV';
 
   @override
-  String get plannerSeries_followFirstDiveOnly =>
-      'Solo la primera inmersión de una serie puede seguir una inmersión registrada';
+  String get plannerSeries_followUnavailableInReplan =>
+      'Una replanificación no puede seguir otra inmersión';
 
   @override
   String get plannerCanvas_follow_title => 'Seguir una inmersión';
