@@ -210,6 +210,47 @@ void main() {
     expect(s.selected.state, editor(c));
   });
 
+  group('opening a plan starts a new series', () {
+    test('even one with the first dive\'s own id', () async {
+      final c = await makeContainer();
+      final notifier = series(c);
+      notifier.addDive();
+      notifier.previous();
+      final first = editor(c);
+
+      // Opening the same saved plan again, as from Saved plans: the plan
+      // read back is a fresh copy under the same id.
+      c.read(divePlanNotifierProvider.notifier).loadPlan(first.copyWith());
+
+      final s = c.read(planSeriesNotifierProvider);
+      expect(s.isSeries, isFalse);
+      expect(s.selected.state, editor(c));
+      expect(c.read(planSaveAllowedProvider), isTrue);
+    });
+
+    test('from a later dive', () async {
+      final c = await makeContainer();
+      final first = editor(c);
+      series(c).addDive();
+
+      c.read(divePlanNotifierProvider.notifier).loadPlan(first);
+
+      final s = c.read(planSeriesNotifierProvider);
+      expect(s.isSeries, isFalse);
+      expect(s.selected.state, editor(c));
+    });
+
+    test('but moving between its dives does not', () async {
+      final c = await makeContainer();
+      final notifier = series(c);
+      notifier.addDive();
+      notifier.previous();
+      notifier.next();
+
+      expect(c.read(planSeriesNotifierProvider).dives, hasLength(2));
+    });
+  });
+
   test('a series cannot be saved yet; a single dive can', () async {
     final c = await makeContainer();
     expect(c.read(planSaveAllowedProvider), isTrue);

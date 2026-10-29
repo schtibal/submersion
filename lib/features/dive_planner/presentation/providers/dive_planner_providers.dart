@@ -112,6 +112,13 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
   /// production caller must set [_loaded] as [loadPlanById] does.
   bool get isPersisted => _loaded != null;
 
+  /// How many times a whole plan has replaced the one being edited: by
+  /// [newPlan], [loadPlan] or [loadPlanById]. It goes up before the new state
+  /// is assigned, so a listener can tell a load from an edit even when the
+  /// loaded plan has the same id (a saved plan opened again).
+  int get loadCount => _loadCount;
+  int _loadCount = 0;
+
   /// Resolves each defaulted source once, so the initial plan and every later
   /// [newPlan] are provably built from the same one. Dart forbids reading a
   /// field in an initializer list, so without this hop the private constructor
@@ -207,6 +214,7 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
   /// Reset to a new empty plan.
   void newPlan() {
     _loaded = null;
+    _loadCount++;
     state = _createInitialState(
       plannerWaterType: _getDefaultPlannerWaterType(),
     );
@@ -230,6 +238,7 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
 
   /// Load an existing plan for editing.
   void loadPlan(DivePlanState plan) {
+    _loadCount++;
     state = _withCcrSlots(plan);
   }
 
@@ -318,6 +327,7 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
     final plan = await repository.getPlan(planId);
     if (plan == null || !mounted) return false;
     _loaded = plan;
+    _loadCount++;
     state = _withCcrSlots(stateFromDivePlan(plan));
     final mission = plan.mission;
     if (mission != null) {

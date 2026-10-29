@@ -46,10 +46,19 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
   /// different dive is selected or the settings change.
   List<calculator.SeriesDiveResult> _earlier = const [];
 
+  /// The editor's [DivePlanNotifier.loadCount] when this last saw a change.
+  late int _seenLoads = _editor.loadCount;
+
   /// Called on every change of the editor's plan.
   void editorChanged(DivePlanState? previous, DivePlanState next) {
+    final loaded = _editor.loadCount != _seenLoads;
+    _seenLoads = _editor.loadCount;
     if (_pushing) return;
-    final index = state.dives.indexWhere((d) => d.state.id == next.id);
+    // A plan loaded from outside starts over, even under the id of a dive
+    // already here: a saved plan opened again is that plan as saved.
+    final index = loaded
+        ? -1
+        : state.dives.indexWhere((d) => d.state.id == next.id);
     if (index < 0) {
       _earlier = const [];
       state = PlanSeries.single(next);
