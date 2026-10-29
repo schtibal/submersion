@@ -67,9 +67,16 @@ void main() {
         config: _config,
       );
 
+      // As they were on surfacing, after the ascent and its stops, not as
+      // they were at the end of the bottom.
+      expect(results[0].outcome.stops, isNotEmpty);
       expect(
         results[1].state.initialTissueState,
-        results[0].outcome.endTissue.compartments,
+        results[0].outcome.surfacedTissue.compartments,
+      );
+      expect(
+        results[1].state.initialTissueState,
+        isNot(results[0].outcome.endTissue.compartments),
       );
       expect(
         results[1].outcome.totalDecoSeconds,

@@ -17,7 +17,8 @@ class SeriesDiveResult {
 }
 
 /// Computes a repetitive series in order (issue #3565). Each dive after the
-/// first starts from the dive before it: its tissues off-gassed and its CNS
+/// first starts from the dive before it: its tissues as they surfaced, after
+/// the ascent and its stops, then off-gassed, and its CNS
 /// decayed over the surface interval, the OTU of every dive that ended in
 /// the last [otuCarryWindow], and each mapped tank at its source tank's end
 /// pressure. The first dive is computed as given, so a dive it follows
@@ -65,7 +66,7 @@ DivePlanState carriedState(
   ];
 
   return dive.state.copyWith(
-    initialTissueState: previous.outcome.endTissue.compartments,
+    initialTissueState: previous.outcome.surfacedTissue.compartments,
     initialCns: previous.outcome.cnsEnd,
     initialOtu: _carriedOtu(dives, index, earlier),
     tanks: tanks,
