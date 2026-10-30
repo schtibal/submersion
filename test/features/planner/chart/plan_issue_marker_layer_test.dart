@@ -323,7 +323,8 @@ void main() {
       expect(popup.overlaps(placed.glyph.shift(origin)), isFalse);
     });
 
-    testWidgets('a deco stop under a marker keeps the hover', (tester) async {
+    testWidgets('a marker on a deco stop shows its warnings, locked onto '
+        'the stop', (tester) async {
       // A marker where the ascent reaches the first deco stop, a corner of
       // the profile with no waypoint of its own.
       int firstStop(Ref ref) => ref
@@ -363,7 +364,7 @@ void main() {
       await tester.pump();
 
       expect(container.read(scrubTimeProvider), arrival);
-      expect(find.byKey(const Key('planChartIssuePopup')), findsNothing);
+      expect(find.byKey(const Key('planChartIssuePopup')), findsOneWidget);
     });
 
     testWidgets('a row picked in the list shows on its marker', (tester) async {

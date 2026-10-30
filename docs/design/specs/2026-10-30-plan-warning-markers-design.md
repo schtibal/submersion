@@ -85,9 +85,8 @@ below, else above.
 
 - **Hover (desktop):** a waypoint first, then a corner of the computed
   profile such as a deco stop (#3775), then a marker, otherwise the
-  position line follows the cursor. A marker that sits on a stop never takes
-  the hover from it. A marker on a waypoint shows its popup while the line
-  stays locked onto the waypoint.
+  position line follows the cursor. A marker on a waypoint or a stop shows
+  its popup while the line stays locked onto that point.
 - **Tap:** a marker toggles its popup and highlights its list rows. A tap
   elsewhere on the chart lets go. A marker tap never selects a segment or
   adds a waypoint.
@@ -127,7 +126,7 @@ below, else above.
   plan, including a deco ppO2 ceiling set by the explicit O2 depth.
 - `plan_issue_markers_test.dart`: grouping and sharing.
 - `plan_issue_marker_layer_test.dart`: placement, hit-testing, the popup,
-  highlighting both ways, and hover over a deco stop under a marker.
+  highlighting both ways, and hover over a marker on a deco stop.
 - `plan_issue_marker_on_waypoint_test.dart`: hover, click, drag, touch,
   long-press and right-click on a marker that sits on a waypoint.
 - `plan_warnings_reveal_test.dart`: the results panel scrolling to the

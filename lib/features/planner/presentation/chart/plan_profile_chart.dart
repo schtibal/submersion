@@ -569,12 +569,9 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
                   geometry: geometry,
                   position: event.localPosition,
                 )?.timeSeconds;
-          // A warning marker on a waypoint shows its warnings while the
-          // line stays locked onto the waypoint. Near a deco stop the stop
-          // keeps the hover, so a marker never hides it (#3738).
-          final marker = hit != null || lockTime == null
-              ? hitTestIssueMarker(placedMarkers, event.localPosition)
-              : null;
+          // A warning marker on a waypoint or a deco stop shows its
+          // warnings while the line stays locked onto that point (#3738).
+          final marker = hitTestIssueMarker(placedMarkers, event.localPosition);
           if (marker != _hoverMarker) setState(() => _hoverMarker = marker);
           if (lockTime != null) {
             ref.read(scrubTimeProvider.notifier).state = lockTime;
