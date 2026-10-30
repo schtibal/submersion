@@ -419,4 +419,141 @@ void main() {
     expect(badge('Dive A').backgroundColor, Colors.orange);
     expect(badge('Dive B').backgroundColor, scheme.error);
   });
+
+  group('the surface interval field', () {
+    Future<ProviderContainer> threeDives(WidgetTester tester) async {
+      await pumpPlan(tester, const Size(1400, 900));
+      await addDive(tester);
+      await addDive(tester);
+      return containerOf(tester);
+    }
+
+    String fieldText(WidgetTester tester) =>
+        tester.widget<TextField>(siField()).controller!.text;
+
+    testWidgets('a touch on another dive commits to the dive it was typed on', (
+      tester,
+    ) async {
+      final c = await threeDives(tester);
+      await tester.tap(siField());
+      await tester.pump();
+      await tester.enterText(siField(), '3:00');
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('Dive B'));
+      await tester.pumpAndSettle();
+
+      final s = c.read(planSeriesNotifierProvider);
+      expect(s.selectedIndex, 1);
+      expect(s.dives[1].state.surfaceInterval, const Duration(hours: 1));
+      expect(s.dives[2].state.surfaceInterval, const Duration(hours: 3));
+      expect(fieldText(tester), '1:00');
+    });
+
+    testWidgets(
+      'invalid text does not follow to a dive with the same interval',
+      (tester) async {
+        await threeDives(tester);
+        await tester.enterText(siField(), '1:75');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+        expect(find.text('Enter a time as h:mm'), findsOneWidget);
+
+        await tester.tap(find.byTooltip('Dive B'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Enter a time as h:mm'), findsNothing);
+        expect(fieldText(tester), '1:00');
+      },
+    );
+
+    testWidgets('a stepper steps from what was typed', (tester) async {
+      final c = await threeDives(tester);
+      await tester.tap(siField());
+      await tester.pump();
+      await tester.enterText(siField(), '3:00');
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('15 minutes more'));
+      await tester.pumpAndSettle();
+
+      expect(
+        c.read(divePlanNotifierProvider).surfaceInterval,
+        const Duration(hours: 3, minutes: 15),
+      );
+    });
+
+    testWidgets('leaving it untouched keeps the seconds it does not show', (
+      tester,
+    ) async {
+      final c = await threeDives(tester);
+      const interval = Duration(hours: 1, minutes: 5, seconds: 30);
+      c.read(divePlanNotifierProvider.notifier).setSurfaceInterval(interval);
+      await tester.pumpAndSettle();
+      expect(fieldText(tester), '1:05');
+
+      await tester.tap(siField());
+      await tester.pump();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+
+      expect(c.read(divePlanNotifierProvider).surfaceInterval, interval);
+    });
+  });
+
+  group('the name field', () {
+    testWidgets('drops a name the plan no longer has', (tester) async {
+      await pumpPlan(tester, const Size(1400, 900));
+      await tester.enterText(nameField(), 'Wreck');
+      await tester.pumpAndSettle();
+
+      final c = containerOf(tester);
+      c
+          .read(divePlanNotifierProvider.notifier)
+          .loadPlan(c.read(divePlanNotifierProvider).copyWith());
+      await tester.pumpAndSettle();
+
+      expect(c.read(planSeriesNotifierProvider).selected.name, isNull);
+      expect(tester.widget<TextField>(nameField()).controller!.text, isEmpty);
+    });
+
+    testWidgets('leaves the space at the end of a name being typed', (
+      tester,
+    ) async {
+      await pumpPlan(tester, const Size(1400, 900));
+      await tester.enterText(nameField(), 'Wreck ');
+      await tester.pumpAndSettle();
+
+      expect(
+        containerOf(tester).read(planSeriesNotifierProvider).selected.name,
+        'Wreck',
+      );
+      expect(tester.widget<TextField>(nameField()).controller!.text, 'Wreck ');
+    });
+  });
+
+  testWidgets('saving a carried tank untouched leaves it carried', (
+    tester,
+  ) async {
+    await pumpPlan(tester, const Size(1400, 900));
+    await addDive(tester);
+    final c = containerOf(tester);
+    final carried = c.read(divePlanNotifierProvider).tanks.first;
+    // The dialog shows whole bar, so this is the value it would round.
+    expect(
+      carried.startPressure,
+      isNot(carried.startPressure!.roundToDouble()),
+    );
+
+    await tester.tap(find.widgetWithText(InputChip, 'Primary'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(c.read(planSeriesNotifierProvider).selected.pinnedTankIds, isEmpty);
+    expect(
+      c.read(divePlanNotifierProvider).tanks.first.startPressure,
+      carried.startPressure,
+    );
+  });
 }

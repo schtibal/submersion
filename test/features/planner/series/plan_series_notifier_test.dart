@@ -316,4 +316,91 @@ void main() {
       expect(c.read(planSeriesNotifierProvider).selected.name, isNull);
     });
   });
+
+  group('the series survives', () {
+    test('a settings change on the first dive, then an edit', () async {
+      final c = await makeContainer();
+      series(c).addDive();
+      series(c).select(0);
+
+      series(c).configChanged();
+      c.read(divePlanNotifierProvider.notifier).updateGradientFactors(30, 70);
+
+      expect(c.read(planSeriesNotifierProvider).dives, hasLength(2));
+    });
+
+    test('stepping past the first dive, then an edit', () async {
+      final c = await makeContainer();
+      series(c).addDive();
+      series(c).select(0);
+
+      series(c).previous();
+      c.read(divePlanNotifierProvider.notifier).updateGradientFactors(30, 70);
+
+      expect(c.read(planSeriesNotifierProvider).dives, hasLength(2));
+    });
+
+    test('removing a dive the editor is not on, then an edit', () async {
+      final c = await makeContainer();
+      series(c).addDive();
+      series(c).addDive();
+      series(c).select(0);
+
+      series(c).removeDive(2);
+      c.read(divePlanNotifierProvider.notifier).updateGradientFactors(30, 70);
+
+      expect(c.read(planSeriesNotifierProvider).dives, hasLength(2));
+    });
+  });
+
+  test('a load is a load even as the first change this sees', () async {
+    final c = await makeContainer();
+    series(c).renameSelected('Wreck');
+
+    c.read(divePlanNotifierProvider.notifier).loadPlan(editor(c).copyWith());
+
+    expect(c.read(planSeriesNotifierProvider).selected.name, isNull);
+  });
+
+  test('renaming the plan names it on every dive', () async {
+    final c = await makeContainer();
+    series(c).addDive();
+
+    c.read(divePlanNotifierProvider.notifier).updateName('Wreck week');
+
+    final s = c.read(planSeriesNotifierProvider);
+    expect(s.dives.map((d) => d.state.name), ['Wreck week', 'Wreck week']);
+    series(c).select(0);
+    expect(editor(c).name, 'Wreck week');
+  });
+
+  test('a DPV mission on an earlier dive holds + back', () async {
+    final c = await makeContainer();
+    series(c).addDive();
+    series(c).select(0);
+
+    c.read(divePlanNotifierProvider.notifier).enableMission(const DpvMission());
+
+    expect(c.read(canAddSeriesDiveProvider), isFalse);
+  });
+
+  group('computing the series', () {
+    test('a single dive shares the live outcome', () async {
+      final c = await makeContainer();
+      expect(
+        c.read(planSeriesResultsProvider).single.outcome,
+        same(c.read(planOutcomeProvider)),
+      );
+    });
+
+    test('naming a dive runs nothing', () async {
+      final c = await makeContainer();
+      series(c).addDive();
+      final before = c.read(planSeriesResultsProvider);
+
+      series(c).renameSelected('Wreck');
+
+      expect(c.read(planSeriesResultsProvider), same(before));
+    });
+  });
 }

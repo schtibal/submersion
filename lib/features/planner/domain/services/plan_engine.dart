@@ -1090,10 +1090,11 @@ class PlanEngine {
       }
     }
 
-    BreathingConfig ascentBreathingAt(double depth) {
-      final gas = ascentPlan.gasForDepth(depth);
-      return OpenCircuit(fO2: 1.0 - gas.fN2 - gas.fHe, fHe: gas.fHe);
-    }
+    BreathingConfig breathing(AscentGas gas) =>
+        OpenCircuit(fO2: 1.0 - gas.fN2 - gas.fHe, fHe: gas.fHe);
+
+    BreathingConfig ascentBreathingAt(double depth) =>
+        breathing(ascentPlan.gasForDepth(depth));
 
     for (final leg in legs) {
       final segment = leg.segment;
@@ -1123,10 +1124,7 @@ class PlanEngine {
       final breakGas = ascentPlan.breakGasForDepth(stop.depthMeters);
       final airBreaks = policy.airBreaks;
       if (stop.airBreakSeconds > 0 && breakGas != null && airBreaks != null) {
-        final onBreak = OpenCircuit(
-          fO2: 1.0 - breakGas.fN2 - breakGas.fHe,
-          fHe: breakGas.fHe,
-        );
+        final onBreak = breathing(breakGas);
         for (final run in airBreakRuns(stop.durationSeconds, airBreaks)) {
           sampleLeg(
             stop.depthMeters,

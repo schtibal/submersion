@@ -31,6 +31,7 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
        _readEditor = readEditor,
        _getConfig = getConfig,
        _newId = newId ?? _uuid.v4,
+       _seenLoads = editor.loadCount,
        super(PlanSeries.single(readEditor()));
 
   final DivePlanNotifier _editor;
@@ -47,7 +48,7 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
   List<calculator.SeriesDiveResult> _earlier = const [];
 
   /// The editor's [DivePlanNotifier.loadCount] when this last saw a change.
-  late int _seenLoads = _editor.loadCount;
+  int _seenLoads;
 
   /// Called on every change of the editor's plan.
   void editorChanged(DivePlanState? previous, DivePlanState next) {
@@ -65,6 +66,10 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
       return;
     }
     state = edits.updateDiveState(state, index, next);
+    // The name is the whole plan's, so every dive takes a new one.
+    if (previous?.name != next.name) {
+      state = edits.setPlanName(state, next.name);
+    }
     // The OTU carried in depends on how long ago each earlier dive ended.
     if (index > 0 && previous?.surfaceInterval != next.surfaceInterval) {
       final carried = calculator.carriedState(state.dives, index, _earlier);
@@ -74,12 +79,16 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
     }
   }
 
-  /// Re-seeds the selected dive after the engine settings changed.
-  void configChanged() => _loadSelected();
+  /// Re-seeds the selected dive after the engine settings changed. Nothing
+  /// is carried into a first dive, so it has nothing to re-seed.
+  void configChanged() {
+    if (state.selectedIndex > 0) _loadSelected();
+  }
 
   void select(int index) {
-    if (index == state.selectedIndex) return;
-    state = edits.selectDive(state, index);
+    final target = index.clamp(0, state.dives.length - 1);
+    if (target == state.selectedIndex) return;
+    state = edits.selectDive(state, target);
     _loadSelected();
   }
 
@@ -135,6 +144,9 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
     } finally {
       _pushing = false;
     }
+    // Loading the plan the editor already holds notifies no one, so
+    // [editorChanged] cannot be left to catch this count up.
+    _seenLoads = _editor.loadCount;
     state = edits.updateDiveState(
       state,
       state.selectedIndex,
@@ -171,12 +183,29 @@ final planSeriesNotifierProvider =
 final planSeriesResultsProvider = Provider<List<calculator.SeriesDiveResult>>((
   ref,
 ) {
-  final series = ref.watch(planSeriesNotifierProvider);
+  final dives = ref
+      .watch(planSeriesNotifierProvider.select(_chainInputs))
+      .dives;
+  // One dive is the plan in the editor, which that provider already runs.
+  if (dives.length == 1) {
+    return [
+      calculator.SeriesDiveResult(
+        state: dives.single.state,
+        outcome: ref.watch(planOutcomeProvider),
+      ),
+    ];
+  }
   return calculator.computeSeries(
-    series.dives,
+    dives,
     config: ref.watch(planEngineConfigProvider),
   );
 });
+
+/// The series as the chain reads it: without the dives' names or the
+/// selection, so neither of those runs the engine again.
+PlanSeries _chainInputs(PlanSeries series) => PlanSeries(
+  dives: [for (final dive in series.dives) dive.copyWith(clearName: true)],
+);
 
 /// Whether a dive can be added after the last one.
 final canAddSeriesDiveProvider = Provider<bool>(

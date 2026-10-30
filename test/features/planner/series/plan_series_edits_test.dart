@@ -98,6 +98,22 @@ void main() {
       expect(canAppendDive(PlanSeries.single(seriesDiveState())), isTrue);
       expect(appendDive(mission, newId: idSequence()), same(mission));
     });
+
+    test('is not offered with a DPV mission on any dive', () {
+      final series = appendDive(
+        PlanSeries.single(seriesDiveState()),
+        newId: idSequence(),
+      );
+      final missionFirst = PlanSeries(
+        dives: [
+          series.dives[0].copyWith(
+            state: series.dives[0].state.copyWith(mission: const DpvMission()),
+          ),
+          series.dives[1],
+        ],
+      );
+      expect(canAppendDive(missionFirst), isFalse);
+    });
   });
 
   group('removeDive', () {
@@ -242,6 +258,32 @@ void main() {
       series = renameDive(series, 2, 'Reef');
       final removed = removeDive(series, 1);
       expect(removed.dives.map((d) => d.name), ['Wreck', 'Reef']);
+    });
+  });
+
+  group('removing the first dive', () {
+    test('leaves a plan that can be saved', () {
+      final two = appendDive(
+        PlanSeries.single(seriesDiveState()),
+        newId: idSequence(),
+      );
+      expect(two.dives[1].state.isDirty, isFalse);
+      expect(removeDive(two, 0).selected.state.isDirty, isTrue);
+    });
+  });
+
+  group('setPlanName', () {
+    test('names the plan on every dive', () {
+      final two = appendDive(
+        PlanSeries.single(seriesDiveState()),
+        newId: idSequence(),
+      );
+      final named = setPlanName(two, 'Wreck week');
+      expect(named.dives.map((d) => d.state.name), [
+        'Wreck week',
+        'Wreck week',
+      ]);
+      expect(named.selectedIndex, two.selectedIndex);
     });
   });
 }

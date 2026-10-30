@@ -8,7 +8,7 @@ import 'package:submersion/features/planner/domain/entities/plan_series.dart';
 /// Whether a dive can be added after the last one. DPV mission plans are
 /// single dives for now.
 bool canAppendDive(PlanSeries series) =>
-    series.dives.last.state.mission == null;
+    series.dives.every((dive) => dive.state.mission == null);
 
 /// Adds a dive after the last one, copying its settings, profile, tanks and
 /// gases under fresh ids, with a [defaultSeriesSurfaceInterval], and selects
@@ -76,6 +76,8 @@ PlanSeries removeDive(PlanSeries series, int index) {
           clearSurfaceInterval: true,
           clearInitialTissueState: true,
           clearInitialExposure: true,
+          // It is the whole plan now, and it has never been saved.
+          isDirty: true,
         ),
         sourceTankIds: const {},
       );
@@ -115,6 +117,14 @@ PlanSeries renameDive(PlanSeries series, int index, String name) {
         : dive.copyWith(name: trimmed),
   );
 }
+
+/// Names the whole plan: every dive of the series carries its name.
+PlanSeries setPlanName(PlanSeries series, String name) => series.copyWith(
+  dives: [
+    for (final dive in series.dives)
+      dive.copyWith(state: dive.state.copyWith(name: name)),
+  ],
+);
 
 /// Replaces the inputs of the dive at [index] with an edited [state].
 ///

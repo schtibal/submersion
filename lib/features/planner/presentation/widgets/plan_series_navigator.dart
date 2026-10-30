@@ -20,8 +20,9 @@ import 'package:submersion/l10n/l10n_extension.dart';
 /// it has none; each surface interval is its time above two waves. Tapping a
 /// dive selects it; + adds a dive after the last one. The selected dive can
 /// be removed from its chip. A dot marks a dive with a warning: red when
-/// any is critical, orange otherwise. Wider than the screen, the dives scroll by touch or mouse drag behind faded edges,
-/// keeping the selected dive in view.
+/// any is critical, orange otherwise. Wider than the screen, the dives scroll
+/// by touch or mouse drag behind faded edges, keeping the selected dive in
+/// view.
 class PlanSeriesNavigator extends ConsumerStatefulWidget {
   const PlanSeriesNavigator({super.key});
 
@@ -97,6 +98,8 @@ class _PlanSeriesNavigatorState extends ConsumerState<PlanSeriesNavigator> {
     final canAdd = ref.watch(canAddSeriesDiveProvider);
     final notifier = ref.read(planSeriesNotifierProvider.notifier);
     final selected = series.selectedIndex;
+    final diveIds = {for (final dive in series.dives) dive.state.id};
+    _chipKeys.removeWhere((id, _) => !diveIds.contains(id));
 
     final items = <Widget>[];
     for (var i = 0; i < series.dives.length; i++) {
@@ -109,9 +112,7 @@ class _PlanSeriesNavigatorState extends ConsumerState<PlanSeriesNavigator> {
           ),
         );
       }
-      final worst = i < results.length
-          ? _worstWarning(results[i].outcome.issues)
-          : null;
+      final worst = _worstWarning(results[i].outcome.issues);
       items.add(
         _DiveChip(
           key: _keyFor(dive.state.id),

@@ -412,6 +412,7 @@ class _TankEditDialogState extends State<_TankEditDialog> {
   /// The volume field's seeded text, so [_save] can tell an untouched field
   /// from an edited one and keep the stored litres exactly (issue #2027).
   late String _initialVolumeText;
+  late String _initialPressureText;
 
   /// Imperial divers name a cylinder by its rated gas capacity in cuft, not
   /// by its water volume, so the field must use the capacity conversion
@@ -434,14 +435,13 @@ class _TankEditDialogState extends State<_TankEditDialog> {
             1,
           );
     _volumeController = TextEditingController(text: _initialVolumeText);
-    _pressureController = TextEditingController(
-      text: formatRoundedForInput(
-        widget.units.convertPressure(
-          widget.tank?.startPressure ?? TankPresets.planFillPressureBar,
-        ),
-        0,
+    _initialPressureText = formatRoundedForInput(
+      widget.units.convertPressure(
+        widget.tank?.startPressure ?? TankPresets.planFillPressureBar,
       ),
+      0,
     );
+    _pressureController = TextEditingController(text: _initialPressureText);
     _o2Controller = TextEditingController(
       text: formatDecimalForInput(widget.tank?.gasMix.o2 ?? 21),
     );
@@ -724,12 +724,18 @@ class _TankEditDialogState extends State<_TankEditDialog> {
   void _save() {
     if (!_formKey.currentState!.validate()) return;
 
-    final parsedPressure = _validated(_pressureController);
-    final startPressureBar = parsedPressure != null
-        ? widget.units.pressureToBar(parsedPressure)
-        : null;
-    final specs = _volumeSpecs(startPressureBar);
     final original = widget.tank;
+    final parsedPressure = _validated(_pressureController);
+    // The field shows the pressure rounded, so an untouched field keeps the
+    // tank's own: a carried one would otherwise read as typed, and pin it.
+    final startPressureBar =
+        (_pressureController.text == _initialPressureText
+            ? original?.startPressure
+            : null) ??
+        (parsedPressure != null
+            ? widget.units.pressureToBar(parsedPressure)
+            : null);
+    final specs = _volumeSpecs(startPressureBar);
 
     final tank = DiveTank(
       id: _tankId,

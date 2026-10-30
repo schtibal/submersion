@@ -46,7 +46,8 @@ is the only phase built so far.
   stroked. Each surface interval is its time above two waves (the top two
   lines of `Icons.waves`). There are no step arrows: the bar scrolls by
   touch or mouse drag, and a dive is selected by tapping it. A dot marks a
-  dive with any warning. A logged dive the plan follows
+  dive with a warning, red when any is critical and orange otherwise. A
+  logged dive the plan follows
   joins the bar in phase 4, as a solid diver and its dive number: today
   `sourceDiveId` names both a followed dive and the dive a "What if" plan
   replans, so the bar cannot yet tell which it is.
@@ -67,7 +68,7 @@ is the only phase built so far.
 
 | Carried | How |
 | --- | --- |
-| Tissues | The previous dive's end compartments, off-gassed on air over the surface interval (`seededTissueState`, the existing follow-a-dive seed). |
+| Tissues | The previous dive's compartments on reaching the surface (`PlanOutcome.surfacedTissue`: after the ascent, its stops and any air breaks), off-gassed on air over the surface interval (`seededTissueState`, the existing follow-a-dive seed). |
 | CNS | The previous dive's end CNS, decayed over the surface interval with the 90-minute half-time the dive log uses. |
 | OTU | The OTU of every earlier dive that ended less than 24 hours before this dive starts (a rolling daily total). Times run from Dive A's start; each dive starts its surface interval after the previous one ends. |
 | Tank pressures | Each tank starts at its source tank's end pressure (clamped at 0), unless it was filled or its start pressure typed. |

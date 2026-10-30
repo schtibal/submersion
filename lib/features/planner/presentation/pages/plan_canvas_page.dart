@@ -112,12 +112,13 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
   @override
   Widget build(BuildContext context) {
     final planState = ref.watch(divePlanNotifierProvider);
-    _notifier = ref.read(divePlanNotifierProvider.notifier);
-    _isReplan = planState.sourceDiveId != null;
-    final units = UnitFormatter(ref.watch(settingsProvider));
     // A series of dives cannot be saved, or logged, until series
     // persistence lands (issue #3565).
     final saveAllowed = ref.watch(planSaveAllowedProvider);
+    _notifier = ref.read(divePlanNotifierProvider.notifier);
+    // A series is not a throwaway: leaving must not lose what cannot be saved.
+    _isReplan = planState.sourceDiveId != null && saveAllowed;
+    final units = UnitFormatter(ref.watch(settingsProvider));
     final followAllowed = ref.watch(followAllowedProvider);
     // A plan opened via the :planId route is known-persisted, so short-circuit
     // before watching the (DB-backed) summaries provider; that avoids an

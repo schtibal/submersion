@@ -77,6 +77,9 @@ class _PlanSurfaceIntervalFieldState
   }
 
   void _commit() {
+    // Untouched text is only the interval as shown, to the minute, so
+    // leaving the field must not write it back over the real one.
+    if (_controller.text == formatHoursMinutes(_interval)) return;
     final parsed = parseHoursMinutes(_controller.text);
     if (parsed == null) {
       setState(() => _invalid = true);
@@ -92,8 +95,14 @@ class _PlanSurfaceIntervalFieldState
 
   @override
   Widget build(BuildContext context) {
-    // Follow changes made elsewhere (another dive selected, a followed
-    // dive) without fighting the diver's typing.
+    // Another dive in the editor: anything left in the field was not for it.
+    ref.listen(divePlanNotifierProvider.select((s) => s.id), (_, _) {
+      if (!widget.enabled) return;
+      if (_invalid) setState(() => _invalid = false);
+      _show(_interval);
+    });
+    // Follow changes made elsewhere (a followed dive) without fighting the
+    // diver's typing.
     ref.listen(divePlanNotifierProvider.select((s) => s.surfaceInterval), (
       _,
       next,
@@ -145,7 +154,6 @@ class _PlanSurfaceIntervalFieldState
                 decoration: InputDecoration(
                   isDense: true,
                   border: const OutlineInputBorder(),
-                  hintText: 'h:mm',
                   errorText: _invalid
                       ? l10n.plannerSeries_surfaceInterval_invalid
                       : null,
@@ -154,6 +162,9 @@ class _PlanSurfaceIntervalFieldState
                   if (_invalid) setState(() => _invalid = false);
                 },
                 onSubmitted: (_) => _commit(),
+                // On every platform, so a touch on another dive or a stepper
+                // commits this one first: leaving the field does that.
+                onTapOutside: (_) => _focusNode.unfocus(),
               ),
             ),
             IconButton(

@@ -107,10 +107,13 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
   /// this is an accurate "has been persisted" signal. The plan canvas uses it
   /// to prompt for a name on the first save only.
   ///
-  /// Note that [loadPlan] deliberately does not set [_loaded] and therefore
-  /// reports `false`. That method has no production call sites today; a future
-  /// production caller must set [_loaded] as [loadPlanById] does.
-  bool get isPersisted => _loaded != null;
+  /// Note that [loadPlan] deliberately does not set [_loaded]: a What if plan
+  /// has not been saved, and neither have the other dives of a repetitive
+  /// series, which it swaps in while [_loaded] stays on the saved one.
+  bool get isPersisted => _persisted != null;
+
+  /// [_loaded] while it is the plan being edited.
+  domain.DivePlan? get _persisted => _loaded?.id == state.id ? _loaded : null;
 
   /// How many times a whole plan has replaced the one being edited: by
   /// [newPlan], [loadPlan] or [loadPlanById]. It goes up before the new state
@@ -1169,7 +1172,7 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
       return;
     }
     final submitted = state;
-    final plan = divePlanFromState(submitted, existing: _loaded);
+    final plan = divePlanFromState(submitted, existing: _persisted);
     final stored = await repository.savePlan(plan, summary: summary);
     _loaded = stored;
     if (!mounted) return;
@@ -1185,11 +1188,12 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
     final linkedDiveWentAway =
         stored.linkedDiveId == null && state.linkedDiveId == plan.linkedDiveId;
     // A dropped source dive takes the context it seeded, as clearFollowedDive
-    // does, carried CNS and OTU included. The tissues are never stored, so leaving them would keep seeding
-    // deco for a plan that no longer follows a dive, and the schedule would
-    // change silently on the next reload. The repository drops the surface
-    // interval with the dive. Each keeps the same guard: tissues or an
-    // interval the diver set during the async gap are a newer choice.
+    // does, carried CNS and OTU included. The tissues are never stored, so
+    // leaving them would keep seeding deco for a plan that no longer follows a
+    // dive, and the schedule would change silently on the next reload. The
+    // repository drops the surface interval with the dive. Each keeps the same
+    // guard: tissues or an interval the diver set during the async gap are a
+    // newer choice.
     final tissuesWentAway =
         sourceDiveWentAway &&
         identical(state.initialTissueState, submitted.initialTissueState);

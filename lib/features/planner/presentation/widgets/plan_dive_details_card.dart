@@ -43,14 +43,17 @@ class _PlanDiveDetailsCardState extends ConsumerState<PlanDiveDetailsCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Show the selected dive's own name whenever another dive is selected.
-    ref.listen(planSeriesNotifierProvider.select((s) => s.selected.state.id), (
-      _,
-      _,
-    ) {
-      final name = ref.read(planSeriesNotifierProvider).selected.name ?? '';
-      if (_nameController.text != name) _nameController.text = name;
-    });
+    // Show the selected dive's own name, whatever changed it. Compared
+    // trimmed, so the space at the end of a name being typed stays put.
+    ref.listen(
+      planSeriesNotifierProvider.select(
+        (s) => (s.selected.state.id, s.selected.name),
+      ),
+      (_, _) {
+        final name = ref.read(planSeriesNotifierProvider).selected.name ?? '';
+        if (_nameController.text.trim() != name) _nameController.text = name;
+      },
+    );
 
     final index = ref.watch(
       planSeriesNotifierProvider.select((s) => s.selectedIndex),

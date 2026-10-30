@@ -31,5 +31,12 @@ void main() {
       expect(parseHoursMinutes('1h'), isNull);
       expect(parseHoursMinutes('1:2:3'), isNull);
     });
+
+    test('reads the most hours a dive can follow, and no more', () {
+      expect(parseHoursMinutes('999999'), const Duration(hours: 999999));
+      expect(parseHoursMinutes('1000000'), isNull);
+      expect(parseHoursMinutes('99999999999999999999'), isNull);
+      expect(parseHoursMinutes('9999999999999:00'), isNull);
+    });
   });
 }
