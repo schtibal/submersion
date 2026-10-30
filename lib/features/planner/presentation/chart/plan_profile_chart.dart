@@ -361,6 +361,7 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
           markers: issueMarkers,
           geometry: geometry,
           depthAt: (ghost ?? series).depthAt,
+          highlighted: highlightedIssues,
         );
         final hoverMarker = _hoverMarker;
         int? activeMarker =
@@ -368,9 +369,7 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
             ? hoverMarker
             : null;
         if (activeMarker == null && highlightedIssues.isNotEmpty) {
-          final picked = placedMarkers.indexWhere(
-            (p) => p.marker.keys.any(highlightedIssues.contains),
-          );
+          final picked = placedMarkers.indexWhere((p) => p.highlighted);
           if (picked >= 0) activeMarker = picked;
         }
 
@@ -689,7 +688,6 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
                               Positioned.fill(
                                 child: PlanIssueMarkerLayer(
                                   placed: placedMarkers,
-                                  highlighted: highlightedIssues,
                                   activeIndex: activeMarker,
                                   palette: palette,
                                   units: units,

@@ -80,6 +80,57 @@ void main() {
       expect(placed.glyph.left, greaterThanOrEqualTo(_geometry.plotRect.left));
     });
 
+    group('a picked marker', () {
+      final deep = _marker(
+        600,
+        PlanIssueType.endExceeded,
+        PlanIssueSeverity.warning,
+      );
+      final shallow = _marker(
+        30,
+        PlanIssueType.cnsWarning,
+        PlanIssueSeverity.warning,
+      );
+
+      PlacedIssueMarker place(PlanIssueMarker marker, {required bool picked}) =>
+          placeIssueMarkers(
+            markers: [marker],
+            geometry: _geometry,
+            depthAt: _profile,
+            highlighted: picked ? marker.keys : const {},
+          ).single;
+
+      // How far the sign reaches from its centre towards the point.
+      double reach(Rect glyph, Offset direction) =>
+          glyph.width / 2 * direction.dx.abs() +
+          glyph.height / 2 * direction.dy.abs();
+
+      for (final (name, marker) in [('deep', deep), ('shallow', shallow)]) {
+        test('$name: the sign steps clear of a ring centred on the point', () {
+          final picked = place(marker, picked: true);
+          expect(picked.highlighted, isTrue);
+          final away = picked.glyph.center - picked.anchor;
+          final direction = away / away.distance;
+          final gap = away.distance - reach(picked.glyph, direction);
+          expect(gap, greaterThan(issueMarkerRingRadius + 1));
+
+          // It stays right by the point it marks.
+          expect(gap, lessThan(issueMarkerRingRadius + 4));
+          expect(place(marker, picked: false).highlighted, isFalse);
+        });
+
+        test('$name: the sign moves towards the middle of the plot', () {
+          final picked = place(marker, picked: true);
+          final toMiddle = _geometry.plotRect.center - picked.anchor;
+          final away = picked.glyph.center - picked.anchor;
+          final cosine =
+              (toMiddle.dx * away.dx + toMiddle.dy * away.dy) /
+              (toMiddle.distance * away.distance);
+          expect(cosine, closeTo(1, 0.01));
+        });
+      }
+    });
+
     test('markers a few pixels apart share one, worst first', () {
       final placed = placeIssueMarkers(
         markers: [
@@ -176,6 +227,19 @@ void main() {
       expect(find.byKey(const Key('planChartIssuePopup')), findsOneWidget);
       expect(container.read(highlightedPlanIssuesProvider), placed.marker.keys);
       expect(markerPainter(tester).highlighted.first, isTrue);
+      // The ring is centred on the point the warnings start at.
+      final anchor = markerPainter(tester).placed.first.anchor;
+      expect(
+        tester.renderObject(find.byKey(const Key('planChartIssueMarkers'))),
+        paints..something((method, arguments) {
+          if (method != #drawCircle) return false;
+          final paint = arguments[2] as Paint;
+          return arguments[0] == anchor &&
+              arguments[1] == issueMarkerRingRadius &&
+              paint.style == PaintingStyle.stroke &&
+              paint.strokeWidth == 2;
+        }),
+      );
       // A marker tap is not a segment tap.
       expect(container.read(selectedSegmentIdProvider), selectedBefore);
 

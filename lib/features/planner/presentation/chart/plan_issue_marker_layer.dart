@@ -15,19 +15,22 @@ import 'package:submersion/l10n/l10n_extension.dart';
 /// A warning marker where the chart draws it (#3738): [anchor] is the point
 /// on the profile line where the warnings start, [glyph] the small warning
 /// sign drawn just above it (below it when the anchor is too close to the
-/// top of the plot).
+/// top of the plot). A [highlighted] marker has a ring around its anchor,
+/// and its sign steps clear of the ring towards the middle of the plot.
 class PlacedIssueMarker {
   const PlacedIssueMarker({
     required this.marker,
     required this.depthMeters,
     required this.anchor,
     required this.glyph,
+    this.highlighted = false,
   });
 
   final PlanIssueMarker marker;
   final double depthMeters;
   final Offset anchor;
   final Rect glyph;
+  final bool highlighted;
 }
 
 /// Width and height of a marker's warning sign, in logical pixels.
@@ -37,13 +40,24 @@ const issueMarkerGlyphSize = Size(14, 12);
 /// covers the line it points at.
 const _glyphGap = 5.0;
 
+/// Radius of the ring around a highlighted marker's anchor.
+const issueMarkerRingRadius = 7.0;
+
+/// Width of the ring's stroke.
+const _ringStroke = 2.0;
+
+/// Gap between the ring and a highlighted marker's sign.
+const _ringGap = 2.0;
+
 /// Places [markers] on the profile [depthAt] describes. Markers whose
 /// anchors land closer than [mergeDistance] pixels share one, so warnings
 /// that start at nearly the same point never pile up at the current zoom.
+/// A marker with any of the [highlighted] rows is placed highlighted.
 List<PlacedIssueMarker> placeIssueMarkers({
   required List<PlanIssueMarker> markers,
   required PlanChartGeometry geometry,
   required double Function(double timeSeconds) depthAt,
+  Set<PlanIssueKey> highlighted = const {},
   double mergeDistance = 16,
 }) {
   final plot = geometry.plotRect;
@@ -75,19 +89,49 @@ List<PlacedIssueMarker> placeIssueMarkers({
   return [
     for (final (marker, depth, anchor) in merged)
       () {
-        final above = anchor.dy - _glyphGap - size.height;
-        final top = above >= plot.top ? above : anchor.dy + _glyphGap;
-        final left = (anchor.dx - size.width / 2)
+        final picked = marker.keys.any(highlighted.contains);
+        final Offset topLeft;
+        if (picked) {
+          topLeft = _clearOfRing(anchor, plot) - size.center(Offset.zero);
+        } else {
+          final above = anchor.dy - _glyphGap - size.height;
+          topLeft = Offset(
+            anchor.dx - size.width / 2,
+            above >= plot.top ? above : anchor.dy + _glyphGap,
+          );
+        }
+        final left = topLeft.dx
             .clamp(plot.left, math.max(plot.left, plot.right - size.width))
+            .toDouble();
+        final top = topLeft.dy
+            .clamp(plot.top, math.max(plot.top, plot.bottom - size.height))
             .toDouble();
         return PlacedIssueMarker(
           marker: marker,
           depthMeters: depth,
           anchor: anchor,
           glyph: Rect.fromLTWH(left, top, size.width, size.height),
+          highlighted: picked,
         );
       }(),
   ];
+}
+
+/// Where a highlighted marker's sign is centred: on the line from [anchor]
+/// towards the middle of [plot], just far enough out that the sign clears
+/// the ring around the anchor.
+Offset _clearOfRing(Offset anchor, Rect plot) {
+  final toMiddle = plot.center - anchor;
+  final direction = toMiddle.distance < 1
+      ? const Offset(0, -1)
+      : toMiddle / toMiddle.distance;
+  const size = issueMarkerGlyphSize;
+  // How far the sign reaches from its centre back towards the anchor.
+  final reach =
+      size.width / 2 * direction.dx.abs() +
+      size.height / 2 * direction.dy.abs();
+  const ringOuter = issueMarkerRingRadius + _ringStroke / 2;
+  return anchor + direction * (ringOuter + _ringGap + reach);
 }
 
 /// The marker under [position], or null. [radius] widens the target past
@@ -118,7 +162,6 @@ class PlanIssueMarkerLayer extends StatelessWidget {
   const PlanIssueMarkerLayer({
     super.key,
     required this.placed,
-    required this.highlighted,
     required this.activeIndex,
     required this.palette,
     required this.units,
@@ -126,7 +169,6 @@ class PlanIssueMarkerLayer extends StatelessWidget {
   });
 
   final List<PlacedIssueMarker> placed;
-  final Set<PlanIssueKey> highlighted;
   final int? activeIndex;
   final PlanChartPalette palette;
   final UnitFormatter units;
@@ -149,9 +191,7 @@ class PlanIssueMarkerLayer extends StatelessWidget {
                 for (final p in placed)
                   planIssueSeverityColor(scheme, p.marker.severity),
               ],
-              highlighted: [
-                for (final p in placed) p.marker.keys.any(highlighted.contains),
-              ],
+              highlighted: [for (final p in placed) p.highlighted],
               outline: palette.backdrop,
             ),
           ),
@@ -216,7 +256,7 @@ String _groupText(
 /// Each marker as a small warning sign in its severity's colour, outlined
 /// in the chart backdrop so it reads over the profile, the fill and the
 /// ceiling band, with a dot on the line where the warnings start. A
-/// highlighted marker gets a ring.
+/// highlighted marker gets a ring centred on that dot.
 class PlanIssueMarkerPainter extends CustomPainter {
   const PlanIssueMarkerPainter({
     required this.placed,
@@ -269,12 +309,12 @@ class PlanIssueMarkerPainter extends CustomPainter {
 
       if (highlighted[i]) {
         canvas.drawCircle(
-          glyph.center,
-          glyph.longestSide / 2 + 5,
+          marker.anchor,
+          issueMarkerRingRadius,
           Paint()
             ..color = color
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 2,
+            ..strokeWidth = _ringStroke,
         );
       }
     }
