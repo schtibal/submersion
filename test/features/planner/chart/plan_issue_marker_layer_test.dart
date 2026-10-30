@@ -80,55 +80,24 @@ void main() {
       expect(placed.glyph.left, greaterThanOrEqualTo(_geometry.plotRect.left));
     });
 
-    group('a picked marker', () {
-      final deep = _marker(
+    test('a picked marker stays exactly where it sits unpicked', () {
+      final marker = _marker(
         600,
         PlanIssueType.endExceeded,
         PlanIssueSeverity.warning,
       );
-      final shallow = _marker(
-        30,
-        PlanIssueType.cnsWarning,
-        PlanIssueSeverity.warning,
-      );
+      PlacedIssueMarker place({required bool picked}) => placeIssueMarkers(
+        markers: [marker],
+        geometry: _geometry,
+        depthAt: _profile,
+        highlighted: picked ? marker.keys : const {},
+      ).single;
 
-      PlacedIssueMarker place(PlanIssueMarker marker, {required bool picked}) =>
-          placeIssueMarkers(
-            markers: [marker],
-            geometry: _geometry,
-            depthAt: _profile,
-            highlighted: picked ? marker.keys : const {},
-          ).single;
-
-      // How far the sign reaches from its centre towards the point.
-      double reach(Rect glyph, Offset direction) =>
-          glyph.width / 2 * direction.dx.abs() +
-          glyph.height / 2 * direction.dy.abs();
-
-      for (final (name, marker) in [('deep', deep), ('shallow', shallow)]) {
-        test('$name: the sign steps clear of a ring centred on the point', () {
-          final picked = place(marker, picked: true);
-          expect(picked.highlighted, isTrue);
-          final away = picked.glyph.center - picked.anchor;
-          final direction = away / away.distance;
-          final gap = away.distance - reach(picked.glyph, direction);
-          expect(gap, greaterThan(issueMarkerRingRadius + 1));
-
-          // It stays right by the point it marks.
-          expect(gap, lessThan(issueMarkerRingRadius + 4));
-          expect(place(marker, picked: false).highlighted, isFalse);
-        });
-
-        test('$name: the sign moves towards the middle of the plot', () {
-          final picked = place(marker, picked: true);
-          final toMiddle = _geometry.plotRect.center - picked.anchor;
-          final away = picked.glyph.center - picked.anchor;
-          final cosine =
-              (toMiddle.dx * away.dx + toMiddle.dy * away.dy) /
-              (toMiddle.distance * away.distance);
-          expect(cosine, closeTo(1, 0.01));
-        });
-      }
+      final picked = place(picked: true);
+      final unpicked = place(picked: false);
+      expect(picked.highlighted, isTrue);
+      expect(unpicked.highlighted, isFalse);
+      expect(picked.glyph, unpicked.glyph);
     });
 
     test('markers a few pixels apart share one, worst first', () {
@@ -240,6 +209,15 @@ void main() {
               paint.strokeWidth == 2;
         }),
       );
+      // Its sign gives way to the ring: only the other markers draw one,
+      // each a fill and an outline.
+      expect(
+        tester.renderObject(find.byKey(const Key('planChartIssueMarkers'))),
+        paintsExactlyCountTimes(
+          #drawPath,
+          2 * (markerPainter(tester).placed.length - 1),
+        ),
+      );
       // A marker tap is not a segment tap.
       expect(container.read(selectedSegmentIdProvider), selectedBefore);
 
@@ -280,6 +258,69 @@ void main() {
       await gesture.moveTo(const Offset(700, 500));
       await tester.pump();
       expect(find.byKey(const Key('planChartIssuePopup')), findsNothing);
+    });
+
+    testWidgets('the popup stays put from hover to click', (tester) async {
+      await seed(tester);
+      final popup = find.byKey(const Key('planChartIssuePopup'));
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(markerAt(tester, 0));
+      await tester.pump();
+      final hovered = tester.getRect(popup);
+
+      await gesture.down(markerAt(tester, 0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(markerPainter(tester).highlighted.first, isTrue);
+      expect(tester.getRect(popup), hovered);
+    });
+
+    testWidgets('the popup leaves room for the ring', (tester) async {
+      // A marker mid-chart with a wide popup, too wide to fit on either side
+      // of it on a 500 px chart.
+      await seed(
+        tester,
+        overrides: [
+          planIssueMarkersProvider.overrideWith(
+            (ref) => [
+              PlanIssueMarker(
+                runtimeSeconds:
+                    ref.watch(activePlanOutcomeProvider).runtimeSeconds ~/ 2,
+                groups: const [
+                  GroupedPlanIssue(
+                    issue: PlanIssue(
+                      type: PlanIssueType.ndlExceededNoDecoGas,
+                      severity: PlanIssueSeverity.alert,
+                      message: 'no deco gas',
+                    ),
+                    count: 1,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+      final placed = markerPainter(tester).placed.single;
+      final origin = tester.getTopLeft(find.byType(PlanProfileChart));
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(origin + placed.glyph.center);
+      await tester.pump();
+
+      final popup = tester.getRect(
+        find.byKey(const Key('planChartIssuePopup')),
+      );
+      final ring = Rect.fromCircle(
+        center: origin + placed.anchor,
+        radius: issueMarkerRingRadius + 1,
+      );
+      expect(popup.overlaps(ring), isFalse);
+      expect(popup.overlaps(placed.glyph.shift(origin)), isFalse);
     });
 
     testWidgets('a deco stop under a marker keeps the hover', (tester) async {

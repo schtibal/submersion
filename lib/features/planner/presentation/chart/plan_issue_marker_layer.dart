@@ -15,8 +15,8 @@ import 'package:submersion/l10n/l10n_extension.dart';
 /// A warning marker where the chart draws it (#3738): [anchor] is the point
 /// on the profile line where the warnings start, [glyph] the small warning
 /// sign drawn just above it (below it when the anchor is too close to the
-/// top of the plot). A [highlighted] marker has a ring around its anchor,
-/// and its sign steps clear of the ring towards the middle of the plot.
+/// top of the plot). A [highlighted] marker shows a ring around its anchor
+/// in place of its sign.
 class PlacedIssueMarker {
   const PlacedIssueMarker({
     required this.marker,
@@ -31,6 +31,15 @@ class PlacedIssueMarker {
   final Offset anchor;
   final Rect glyph;
   final bool highlighted;
+
+  /// The sign and the ring together, whichever is showing, so the popup
+  /// sits in the same place on hover and once picked, clear of both.
+  Rect get footprint => glyph.expandToInclude(
+    Rect.fromCircle(
+      center: anchor,
+      radius: issueMarkerRingRadius + _ringStroke / 2,
+    ),
+  );
 }
 
 /// Width and height of a marker's warning sign, in logical pixels.
@@ -45,9 +54,6 @@ const issueMarkerRingRadius = 7.0;
 
 /// Width of the ring's stroke.
 const _ringStroke = 2.0;
-
-/// Gap between the ring and a highlighted marker's sign.
-const _ringGap = 2.0;
 
 /// Places [markers] on the profile [depthAt] describes. Markers whose
 /// anchors land closer than [mergeDistance] pixels share one, so warnings
@@ -89,49 +95,20 @@ List<PlacedIssueMarker> placeIssueMarkers({
   return [
     for (final (marker, depth, anchor) in merged)
       () {
-        final picked = marker.keys.any(highlighted.contains);
-        final Offset topLeft;
-        if (picked) {
-          topLeft = _clearOfRing(anchor, plot) - size.center(Offset.zero);
-        } else {
-          final above = anchor.dy - _glyphGap - size.height;
-          topLeft = Offset(
-            anchor.dx - size.width / 2,
-            above >= plot.top ? above : anchor.dy + _glyphGap,
-          );
-        }
-        final left = topLeft.dx
+        final above = anchor.dy - _glyphGap - size.height;
+        final top = above >= plot.top ? above : anchor.dy + _glyphGap;
+        final left = (anchor.dx - size.width / 2)
             .clamp(plot.left, math.max(plot.left, plot.right - size.width))
-            .toDouble();
-        final top = topLeft.dy
-            .clamp(plot.top, math.max(plot.top, plot.bottom - size.height))
             .toDouble();
         return PlacedIssueMarker(
           marker: marker,
           depthMeters: depth,
           anchor: anchor,
           glyph: Rect.fromLTWH(left, top, size.width, size.height),
-          highlighted: picked,
+          highlighted: marker.keys.any(highlighted.contains),
         );
       }(),
   ];
-}
-
-/// Where a highlighted marker's sign is centred: on the line from [anchor]
-/// towards the middle of [plot], just far enough out that the sign clears
-/// the ring around the anchor.
-Offset _clearOfRing(Offset anchor, Rect plot) {
-  final toMiddle = plot.center - anchor;
-  final direction = toMiddle.distance < 1
-      ? const Offset(0, -1)
-      : toMiddle / toMiddle.distance;
-  const size = issueMarkerGlyphSize;
-  // How far the sign reaches from its centre back towards the anchor.
-  final reach =
-      size.width / 2 * direction.dx.abs() +
-      size.height / 2 * direction.dy.abs();
-  const ringOuter = issueMarkerRingRadius + _ringStroke / 2;
-  return anchor + direction * (ringOuter + _ringGap + reach);
 }
 
 /// The marker under [position], or null. [radius] widens the target past
@@ -211,7 +188,7 @@ class PlanIssueMarkerLayer extends StatelessWidget {
             child: IgnorePointer(
               child: ExcludeSemantics(
                 child: CustomSingleChildLayout(
-                  delegate: _PopupLayout(placed[active].glyph),
+                  delegate: _PopupLayout(placed[active].footprint),
                   child: _IssuePopup(
                     key: const Key('planChartIssuePopup'),
                     placed: placed[active],
@@ -256,7 +233,7 @@ String _groupText(
 /// Each marker as a small warning sign in its severity's colour, outlined
 /// in the chart backdrop so it reads over the profile, the fill and the
 /// ceiling band, with a dot on the line where the warnings start. A
-/// highlighted marker gets a ring centred on that dot.
+/// highlighted marker shows a ring centred on that dot instead of its sign.
 class PlanIssueMarkerPainter extends CustomPainter {
   const PlanIssueMarkerPainter({
     required this.placed,
@@ -285,6 +262,18 @@ class PlanIssueMarkerPainter extends CustomPainter {
       canvas.drawCircle(marker.anchor, 2.5, fill);
       canvas.drawCircle(marker.anchor, 2.5, outlinePaint);
 
+      if (highlighted[i]) {
+        canvas.drawCircle(
+          marker.anchor,
+          issueMarkerRingRadius,
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = _ringStroke,
+        );
+        continue;
+      }
+
       final glyph = marker.glyph;
       final sign = Path()
         ..moveTo(glyph.center.dx, glyph.top)
@@ -306,17 +295,6 @@ class PlanIssueMarkerPainter extends CustomPainter {
         mark,
       );
       canvas.drawCircle(Offset(glyph.center.dx, glyph.bottom - 2.2), 0.9, mark);
-
-      if (highlighted[i]) {
-        canvas.drawCircle(
-          marker.anchor,
-          issueMarkerRingRadius,
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = _ringStroke,
-        );
-      }
     }
   }
 
@@ -331,13 +309,14 @@ class PlanIssueMarkerPainter extends CustomPainter {
       );
 }
 
-/// Puts the warnings card beside its marker: to the right when it fits,
-/// else to the left, vertically centred on the sign and kept inside the
-/// chart.
+/// Puts the warnings card beside its marker's [footprint]: to the right
+/// when it fits, else to the left, vertically centred on it. When the card
+/// fits on neither side it goes below the marker, else above, so it never
+/// covers the sign or the ring. It always stays inside the chart.
 class _PopupLayout extends SingleChildLayoutDelegate {
-  const _PopupLayout(this.glyph);
+  const _PopupLayout(this.footprint);
 
-  final Rect glyph;
+  final Rect footprint;
 
   static const _margin = 4.0;
   static const _gap = 8.0;
@@ -351,19 +330,39 @@ class _PopupLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    var x = glyph.right + _gap;
-    if (x + childSize.width > size.width - _margin) {
-      x = glyph.left - _gap - childSize.width;
+    final right = footprint.right + _gap;
+    final left = footprint.left - _gap - childSize.width;
+    final below = footprint.bottom + _gap;
+    final above = footprint.top - _gap - childSize.height;
+    final besideY = footprint.center.dy - childSize.height / 2;
+    final centredX = footprint.center.dx - childSize.width / 2;
+    final Offset position;
+    if (right + childSize.width <= size.width - _margin) {
+      position = Offset(right, besideY);
+    } else if (left >= _margin) {
+      position = Offset(left, besideY);
+    } else if (below + childSize.height <= size.height - _margin) {
+      position = Offset(centredX, below);
+    } else if (above >= _margin) {
+      position = Offset(centredX, above);
+    } else {
+      position = Offset(left, besideY);
     }
-    final y = glyph.center.dy - childSize.height / 2;
     return Offset(
-      x.clamp(_margin, math.max(_margin, size.width - childSize.width)),
-      y.clamp(_margin, math.max(_margin, size.height - childSize.height)),
+      position.dx.clamp(
+        _margin,
+        math.max(_margin, size.width - childSize.width - _margin),
+      ),
+      position.dy.clamp(
+        _margin,
+        math.max(_margin, size.height - childSize.height - _margin),
+      ),
     );
   }
 
   @override
-  bool shouldRelayout(_PopupLayout oldDelegate) => glyph != oldDelegate.glyph;
+  bool shouldRelayout(_PopupLayout oldDelegate) =>
+      footprint != oldDelegate.footprint;
 }
 
 class _IssuePopup extends StatelessWidget {

@@ -71,12 +71,15 @@ up at the current zoom.
 
 A marker is a small warning sign drawn 5 px above the line, or below it at
 the top of the plot, so it never covers the line it points at. A dot marks
-the start on the line. A highlighted marker gets a ring centred on that
-dot, and its sign steps out of the ring's way, along the line from the dot
-towards the middle of the plot, so the ring never hides it and it stays
-clear of the chart's edges. The sign is outlined in the chart backdrop so
-it reads over the profile, the fill and the ceiling band, in light and
-dark themes alike.
+the start on the line. A highlighted marker shows a ring centred on that
+dot in place of its sign, so nothing moves when a marker is picked. The
+sign is outlined in the chart backdrop so it reads over the profile, the
+fill and the ceiling band, in light and dark themes alike.
+
+The popup sits beside the sign and the ring's space together, whichever is
+showing, so it stays in the same place from hover to click and never
+covers either. It goes to the right when it fits, else to the left, else
+below, else above.
 
 ## Interaction
 
