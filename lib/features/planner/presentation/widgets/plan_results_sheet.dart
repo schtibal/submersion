@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import 'package:submersion/core/constants/enums.dart';
@@ -7,6 +5,7 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
+import 'package:submersion/features/planner/presentation/widgets/plan_issue_text.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_kit.dart';
 import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
     show PlanMode;
@@ -17,6 +16,7 @@ import 'package:submersion/features/planner/domain/services/schedule_lines.dart'
 import 'package:submersion/features/planner/domain/services/tank_role_resolver.dart';
 import 'package:submersion/features/planner/presentation/mission/mission_results_section.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_canvas_providers.dart';
+import 'package:submersion/features/planner/presentation/providers/plan_issue_marker_providers.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_status_chips.dart';
 import 'package:submersion/features/planner/presentation/widgets/range_table_section.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
@@ -25,107 +25,6 @@ import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/widgets/forms/number_field.dart';
 import 'package:submersion/shared/widgets/forms/number_input_validation.dart';
-
-/// Localized, unit-aware message for a plan issue. Reuses the existing
-/// `divePlanner_warning_*` strings where a type overlaps, so only genuinely
-/// new issue types need new keys.
-String planIssueMessage(
-  BuildContext context,
-  PlanIssue issue,
-  UnitFormatter units,
-) {
-  final l10n = context.l10n;
-  switch (issue.type) {
-    case PlanIssueType.ppO2High:
-      return l10n.divePlanner_warning_ppO2High(
-        issue.value?.toStringAsFixed(2) ?? '--',
-      );
-    case PlanIssueType.ppO2Critical:
-      return l10n.divePlanner_warning_ppO2Critical(
-        issue.value?.toStringAsFixed(2) ?? '--',
-      );
-    case PlanIssueType.hypoxicGas:
-      return l10n.plannerCanvas_issue_hypoxic(
-        units.formatDepth(issue.atDepth ?? 0, decimals: 0),
-        issue.value?.toStringAsFixed(2) ?? '--',
-      );
-    case PlanIssueType.endExceeded:
-      // The engine compares unrounded values, so plain rounding could print
-      // "30m exceeds the 30m limit" for an END of 30.05 m. Round the END up
-      // and the limit down; the epsilon stops float noise (32.0000001) from
-      // bumping a whole value. The engine only raises this issue when the END
-      // is above the limit, so an END within the epsilon of it is still shown
-      // one unit higher rather than equal.
-      const epsilon = 1e-6;
-      final limit = (units.convertDepth(issue.threshold ?? 0) + epsilon)
-          .floor();
-      final end = max(
-        (units.convertDepth(issue.value ?? 0) - epsilon).ceil(),
-        limit + 1,
-      );
-      return l10n.divePlanner_warning_endExceedsLimit(
-        units.formatDepth(units.depthToMeters(end.toDouble()), decimals: 0),
-        units.formatDepth(units.depthToMeters(limit.toDouble()), decimals: 0),
-      );
-    case PlanIssueType.gasDensityHigh:
-      return l10n.plannerCanvas_issue_gasDensityHigh(
-        issue.value?.toStringAsFixed(1) ?? '--',
-      );
-    case PlanIssueType.gasDensityCritical:
-      return l10n.plannerCanvas_issue_gasDensityCritical(
-        issue.value?.toStringAsFixed(1) ?? '--',
-      );
-    case PlanIssueType.cnsWarning:
-      return l10n.divePlanner_warning_cnsWarning(
-        issue.value?.toStringAsFixed(0) ?? '--',
-      );
-    case PlanIssueType.cnsCritical:
-      return l10n.divePlanner_warning_cnsCritical;
-    case PlanIssueType.otuHigh:
-      return l10n.divePlanner_warning_otuWarning;
-    case PlanIssueType.gasReserveViolation:
-      return l10n.divePlanner_warning_gasLow(
-        units.formatPressure(issue.threshold ?? 0),
-      );
-    case PlanIssueType.gasOut:
-      return l10n.divePlanner_warning_gasOut;
-    case PlanIssueType.ndlExceededNoDecoGas:
-      return l10n.plannerCanvas_issue_noDecoGas;
-    case PlanIssueType.noBailoutCarried:
-      return l10n.plannerCanvas_issue_noBailout;
-    case PlanIssueType.minGasViolation:
-      return l10n.plannerCanvas_issue_minGas(
-        units.formatPressure(issue.threshold ?? 0),
-      );
-    case PlanIssueType.noUsableGas:
-      return l10n.plannerCanvas_issue_noUsableGas(
-        units.formatPressure(issue.value ?? 0),
-        units.formatPressure(issue.threshold ?? 0),
-      );
-    case PlanIssueType.diluentModExceeded:
-      return l10n.plannerCanvas_issue_diluentModExceeded(
-        units.formatDepth(issue.atDepth ?? 0, decimals: 0),
-        issue.value?.toStringAsFixed(2) ?? '--',
-      );
-    case PlanIssueType.ceilingViolated:
-      return l10n.plannerCanvas_issue_ceilingViolated(
-        units.formatDepth(issue.value ?? 0, decimals: 1),
-      );
-  }
-}
-
-IconData _issueIcon(PlanIssueSeverity severity) {
-  switch (severity) {
-    case PlanIssueSeverity.critical:
-      return Icons.error;
-    case PlanIssueSeverity.alert:
-      return Icons.warning;
-    case PlanIssueSeverity.warning:
-      return Icons.warning_amber;
-    case PlanIssueSeverity.info:
-      return Icons.info_outline;
-  }
-}
 
 /// The results content: runtime table, per-tank gas plan, and the
 /// severity-sorted issue list. The page owns the sheet chrome and passes the
@@ -794,24 +693,50 @@ class _GasRow extends StatelessWidget {
   }
 }
 
-class _IssueRow extends StatelessWidget {
+/// One warnings-list row. A row with a marker on the chart (#3738) picks
+/// that marker out when tapped, and is tinted while it is picked, whether
+/// from here or from the chart.
+class _IssueRow extends ConsumerWidget {
   const _IssueRow({required this.group, required this.units});
 
   final GroupedPlanIssue group;
   final UnitFormatter units;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final issue = group.issue;
     final color = planIssueSeverityColor(theme.colorScheme, issue.severity);
     final message = planIssueMessage(context, issue, units);
-    return PlanWarningRow(
-      icon: _issueIcon(issue.severity),
-      color: color,
-      message: group.count > 1
-          ? context.l10n.plannerCanvas_issue_repeated(message, group.count)
-          : message,
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: PlanWarningRow(
+        icon: planIssueIcon(issue.severity),
+        color: color,
+        message: group.count > 1
+            ? context.l10n.plannerCanvas_issue_repeated(message, group.count)
+            : message,
+      ),
+    );
+    final onChart = ref.watch(
+      planIssueMarkersProvider.select(
+        (markers) => markers.any((m) => m.keys.contains(group.key)),
+      ),
+    );
+    if (!onChart) return row;
+    final picked = ref.watch(
+      highlightedPlanIssuesProvider.select((keys) => keys.contains(group.key)),
+    );
+    return Material(
+      key: ValueKey('planIssueRow-${issue.type.name}-${issue.severity.name}'),
+      color: picked ? color.withValues(alpha: 0.12) : Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => ref.read(highlightedPlanIssuesProvider.notifier).state =
+            picked ? const {} : {group.key},
+        child: row,
+      ),
     );
   }
 }
