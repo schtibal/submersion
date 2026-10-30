@@ -353,10 +353,11 @@ void main() {
       );
       await _seedDecoPlan(tester, find.byType(PlanResultsSheet));
 
-      final listView = tester.widget<ListView>(find.byType(ListView));
-      expect(listView.shrinkWrap, isTrue);
-      expect(listView.physics, isA<NeverScrollableScrollPhysics>());
-      expect(listView.controller, same(controller));
+      final scrollView = tester.widget<SingleChildScrollView>(
+        find.byType(SingleChildScrollView).first,
+      );
+      expect(scrollView.physics, isA<NeverScrollableScrollPhysics>());
+      expect(scrollView.controller, same(controller));
     },
   );
 

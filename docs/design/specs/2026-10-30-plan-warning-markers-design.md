@@ -84,6 +84,15 @@ the ceiling band, in light and dark themes alike.
 - **Tap:** a marker toggles its popup and highlights its list rows. A tap
   elsewhere on the chart lets go. A marker tap never selects a segment or
   adds a waypoint.
+- **Scrolling the list:** when a marker tap picks out warnings that are
+  scrolled out of the results panel, the panel scrolls up to show the
+  whole warnings list, or, when the list is taller than the panel, just
+  enough to show the picked rows. It does not move when they are already
+  in view, when a marker is let go, or when a row is picked in the list.
+  The phone's Results tab scrolls with the page, chart and all, so there
+  the list is left where it is rather than scrolling the chart away. The
+  sheet lays out in full rather than lazily, so the list can be measured
+  while it is out of view.
 - **List:** a row with a marker is tappable and highlights it. A row with no
   moment is not.
 - The highlight lives in `highlightedPlanIssuesProvider` and clears when
@@ -106,3 +115,5 @@ the ceiling band, in light and dark themes alike.
 - `plan_issue_markers_test.dart`: grouping and sharing.
 - `plan_issue_marker_layer_test.dart`: placement, hit-testing, the popup,
   highlighting both ways, and hover over a deco stop under a marker.
+- `plan_warnings_reveal_test.dart`: the results panel scrolling to the
+  warnings a marker tap picks out.

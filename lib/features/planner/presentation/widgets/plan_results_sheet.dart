@@ -5,7 +5,6 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
-import 'package:submersion/features/planner/presentation/widgets/plan_issue_text.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_kit.dart';
 import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
     show PlanMode;
@@ -16,11 +15,10 @@ import 'package:submersion/features/planner/domain/services/schedule_lines.dart'
 import 'package:submersion/features/planner/domain/services/tank_role_resolver.dart';
 import 'package:submersion/features/planner/presentation/mission/mission_results_section.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_canvas_providers.dart';
-import 'package:submersion/features/planner/presentation/providers/plan_issue_marker_providers.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_status_chips.dart';
+import 'package:submersion/features/planner/presentation/widgets/plan_warnings_section.dart';
 import 'package:submersion/features/planner/presentation/widgets/range_table_section.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
-import 'package:submersion/features/planner/domain/services/plan_issue_grouping.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/widgets/forms/number_field.dart';
@@ -72,53 +70,48 @@ class PlanResultsSheet extends ConsumerWidget {
           role == TankRole.oxygenSupply;
     });
 
-    return ListView(
+    // Laid out in full rather than lazily, so the warnings list can be
+    // measured and scrolled to while it is out of view (#3738).
+    return SingleChildScrollView(
       controller: controller,
-      shrinkWrap: shrinkWrap,
       physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      children: [
-        _grip(theme),
-        PlanSectionHeader(context.l10n.divePlanner_label_decoSchedule),
-        _RuntimeTable(outcome: outcome, units: units),
-        const SizedBox(height: 20),
-        PlanSectionHeader(context.l10n.divePlanner_label_gasConsumption),
-        for (final usage in loopTankUsages)
-          _GasRow(usage: usage, label: tankLabel(usage.tankId), units: units),
-        if (ref.watch(
-          divePlanNotifierProvider.select((s) => s.mission != null),
-        )) ...[
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _grip(theme),
+          PlanSectionHeader(context.l10n.divePlanner_label_decoSchedule),
+          _RuntimeTable(outcome: outcome, units: units),
           const SizedBox(height: 20),
-          PlanSectionHeader(context.l10n.plannerMission_results_title),
-          const MissionResultsSection(),
-        ],
-        if (bailout != null) ...[
+          PlanSectionHeader(context.l10n.divePlanner_label_gasConsumption),
+          for (final usage in loopTankUsages)
+            _GasRow(usage: usage, label: tankLabel(usage.tankId), units: units),
+          if (ref.watch(
+            divePlanNotifierProvider.select((s) => s.mission != null),
+          )) ...[
+            const SizedBox(height: 20),
+            PlanSectionHeader(context.l10n.plannerMission_results_title),
+            const MissionResultsSection(),
+          ],
+          if (bailout != null) ...[
+            const SizedBox(height: 20),
+            PlanSectionHeader(context.l10n.plannerCanvas_bailout_title),
+            _BailoutSection(outcome: bailout, units: units),
+          ],
+          ...?_contingencySections(context, ref, units),
+          if (ref.watch(planRangeTableProvider) != null) ...[
+            const SizedBox(height: 20),
+            PlanSectionHeader(context.l10n.plannerCanvas_range_title),
+            const RangeTableSection(),
+          ],
           const SizedBox(height: 20),
-          PlanSectionHeader(context.l10n.plannerCanvas_bailout_title),
-          _BailoutSection(outcome: bailout, units: units),
+          PlanWarningsSection(
+            key: const Key('planWarningsSection'),
+            issues: outcome.issues,
+            units: units,
+          ),
         ],
-        ...?_contingencySections(context, ref, units),
-        if (ref.watch(planRangeTableProvider) != null) ...[
-          const SizedBox(height: 20),
-          PlanSectionHeader(context.l10n.plannerCanvas_range_title),
-          const RangeTableSection(),
-        ],
-        const SizedBox(height: 20),
-        PlanSectionHeader(context.l10n.divePlanner_label_warnings),
-        if (outcome.issues.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Text(
-              context.l10n.divePlanner_label_empty,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.outline,
-              ),
-            ),
-          )
-        else
-          for (final group in groupPlanIssues(outcome.issues))
-            _IssueRow(group: group, units: units),
-      ],
+      ),
     );
   }
 
@@ -690,54 +683,6 @@ class _GasRow extends StatelessWidget {
         ? '--'
         : '${units.convertPressure(bar).round()}${units.pressureSymbol}';
     return '$volume/$pressure';
-  }
-}
-
-/// One warnings-list row. A row with a marker on the chart (#3738) picks
-/// that marker out when tapped, and is tinted while it is picked, whether
-/// from here or from the chart.
-class _IssueRow extends ConsumerWidget {
-  const _IssueRow({required this.group, required this.units});
-
-  final GroupedPlanIssue group;
-  final UnitFormatter units;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final issue = group.issue;
-    final color = planIssueSeverityColor(theme.colorScheme, issue.severity);
-    final message = planIssueMessage(context, issue, units);
-    final row = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: PlanWarningRow(
-        icon: planIssueIcon(issue.severity),
-        color: color,
-        message: group.count > 1
-            ? context.l10n.plannerCanvas_issue_repeated(message, group.count)
-            : message,
-      ),
-    );
-    final onChart = ref.watch(
-      planIssueMarkersProvider.select(
-        (markers) => markers.any((m) => m.keys.contains(group.key)),
-      ),
-    );
-    if (!onChart) return row;
-    final picked = ref.watch(
-      highlightedPlanIssuesProvider.select((keys) => keys.contains(group.key)),
-    );
-    return Material(
-      key: ValueKey('planIssueRow-${issue.type.name}-${issue.severity.name}'),
-      color: picked ? color.withValues(alpha: 0.12) : Colors.transparent,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () => ref.read(highlightedPlanIssuesProvider.notifier).state =
-            picked ? const {} : {group.key},
-        child: row,
-      ),
-    );
   }
 }
 

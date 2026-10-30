@@ -23,3 +23,8 @@ final highlightedPlanIssuesProvider = StateProvider<Set<PlanIssueKey>>((ref) {
   ref.watch(divePlanNotifierProvider.select((s) => s.id));
   return const {};
 });
+
+/// Bumped when a marker tapped on the chart picks out its warnings, so the
+/// warnings list scrolls them into view. A row picked in the list is
+/// already in view and does not bump it.
+final planIssueRevealRequestProvider = StateProvider<int>((ref) => 0);

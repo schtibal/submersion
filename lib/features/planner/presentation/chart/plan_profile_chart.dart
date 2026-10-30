@@ -97,11 +97,17 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
   void _clearScrub() => ref.read(scrubTimeProvider.notifier).state = null;
 
   /// Picks out [placed]'s warnings on the chart and in the warnings list,
-  /// or clears them when they are already picked.
+  /// scrolling the list to them, or clears them when they are already
+  /// picked.
   void _toggleMarker(PlacedIssueMarker placed) {
     final highlighted = ref.read(highlightedPlanIssuesProvider.notifier);
     final keys = placed.marker.keys;
-    highlighted.state = setEquals(highlighted.state, keys) ? const {} : keys;
+    if (setEquals(highlighted.state, keys)) {
+      highlighted.state = const {};
+      return;
+    }
+    highlighted.state = keys;
+    ref.read(planIssueRevealRequestProvider.notifier).state++;
   }
 
   void _applyDrag(PlanChartGeometry geometry, Offset local) {
