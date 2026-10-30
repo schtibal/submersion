@@ -1149,8 +1149,12 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
     // diver can pick another during the save's async gap and that newer choice
     // wins. The references are independent, so one can go while another stays.
     final siteWentAway = stored.siteId == null && state.siteId == plan.siteId;
+    // Only a dive the plan named can go away: a followed plan has no source
+    // dive, and what it carries belongs to the series.
     final sourceDiveWentAway =
-        stored.sourceDiveId == null && state.sourceDiveId == plan.sourceDiveId;
+        plan.sourceDiveId != null &&
+        stored.sourceDiveId == null &&
+        state.sourceDiveId == plan.sourceDiveId;
     final linkedDiveWentAway =
         stored.linkedDiveId == null && state.linkedDiveId == plan.linkedDiveId;
     // A dropped source dive takes the context it seeded with it, carried CNS

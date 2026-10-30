@@ -102,7 +102,9 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     final notifier = _notifier;
     super.dispose();
     if (_isReplan && notifier != null) {
-      Future.microtask(notifier.newPlan);
+      Future.microtask(() {
+        if (notifier.mounted) notifier.newPlan();
+      });
     }
   }
 

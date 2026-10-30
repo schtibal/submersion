@@ -126,7 +126,7 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
   /// followed one, after [surfaceInterval]. Ignored for a replan, which
   /// keeps the seed it was opened with (see [followAllowedProvider]).
   void followDive(SeriesFollow follow, {required Duration surfaceInterval}) {
-    if (isReplan(_readEditor())) return;
+    if (isReplan(state)) return;
     state = edits.followDive(
       state,
       follow,
@@ -179,6 +179,9 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
       _editor.loadPlan(plan);
     } finally {
       _pushing = false;
+      // Loading the state the editor already holds notifies nobody, so this
+      // load would otherwise read as an outside one at the next edit.
+      _seenLoads = _editor.loadCount;
     }
     // Loading the plan the editor already holds notifies no one, so
     // [editorChanged] cannot be left to catch this count up.
@@ -207,9 +210,14 @@ final planSeriesNotifierProvider =
         divePlanNotifierProvider,
         notifier.editorChanged,
       );
+      // Deferred: when the planner comes back after a settings change, the
+      // config refreshes inside a widget's build, where providers cannot be
+      // changed.
       ref.listen<PlanEngineConfig>(
         planEngineConfigProvider,
-        (_, _) => notifier.configChanged(),
+        (_, _) => Future.microtask(() {
+          if (notifier.mounted) notifier.configChanged();
+        }),
       );
       return notifier;
     });
@@ -264,11 +272,14 @@ final planSaveAllowedProvider = Provider<bool>(
 /// starts from the dive before the one it replans, and its source dive is
 /// what makes it a replan.
 final followAllowedProvider = Provider<bool>(
-  (ref) => !ref.watch(divePlanNotifierProvider.select(isReplan)),
+  (ref) => !ref.watch(planSeriesNotifierProvider.select(isReplan)),
 );
 
-/// Whether [plan] replans a logged dive.
-bool isReplan(DivePlanState plan) => plan.sourceDiveId != null;
+/// Whether [series] replans a logged dive. Its first dive does; the dives
+/// added after it have no source dive of their own, so the selected dive
+/// cannot answer this.
+bool isReplan(PlanSeries series) =>
+    series.dives.first.state.sourceDiveId != null;
 
 /// The tanks of the selected dive that Fill would top up, with the pressure
 /// it fills each to. Empty on a first dive that follows no logged dive,
