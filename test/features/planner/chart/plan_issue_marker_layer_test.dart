@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/constants/map_style.dart';
 import 'package:submersion/core/deco/deco_model.dart';
@@ -115,9 +116,10 @@ void main() {
   });
 
   group('on the chart', () {
-    Widget harness() => testApp(
+    Widget harness({List<Override> overrides = const []}) => testApp(
       overrides: [
         settingsProvider.overrideWith((ref) => _TestSettingsNotifier()),
+        ...overrides,
       ],
       child: const SizedBox(width: 500, height: 400, child: PlanProfileChart()),
     );
@@ -133,8 +135,9 @@ void main() {
     Future<ProviderContainer> seed(
       WidgetTester tester, {
       double depth = 45,
+      List<Override> overrides = const [],
     }) async {
-      await tester.pumpWidget(harness());
+      await tester.pumpWidget(harness(overrides: overrides));
       final container = ProviderScope.containerOf(
         tester.element(find.byType(PlanProfileChart)),
       );
@@ -212,6 +215,49 @@ void main() {
 
       await gesture.moveTo(const Offset(700, 500));
       await tester.pump();
+      expect(find.byKey(const Key('planChartIssuePopup')), findsNothing);
+    });
+
+    testWidgets('a deco stop under a marker keeps the hover', (tester) async {
+      // A marker where the ascent reaches the first deco stop, a corner of
+      // the profile with no waypoint of its own.
+      int firstStop(Ref ref) => ref
+          .watch(activePlanOutcomeProvider)
+          .stops
+          .first
+          .arrivalRuntimeSeconds;
+      final container = await seed(
+        tester,
+        overrides: [
+          planIssueMarkersProvider.overrideWith(
+            (ref) => [
+              _marker(
+                firstStop(ref),
+                PlanIssueType.endExceeded,
+                PlanIssueSeverity.warning,
+              ),
+            ],
+          ),
+        ],
+      );
+      final arrival = container
+          .read(activePlanOutcomeProvider)
+          .stops
+          .first
+          .arrivalRuntimeSeconds;
+      final glyph = markerPainter(tester).placed.single.glyph;
+      final origin = tester.getTopLeft(find.byType(PlanProfileChart));
+      // Halfway between the sign and the stop it stands on, in reach of both.
+      final stop = Offset(glyph.center.dx, glyph.bottom + 5);
+      final between = origin + Offset.lerp(glyph.center, stop, 0.5)!;
+
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(between);
+      await tester.pump();
+
+      expect(container.read(scrubTimeProvider), arrival);
       expect(find.byKey(const Key('planChartIssuePopup')), findsNothing);
     });
 

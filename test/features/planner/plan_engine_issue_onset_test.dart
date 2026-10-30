@@ -19,6 +19,7 @@ domain.DivePlan _plan({
   double volume = 24,
   double startPressure = 232,
   double reservePressure = 50,
+  double descentRate = 20,
   List<DiveTank> extraTanks = const [],
 }) => domain.DivePlan(
   id: 'plan-onset',
@@ -43,7 +44,7 @@ domain.DivePlan _plan({
       tankId: 'back',
       gasMix: gas,
       order: 0,
-      ratePerMinute: 20,
+      ratePerMinute: descentRate,
     ),
     PlanSegment.hold(
       id: 'bottom',
@@ -150,6 +151,23 @@ void main() {
       (i) => i.type == PlanIssueType.ppO2Critical && i.atDepth == 33,
     );
     expect(issue.atRuntime, switchRow.startRuntimeSeconds);
+  });
+
+  test('a deco ppO2 issue starts where its own ceiling is passed', () {
+    // With a 4 m maximum depth for pure O2, oxygen is over its deco ceiling
+    // from 4 m, though its ppO2 there (1.4 bar) is under the flat 1.6 bar
+    // ceiling it would pass only at 6 m. Descending 8 m in 60 s puts 4 m
+    // at 30 s, not 45 s.
+    const engineWithO2Depth = PlanEngine(
+      config: PlanEngineConfig(maxO2DepthEnabled: true, maxO2DepthMeters: 4),
+    );
+    final outcome = engineWithO2Depth.compute(
+      _plan(gas: const GasMix(o2: 100), depth: 8, minutes: 5, descentRate: 8),
+    );
+    final issue = outcome.issues.firstWhere(
+      (i) => i.type == PlanIssueType.ppO2Critical && i.segmentId == 'down',
+    );
+    expect(issue.atRuntime, closeTo(30, 2));
   });
 
   test('a missing deco gas has no moment of its own', () {
