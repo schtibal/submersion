@@ -86,10 +86,17 @@ below, else above.
 - **Hover (desktop):** a waypoint first, then a corner of the computed
   profile such as a deco stop (#3775), then a marker, otherwise the
   position line follows the cursor. A marker that sits on a stop never takes
-  the hover from it.
+  the hover from it. A marker on a waypoint shows its popup while the line
+  stays locked onto the waypoint.
 - **Tap:** a marker toggles its popup and highlights its list rows. A tap
   elsewhere on the chart lets go. A marker tap never selects a segment or
   adds a waypoint.
+- **A marker on a waypoint:** a click or tap picks the marker. A press that
+  moves drags the waypoint instead: the popup hides as the drag starts,
+  whether it showed from hover or from a pick, and the marker is not
+  picked. A touch shows nothing until it lifts, so a touch drag never
+  flashes the popup up. Right-click and a long-press open the waypoint's
+  menu, as anywhere else.
 - **Scrolling the list:** when a marker tap picks out warnings that are
   scrolled out of the results panel, the panel scrolls up to show the
   whole warnings list, or, when the list is taller than the panel, just
@@ -121,5 +128,7 @@ below, else above.
 - `plan_issue_markers_test.dart`: grouping and sharing.
 - `plan_issue_marker_layer_test.dart`: placement, hit-testing, the popup,
   highlighting both ways, and hover over a deco stop under a marker.
+- `plan_issue_marker_on_waypoint_test.dart`: hover, click, drag, touch,
+  long-press and right-click on a marker that sits on a waypoint.
 - `plan_warnings_reveal_test.dart`: the results panel scrolling to the
   warnings a marker tap picks out.

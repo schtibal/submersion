@@ -13,6 +13,7 @@ import 'package:submersion/features/planner/presentation/chart/plan_chart_backdr
 import 'package:submersion/features/planner/presentation/chart/plan_chart_empty_state.dart';
 import 'package:submersion/features/planner/presentation/chart/plan_chart_edit_controller.dart';
 import 'package:submersion/features/planner/presentation/chart/plan_chart_geometry.dart';
+import 'package:submersion/features/planner/presentation/chart/plan_chart_overlay_painter.dart';
 import 'package:submersion/features/planner/presentation/chart/plan_chart_palette.dart';
 import 'package:submersion/features/planner/presentation/chart/plan_chart_series_painter.dart';
 import 'package:submersion/features/planner/presentation/chart/plan_issue_marker_layer.dart';
@@ -64,7 +65,9 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
 
   /// The warning marker under the mouse, and the one a press began on
   /// (#3738). A press on a marker is never a scrub, a selection or half of
-  /// a double-tap.
+  /// a double-tap. On a marker that sits on a waypoint, the press picks the
+  /// marker only if it ends where it began: a drag moves the waypoint and a
+  /// long-press opens its menu.
   int? _hoverMarker;
   int? _markerPress;
 
@@ -364,11 +367,16 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
           highlighted: highlightedIssues,
         );
         final hoverMarker = _hoverMarker;
+        // A waypoint being dragged hides the warnings, which describe the
+        // plan as it was.
+        final dragging = _dragVertex != null && _moved;
         int? activeMarker =
-            hoverMarker != null && hoverMarker < placedMarkers.length
+            !dragging &&
+                hoverMarker != null &&
+                hoverMarker < placedMarkers.length
             ? hoverMarker
             : null;
-        if (activeMarker == null && highlightedIssues.isNotEmpty) {
+        if (activeMarker == null && !dragging && highlightedIssues.isNotEmpty) {
           final picked = placedMarkers.indexWhere((p) => p.highlighted);
           if (picked >= 0) activeMarker = picked;
         }
@@ -438,17 +446,17 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
           );
           final hit = _dragVertex;
           _dragSegmentId = hit == null ? null : vertices[hit].segmentId;
-          _markerPress = hit == null
-              ? hitTestIssueMarker(
-                  placedMarkers,
-                  event.localPosition,
-                  radius: event.kind == PointerDeviceKind.mouse ? 16 : 24,
-                )
-              : null;
-          if (_markerPress != null) {
-            _clearScrub();
-          } else if (hit == null) {
-            _scrubTo(geometry, event.localPosition);
+          _markerPress = hitTestIssueMarker(
+            placedMarkers,
+            event.localPosition,
+            radius: event.kind == PointerDeviceKind.mouse ? 16 : 24,
+          );
+          if (hit == null) {
+            if (_markerPress != null) {
+              _clearScrub();
+            } else {
+              _scrubTo(geometry, event.localPosition);
+            }
           } else {
             _frozenAxes = (time: maxTime, depth: maxDepth);
             // A mouse has right-click, and holding its button still on a
@@ -460,6 +468,7 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
                 _longPressTimer = null;
                 if (!mounted || _dragSegmentId != segmentId) return;
                 _pressHandled = true;
+                _markerPress = null;
                 endDrag();
                 _clearScrub();
                 Feedback.forLongPress(context);
@@ -471,10 +480,17 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
 
         void onPointerMove(PointerMoveEvent event) {
           final down = _downPosition;
-          if (down != null && (event.localPosition - down).distance > 6) {
-            _moved = true;
+          if (down != null &&
+              !_moved &&
+              (event.localPosition - down).distance > 6) {
             _markerPress = null;
             _cancelLongPress();
+            // The warnings go before the waypoint moves. A touch shows them
+            // only once it lifts, so a drag never flashes them up.
+            setState(() {
+              _moved = true;
+              if (_dragVertex != null) _hoverMarker = null;
+            });
           }
           if (_markerPress != null) return;
           // A touch still inside the slop may yet become a long-press, so
@@ -553,9 +569,10 @@ class _PlanProfileChartState extends ConsumerState<PlanProfileChart> {
                   geometry: geometry,
                   position: event.localPosition,
                 )?.timeSeconds;
-          // A warning marker takes the hover only away from those points,
-          // so a marker never hides a waypoint it sits on (#3738).
-          final marker = lockTime == null
+          // A warning marker on a waypoint shows its warnings while the
+          // line stays locked onto the waypoint. Near a deco stop the stop
+          // keeps the hover, so a marker never hides it (#3738).
+          final marker = hit != null || lockTime == null
               ? hitTestIssueMarker(placedMarkers, event.localPosition)
               : null;
           if (marker != _hoverMarker) setState(() => _hoverMarker = marker);
@@ -732,62 +749,4 @@ class _PlotClipper extends CustomClipper<Rect> {
 
   @override
   bool shouldReclip(_PlotClipper oldClipper) => oldClipper.plot != plot;
-}
-
-/// Scrub cursor + waypoint handles layer; repaints per pointer event without
-/// touching the series or backdrop layers.
-class PlanChartOverlayPainter extends CustomPainter {
-  final PlanChartGeometry geometry;
-  final PlanChartPalette palette;
-  final double? scrubX;
-  final List<Offset> handles;
-  final int? activeHandle;
-  final int? selectedHandle;
-
-  const PlanChartOverlayPainter({
-    required this.geometry,
-    required this.palette,
-    required this.scrubX,
-    this.handles = const [],
-    this.activeHandle,
-    this.selectedHandle,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final plot = geometry.plotRect;
-    final x = scrubX;
-    if (x != null) {
-      canvas.drawLine(
-        Offset(x, plot.top),
-        Offset(x, plot.bottom),
-        Paint()
-          ..color = palette.scrubCursor
-          ..strokeWidth = 1,
-      );
-    }
-
-    final fill = Paint()..color = palette.backdrop;
-    final stroke = Paint()
-      ..color = palette.profileLine
-      ..strokeWidth = 1.6
-      ..style = PaintingStyle.stroke;
-    final selectedFill = Paint()..color = palette.profileLine;
-    for (var i = 0; i < handles.length; i++) {
-      final active = i == activeHandle;
-      final selected = i == selectedHandle;
-      final radius = active ? 6.5 : 4.5;
-      canvas.drawCircle(handles[i], radius, selected ? selectedFill : fill);
-      canvas.drawCircle(handles[i], radius, stroke);
-    }
-  }
-
-  @override
-  bool shouldRepaint(PlanChartOverlayPainter oldDelegate) =>
-      oldDelegate.scrubX != scrubX ||
-      oldDelegate.geometry != geometry ||
-      oldDelegate.palette != palette ||
-      oldDelegate.activeHandle != activeHandle ||
-      oldDelegate.selectedHandle != selectedHandle ||
-      !listEquals(oldDelegate.handles, handles);
 }
