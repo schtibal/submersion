@@ -161,6 +161,7 @@ class UddfExportBuilders {
     List<Trip>? trips,
     List<GasSwitchWithTank> gasSwitches, {
     Map<String, List<TankPressurePoint>>? tankPressures,
+    List<DiveSourceExport> sources = const [],
   }) {
     // Find the trip this dive belongs to
     Trip? diveTrip;
@@ -709,39 +710,47 @@ class UddfExportBuilders {
                 },
               );
             }
-            // Export gas switches (source data from dive computers)
-            if (gasSwitches.isNotEmpty) {
-              builder.element(
-                'gasswitches',
-                nest: () {
-                  for (final gs in gasSwitches) {
-                    builder.element(
-                      'gasswitch',
-                      nest: () {
-                        builder.element('time', nest: gs.timestamp.toString());
-                        if (gs.depth != null) {
-                          builder.element('depth', nest: gs.depth.toString());
-                        }
-                        builder.element('tankref', nest: gs.tankId);
-                        builder.element('gasmix', nest: gs.gasMix);
-                        builder.element(
-                          'o2fraction',
-                          nest: gs.o2Fraction.toString(),
-                        );
-                        if (gs.heFraction > 0) {
-                          builder.element(
-                            'hefraction',
-                            nest: gs.heFraction.toString(),
-                          );
-                        }
-                      },
-                    );
-                  }
-                },
-              );
-            }
+            buildGasSwitches(builder, gasSwitches, sources);
           },
         );
+      },
+    );
+  }
+
+  /// Writes [gasSwitches], the source data from dive computers, for a dive
+  /// with [sources]. Shared by the full backup and the dives-only export;
+  /// writes nothing for a dive with none.
+  static void buildGasSwitches(
+    XmlBuilder builder,
+    List<GasSwitchWithTank> gasSwitches,
+    List<DiveSourceExport> sources,
+  ) {
+    if (gasSwitches.isEmpty) return;
+    builder.element(
+      'gasswitches',
+      nest: () {
+        for (final gs in gasSwitches) {
+          builder.element(
+            'gasswitch',
+            nest: () {
+              builder.element('time', nest: gs.timestamp.toString());
+              if (gs.depth != null) {
+                builder.element('depth', nest: gs.depth.toString());
+              }
+              builder.element('tankref', nest: gs.tankId);
+              builder.element('gasmix', nest: gs.gasMix);
+              builder.element('o2fraction', nest: gs.o2Fraction.toString());
+              if (gs.heFraction > 0) {
+                builder.element('hefraction', nest: gs.heFraction.toString());
+              }
+              UddfSourceAttribution.writeSwitchComputer(
+                builder,
+                gs.gasSwitch.computerId,
+                sources,
+              );
+            },
+          );
+        }
       },
     );
   }
