@@ -63,6 +63,28 @@ void main() {
   const engine = PlanEngine();
 
   group('engine start exposure', () {
+    test('a warning names when carried exposure reached its limit', () {
+      int? onsetOf(domain.DivePlan plan, PlanIssueType type) => engine
+          .compute(plan)
+          .issues
+          .firstWhere((issue) => issue.type == type)
+          .atRuntime;
+
+      // Over the limit from the start: there is no moment to point at later.
+      expect(onsetOf(_plan(startCns: 120), PlanIssueType.cnsCritical), 0);
+      expect(onsetOf(_plan(startOtu: 1000), PlanIssueType.otuHigh), 0);
+
+      // Half the dive's own CNS short of the limit: reached part way through.
+      final own = engine.compute(_plan());
+      final limit = engine.config.cnsWarningThreshold.toDouble();
+      final onset = onsetOf(
+        _plan(startCns: limit - own.cnsEnd / 2),
+        PlanIssueType.cnsWarning,
+      )!;
+      expect(onset, greaterThan(0));
+      expect(onset, lessThan(own.runtimeSeconds));
+    });
+
     test('a fresh plan starts at zero, as before', () {
       final plan = _plan();
       expect(plan.startCns, 0);
