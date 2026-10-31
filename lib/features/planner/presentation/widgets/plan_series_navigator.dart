@@ -11,7 +11,6 @@ import 'package:submersion/features/planner/presentation/providers/plan_series_p
 import 'package:submersion/features/planner/presentation/widgets/plan_logged_dive_view.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_status_chips.dart';
 import 'package:submersion/features/planner/presentation/widgets/planned_dive_icon.dart';
-import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// The bar across the top of the dive profile that moves between the dives
@@ -115,7 +114,7 @@ class _PlanSeriesNavigatorState extends ConsumerState<PlanSeriesNavigator> {
     );
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final units = UnitFormatter(ref.watch(settingsProvider));
+    final units = ref.watch(unitFormatterProvider);
     final series = ref.watch(planSeriesNotifierProvider);
     final results = ref.watch(planSeriesResultsProvider);
     final canAdd = ref.watch(canAddSeriesDiveProvider);

@@ -95,7 +95,7 @@ class PlanLoggedDiveView extends ConsumerWidget {
 
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final units = UnitFormatter(ref.watch(settingsProvider));
+    final units = ref.watch(unitFormatterProvider);
     final label = seriesLoggedDiveLabel(logged, units);
     final dive = ref.watch(diveProvider(logged.id));
     // `.value` keeps the last analysis while a settings or dive log change

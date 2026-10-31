@@ -9,7 +9,6 @@ import 'package:submersion/features/planner/domain/utils/hours_minutes.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_follow_providers.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_series_providers.dart';
 import 'package:submersion/features/safety/domain/services/no_fly_service.dart';
-import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// Offers to follow the most recent logged dive with one tap, when it ended
@@ -54,7 +53,7 @@ class _PlanFollowPromptState extends ConsumerState<PlanFollowPrompt> {
 
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final units = UnitFormatter(ref.watch(settingsProvider));
+    final units = ref.watch(unitFormatterProvider);
     // Its name, else its number, as in the series bar.
     final number = dive.diveNumber;
     final label = (dive.name?.isNotEmpty ?? false)
