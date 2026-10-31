@@ -235,6 +235,27 @@ void main() {
       expect(filled.pinnedTankIds, {back.id, stage.id});
     });
 
+    test('Fill and Fill all tanks leave the plan to be saved', () {
+      final longAgo = DateTime.utc(2000);
+      final clean = PlanSeries(
+        dives: [
+          series.dives[0],
+          dive.copyWith(
+            state: dive.state.copyWith(isDirty: false, updatedAt: longAgo),
+          ),
+        ],
+        selectedIndex: 1,
+      );
+
+      for (final filled in [
+        fillTank(clean, 1, back.id).dives[1],
+        fillAllTanks(clean, 1).dives[1],
+      ]) {
+        expect(filled.state.isDirty, isTrue);
+        expect(filled.state.updatedAt.isAfter(longAgo), isTrue);
+      }
+    });
+
     test('a tank new to this dive fills to its own pressure', () {
       expect(fullPressureFor(series, 0, 'dive-a-back'), 220);
       expect(fullPressureFor(series, 1, 'unknown'), isNull);

@@ -145,27 +145,30 @@ class _PlanSurfaceIntervalFieldState
               onPressed: enabled ? () => _stepBy(-_step) : null,
             ),
             Expanded(
-              child: TextField(
-                key: const Key('surfaceIntervalField'),
-                controller: _controller,
-                focusNode: _focusNode,
-                enabled: enabled,
-                textAlign: TextAlign.center,
-                keyboardType: TextInputType.datetime,
-                decoration: InputDecoration(
-                  isDense: true,
-                  border: const OutlineInputBorder(),
-                  errorText: _invalid
-                      ? l10n.plannerSeries_surfaceInterval_invalid
-                      : null,
+              child: Semantics(
+                label: l10n.plannerSeries_surfaceInterval,
+                child: TextField(
+                  key: const Key('surfaceIntervalField'),
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  enabled: enabled,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.datetime,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: const OutlineInputBorder(),
+                    errorText: _invalid
+                        ? l10n.plannerSeries_surfaceInterval_invalid
+                        : null,
+                  ),
+                  onChanged: (_) {
+                    if (_invalid) setState(() => _invalid = false);
+                  },
+                  onSubmitted: (_) => _commit(),
+                  // On every platform, so a touch on another dive or a stepper
+                  // commits this one first: leaving the field does that.
+                  onTapOutside: (_) => _focusNode.unfocus(),
                 ),
-                onChanged: (_) {
-                  if (_invalid) setState(() => _invalid = false);
-                },
-                onSubmitted: (_) => _commit(),
-                // On every platform, so a touch on another dive or a stepper
-                // commits this one first: leaving the field does that.
-                onTapOutside: (_) => _focusNode.unfocus(),
               ),
             ),
             IconButton(

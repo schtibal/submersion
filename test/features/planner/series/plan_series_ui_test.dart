@@ -342,6 +342,21 @@ void main() {
     expect(navigatorText('2:30'), findsOneWidget);
   });
 
+  testWidgets('a screen reader can name the surface interval field', (
+    tester,
+  ) async {
+    await pumpPlan(tester, const Size(1400, 900));
+    await addDive(tester);
+
+    expect(
+      find.descendant(
+        of: find.bySemanticsLabel(RegExp('^Surface interval')),
+        matching: siField(),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('an invalid surface interval is flagged, not applied', (
     tester,
   ) async {
