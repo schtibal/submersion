@@ -790,18 +790,18 @@ void main() {
       final dive = makeDiveWithTanksAndProfile();
       await _pumpDetailPage(tester, dive);
 
-      // The header row stays focused on the chart itself; replanning is a
+      // The header row stays focused on the chart itself; Compare is a
       // whole-dive action, so it is offered only from the overflow menu.
       expect(find.byIcon(Icons.alt_route), findsNothing);
-      expect(find.byTooltip('Replan this dive'), findsNothing);
+      expect(find.byTooltip('Compare…'), findsNothing);
 
       await tester.tap(find.byIcon(Icons.more_vert).last);
       await tester.pumpAndSettle();
 
-      expect(find.text('Replan this dive'), findsOneWidget);
+      expect(find.text('Compare…'), findsOneWidget);
     });
 
-    testWidgets('Plan repetitive dive follows Replan this dive in the menu', (
+    testWidgets('Plan repetitive dive follows Compare in the menu', (
       tester,
     ) async {
       await _pumpDetailPage(tester, makeDiveWithTanksAndProfile());
@@ -812,7 +812,7 @@ void main() {
       expect(find.text('Plan repetitive dive'), findsOneWidget);
       expect(
         tester.getTopLeft(find.text('Plan repetitive dive')).dy,
-        greaterThan(tester.getTopLeft(find.text('Replan this dive')).dy),
+        greaterThan(tester.getTopLeft(find.text('Compare…')).dy),
       );
     });
 
