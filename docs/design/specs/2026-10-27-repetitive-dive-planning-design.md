@@ -62,7 +62,9 @@ is the only phase built so far.
     follows no logged dive it is empty and greyed out rather than hidden,
     so the panels below keep their place when the diver changes dives.
   - Water type and altitude stay in Plan settings.
-- DPV mission plans stay single dives: `+` is disabled for them.
+- DPV mission plans stay single dives: `+` is disabled for them, and "Plan as
+  DPV mission" is disabled for a series, with a tooltip saying why. A series
+  mixing ordinary and mission dives is a separate feature.
 
 ### What carries into the next dive
 

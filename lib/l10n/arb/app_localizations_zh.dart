@@ -19480,6 +19480,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerSeries_convertUnavailable => '暂时无法将潜水系列转换为已记录的潜水';
 
   @override
+  String get plannerSeries_missionUnavailable => '潜水系列无法规划为 DPV 任务';
+
+  @override
   String get plannerSeries_followFirstDiveOnly => '只有系列中的第一次潜水可以跟随已记录的潜水';
 
   @override

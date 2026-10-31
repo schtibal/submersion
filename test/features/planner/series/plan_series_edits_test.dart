@@ -116,6 +116,21 @@ void main() {
     });
   });
 
+  group('canPlanMission', () {
+    test('allows a DPV mission on a single dive', () {
+      expect(canPlanMission(PlanSeries.single(seriesDiveState())), isTrue);
+    });
+
+    test('holds a DPV mission back once the plan is a series', () {
+      final series = appendDive(
+        PlanSeries.single(seriesDiveState()),
+        newId: idSequence(),
+      );
+      expect(canPlanMission(series), isFalse);
+      expect(canPlanMission(series.copyWith(selectedIndex: 0)), isFalse);
+    });
+  });
+
   group('removeDive', () {
     PlanSeries threeDives() {
       final ids = idSequence();

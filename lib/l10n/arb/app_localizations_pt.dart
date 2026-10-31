@@ -20476,6 +20476,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Ainda não é possível converter uma série de mergulhos em mergulhos registados';
 
   @override
+  String get plannerSeries_missionUnavailable =>
+      'Não é possível planear uma série de mergulhos como missão DPV';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'Só o primeiro mergulho de uma série pode seguir um mergulho registado';
 

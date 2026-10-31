@@ -20401,6 +20401,10 @@ class AppLocalizationsHu extends AppLocalizations {
       'Merülések sorozata még nem alakítható naplózott merülésekké';
 
   @override
+  String get plannerSeries_missionUnavailable =>
+      'Merülések sorozata nem tervezhető DPV-küldetésként';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'Csak a sorozat első merülése követhet egy naplózott merülést';
 

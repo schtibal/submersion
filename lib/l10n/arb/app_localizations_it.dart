@@ -20474,6 +20474,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Non è ancora possibile convertire una serie di immersioni in immersioni registrate';
 
   @override
+  String get plannerSeries_missionUnavailable =>
+      'Non è possibile pianificare una serie di immersioni come missione DPV';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'Solo la prima immersione di una serie può seguire un\'immersione registrata';
 

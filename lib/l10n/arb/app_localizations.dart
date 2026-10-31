@@ -32568,6 +32568,12 @@ abstract class AppLocalizations {
   /// **'A series of dives can\'t be converted to logged dives yet'**
   String get plannerSeries_convertUnavailable;
 
+  /// No description provided for @plannerSeries_missionUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A series of dives can\'t be planned as a DPV mission'**
+  String get plannerSeries_missionUnavailable;
+
   /// No description provided for @plannerSeries_followFirstDiveOnly.
   ///
   /// In en, this message translates to:

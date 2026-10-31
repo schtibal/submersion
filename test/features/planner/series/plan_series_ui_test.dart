@@ -279,6 +279,28 @@ void main() {
     });
   }
 
+  testWidgets('the DPV mission toggle says why a series holds it back', (
+    tester,
+  ) async {
+    await pumpPlan(tester, const Size(1400, 900));
+    SwitchListTile toggle() => tester.widget<SwitchListTile>(
+      find.widgetWithText(SwitchListTile, 'Plan as DPV mission'),
+    );
+    expect(toggle().onChanged, isNotNull);
+    expect(tooltipOn('Plan as DPV mission'), findsNothing);
+
+    await addDive(tester);
+    expect(toggle().onChanged, isNull);
+    expect(
+      tester.widget<Tooltip>(tooltipOn('Plan as DPV mission')).message,
+      "A series of dives can't be planned as a DPV mission",
+    );
+
+    await tester.tap(find.byTooltip('Dive A'));
+    await tester.pumpAndSettle();
+    expect(toggle().onChanged, isNull);
+  });
+
   testWidgets('typing a surface interval sets it on the dive', (tester) async {
     await pumpPlan(tester, const Size(1400, 900));
     await addDive(tester);

@@ -10,6 +10,10 @@ import 'package:submersion/features/planner/domain/entities/plan_series.dart';
 bool canAppendDive(PlanSeries series) =>
     series.dives.every((dive) => dive.state.mission == null);
 
+/// Whether the plan can be turned into a DPV mission. A series cannot: a
+/// mission is a single dive for now.
+bool canPlanMission(PlanSeries series) => !series.isSeries;
+
 /// Adds a dive after the last one, copying its settings, profile, tanks and
 /// gases under fresh ids, with a [defaultSeriesSurfaceInterval], and selects
 /// it. Each new tank is mapped to the tank it was copied from, so it starts

@@ -20022,6 +20022,10 @@ class AppLocalizationsHe extends AppLocalizations {
       'עדיין לא ניתן להמיר סדרת צלילות לצלילות מתועדות';
 
   @override
+  String get plannerSeries_missionUnavailable =>
+      'לא ניתן לתכנן סדרת צלילות כמשימת DPV';
+
+  @override
   String get plannerSeries_followFirstDiveOnly =>
       'רק הצלילה הראשונה בסדרה יכולה לעקוב אחרי צלילה מתועדת';
 

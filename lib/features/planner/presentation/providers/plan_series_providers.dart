@@ -212,6 +212,11 @@ final canAddSeriesDiveProvider = Provider<bool>(
   (ref) => edits.canAppendDive(ref.watch(planSeriesNotifierProvider)),
 );
 
+/// Whether the plan can be turned into a DPV mission.
+final missionAllowedProvider = Provider<bool>(
+  (ref) => edits.canPlanMission(ref.watch(planSeriesNotifierProvider)),
+);
+
 /// Whether the plan can be saved. A series of more than one dive cannot be
 /// saved until series persistence lands (issue #3565, phase 3).
 final planSaveAllowedProvider = Provider<bool>(
