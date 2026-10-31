@@ -86,8 +86,9 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
     }
   }
 
-  /// Re-seeds the selected dive after the engine settings changed. Nothing
-  /// is carried into a first dive, so it has nothing to re-seed.
+  /// Re-seeds the selected dive after the engine settings changed. What a
+  /// first dive carries comes from the logged dive it follows, not the
+  /// engine, so it has nothing to re-seed.
   void configChanged() {
     if (state.selectedIndex > 0) _loadSelected();
   }

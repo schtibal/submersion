@@ -114,6 +114,9 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
   /// [_loaded] while it is the plan being edited.
   domain.DivePlan? get _persisted => _loaded?.id == state.id ? _loaded : null;
 
+  /// The id of the plan being edited.
+  String get planId => state.id;
+
   /// How many times a whole plan has replaced the one being edited: by
   /// [newPlan], [loadPlan] or [loadPlanById]. It goes up before the new state
   /// is assigned, so a listener can tell a load from an edit even when the

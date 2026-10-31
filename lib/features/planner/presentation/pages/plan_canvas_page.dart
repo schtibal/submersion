@@ -99,21 +99,25 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     // replans are still in the list. Ordinary plans keep today's behaviour of
     // surviving navigation. The notifier is app-wide, so touching it after
     // this element is gone is safe; the microtask keeps the mutation out of
-    // the dispose frame.
+    // the dispose frame. Only that replan goes: this snapshot can be a frame
+    // old, and a plan that replaced it on the way out is the diver's next one.
     final notifier = _notifier;
+    final replanId = _replanId;
     super.dispose();
-    if (_isReplan && notifier != null) {
+    if (replanId != null && notifier != null) {
       Future.microtask(() {
-        if (notifier.mounted) notifier.newPlan();
+        if (notifier.mounted && notifier.planId == replanId) {
+          notifier.newPlan();
+        }
       });
     }
   }
 
-  /// Snapshot for [dispose], which may not touch `ref`: the notifier and
-  /// whether the plan on screen is a replan of a logged dive. Refreshed on
-  /// every build so it tracks loads, resets and saves.
+  /// Snapshot for [dispose], which may not touch `ref`: the notifier and the
+  /// id of the plan on screen when it is a replan of a logged dive. Refreshed
+  /// on every build so it tracks loads, resets and saves.
   DivePlanNotifier? _notifier;
-  bool _isReplan = false;
+  String? _replanId;
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +127,9 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     final saveAllowed = ref.watch(planSaveAllowedProvider);
     _notifier = ref.read(divePlanNotifierProvider.notifier);
     // A series is not a throwaway: leaving must not lose what cannot be saved.
-    _isReplan = planState.sourceDiveId != null && saveAllowed;
+    _replanId = planState.sourceDiveId != null && saveAllowed
+        ? planState.id
+        : null;
     final units = ref.watch(unitFormatterProvider);
     final followAllowed = ref.watch(followAllowedProvider);
     // A plan opened via the :planId route is known-persisted, so short-circuit

@@ -120,6 +120,8 @@ class PlanLoggedDiveView extends ConsumerWidget {
     }
 
     final chart = dive.when(
+      // A reload keeps the chart, with its zoom and toggles, like the facts.
+      skipLoadingOnReload: true,
       data: (dive) => dive == null || dive.profile.isEmpty
           ? _Placeholder(message: l10n.dashboard_recentDives_noProfileData)
           : ProviderScope(

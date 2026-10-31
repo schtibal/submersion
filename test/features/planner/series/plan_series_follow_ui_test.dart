@@ -61,23 +61,30 @@ void main() {
     List<Dive> dives,
     Future<ProfileAnalysis?> Function(Ref ref, String id) analysis, {
     _TestSettingsNotifier? settings,
+    Future<void> Function(Ref ref)? beforeDive,
   }) => [
     settingsProvider.overrideWith((ref) => settings ?? _TestSettingsNotifier()),
     currentDiverIdProvider.overrideWith((ref) => MockCurrentDiverIdNotifier()),
     divesProvider.overrideWith((ref) async => dives),
-    diveProvider.overrideWith(
-      (ref, id) async => dives.where((d) => d.id == id).firstOrNull,
-    ),
+    diveProvider.overrideWith((ref, id) async {
+      await beforeDive?.call(ref);
+      return dives.where((d) => d.id == id).firstOrNull;
+    }),
     profileAnalysisProvider.overrideWith(analysis),
   ];
 
   Widget harness(
     List<Dive> dives, {
     Future<ProfileAnalysis?> Function(Ref ref, String id)? analysis,
+    Future<void> Function(Ref ref)? beforeDive,
   }) => testApp(
     // No profiles by default: the follow carries no tissues, and the logged
     // view shows its placeholder rather than the full chart.
-    overrides: followOverrides(dives, analysis ?? (ref, id) async => null),
+    overrides: followOverrides(
+      dives,
+      analysis ?? (ref, id) async => null,
+      beforeDive: beforeDive,
+    ),
     locale: const Locale('en'),
     child: const PlanCanvasPage(),
   );
@@ -90,12 +97,15 @@ void main() {
     List<Dive> dives, {
     Size size = const Size(1400, 900),
     Future<ProfileAnalysis?> Function(Ref ref, String id)? analysis,
+    Future<void> Function(Ref ref)? beforeDive,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(harness(dives, analysis: analysis));
+    await tester.pumpWidget(
+      harness(dives, analysis: analysis, beforeDive: beforeDive),
+    );
     containerOf(tester)
         .read(divePlanNotifierProvider.notifier)
         .addSimplePlan(maxDepth: 30, bottomTimeMinutes: 20);
@@ -314,6 +324,31 @@ void main() {
 
     expect(find.text('12%'), findsOneWidget);
     expect(find.text('34'), findsOneWidget);
+
+    gate.complete();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('a logged dive stays on screen while it reloads', (tester) async {
+    final reload = StateProvider<int>((ref) => 0);
+    Completer<void>? gate;
+    await pumpPlan(
+      tester,
+      dayDives,
+      beforeDive: (ref) async {
+        if (ref.watch(reload) > 0) await gate!.future;
+      },
+    );
+    await follow(tester, 'd42');
+    await tester.tap(find.byTooltip('Logged dive #42'));
+    await tester.pumpAndSettle();
+
+    gate = Completer<void>();
+    containerOf(tester).read(reload.notifier).state++;
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsNothing);
 
     gate.complete();
     await tester.pumpAndSettle();
