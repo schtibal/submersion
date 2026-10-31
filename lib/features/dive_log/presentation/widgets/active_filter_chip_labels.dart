@@ -1,7 +1,7 @@
 import 'package:submersion/core/utils/unit_formatter.dart';
+import 'package:submersion/core/utils/unit_formatter_settings.dart';
 import 'package:submersion/features/dive_log/domain/models/dive_filter_state.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/environment_enum_display.dart';
-import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 
 /// One active-filter chip: its label and how to clear just that axis.
@@ -18,7 +18,7 @@ class ActiveFilterChip {
 List<ActiveFilterChip> activeFilterChipLabels(
   DiveFilterState f,
   AppLocalizations l10n,
-  AppSettings settings, {
+  UnitFormatterSettings settings, {
   required String? Function(String id) siteName,
   required String? Function(String id) speciesName,
   required String? Function(String id) computerName,
@@ -92,13 +92,16 @@ List<ActiveFilterChip> activeFilterChipLabels(
       ),
     );
   }
-  if (f.waterTypes.isNotEmpty) {
+  final waterChoices = f.waterTypes.length + (f.noWaterType == true ? 1 : 0);
+  if (waterChoices > 0) {
     chips.add(
       ActiveFilterChip(
-        f.waterTypes.length == 1
-            ? f.waterTypes.single.localizedName(l10n)
-            : l10n.diveLog_filterChip_waterTypeCount(f.waterTypes.length),
-        (x) => x.copyWith(clearWaterTypes: true),
+        waterChoices > 1
+            ? l10n.diveLog_filterChip_waterTypeCount(waterChoices)
+            : f.noWaterType == true
+            ? l10n.diveLog_filterChip_noWaterType
+            : f.waterTypes.single.localizedName(l10n),
+        (x) => x.copyWith(clearWaterTypes: true, clearNoWaterType: true),
       ),
     );
   }
