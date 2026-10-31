@@ -996,20 +996,28 @@ class PlanEngine {
     // ascent over the same depths: each span at its mean depth, on the gas in
     // force at its deeper end, which is the gas the deco model loaded it on.
     // A leg splits at a gas switch, so no span charges one gas for another's
-    // stretch.
+    // stretch. The spans leave out the stops, so the clock jumps over each
+    // one as the ascent passes it.
+    var spanStart = runtime;
+    var nextStop = 0;
     for (final span in ascentTravelSpans(
       policy,
       ascentPlan,
       fromDepth: lastDepth,
       stopDepths: [for (final stop in stops) stop.depthMeters],
     )) {
+      while (nextStop < stops.length &&
+          stops[nextStop].depthMeters >= span.fromDepth) {
+        final stop = stops[nextStop++];
+        spanStart = stop.arrivalRuntimeSeconds + stop.durationSeconds;
+      }
       final avgDepth = (span.fromDepth + span.toDepth) / 2.0;
       final ppO2 = ascentPlan is LoopAscentGas
           ? ascentPlan.inspiredPpO2At(avgDepth)
           : environment.pressureAtDepth(avgDepth) *
                 ascentPlan.gasForDepth(span.fromDepth).fO2;
-      cns += o2Calc.calculateCnsForSegment(ppO2, span.seconds);
-      otu += o2Calc.calculateOtuForSegment(ppO2, span.seconds);
+      addExposure(spanStart, span.seconds, ppO2);
+      spanStart += span.seconds;
     }
 
     // Decompression stops carry O2 exposure too — a long stop on a rich deco

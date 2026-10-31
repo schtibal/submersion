@@ -160,6 +160,71 @@ void main() {
     expect(issue.atRuntime, lessThan(outcome.runtimeSeconds));
   });
 
+  group('the computed ascent', () {
+    // Ends on oxygen, so even the last leg to the surface adds OTU.
+    final plan = _plan(
+      gas: _air,
+      extraTanks: const [
+        DiveTank(
+          id: 'oxygen',
+          volume: 7,
+          startPressure: 200,
+          gasMix: GasMix(o2: 100),
+          role: TankRole.deco,
+        ),
+      ],
+    );
+
+    PlanIssue otuIssueWithLimit(double limit) => _issue(
+      PlanEngine(config: PlanEngineConfig(otuLimit: limit)).compute(plan),
+      PlanIssueType.otuHigh,
+    );
+
+    test('adds its travel to the exposure where the plan leaves off', () {
+      final authored = engine.compute(plan).segmentOutcomes.last;
+      // Just past what the authored legs reach, so only the ascent gets there.
+      final issue = otuIssueWithLimit(authored.otu + 0.001);
+      expect(issue.atRuntime, closeTo(authored.endRuntime, 2));
+    });
+
+    test('adds the leg to the surface after the last stop', () {
+      final outcome = engine.compute(plan);
+      expect(outcome.stops, isNotEmpty);
+      final issue = otuIssueWithLimit(outcome.otuTotal - 0.001);
+      expect(issue.atRuntime, closeTo(outcome.runtimeSeconds, 2));
+    });
+
+    test('draws a deco gas from the moment the diver switches to it', () {
+      const ean50 = GasMix(o2: 50);
+      final outcome = engine.compute(
+        _plan(
+          gas: _air,
+          reservePressure: 199.9,
+          extraTanks: const [
+            DiveTank(
+              id: 'stage',
+              volume: 7,
+              startPressure: 200,
+              gasMix: ean50,
+              role: TankRole.deco,
+            ),
+          ],
+        ),
+      );
+      final firstOnStage = outcome.schedule.firstWhere(
+        (row) => row.gasFO2 == 0.5,
+      );
+      final issue = outcome.issues.firstWhere(
+        (i) =>
+            i.type == PlanIssueType.gasReserveViolation && i.tankId == 'stage',
+      );
+      expect(
+        issue.atRuntime,
+        closeTo(firstOnStage.runtimeSeconds - firstOnStage.durationSeconds, 2),
+      );
+    });
+  });
+
   test('running out of gas starts before the dive ends, on its tank', () {
     final outcome = engine.compute(
       _plan(gas: _air, depth: 30, volume: 3, startPressure: 100),
