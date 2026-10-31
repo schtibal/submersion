@@ -461,6 +461,7 @@ void main() {
       otuTotal: 10,
       issues: [listOnly, issue],
       endTissue: BuhlmannState(compartments: []),
+      surfacedTissue: BuhlmannState(compartments: []),
       tissueTimeline: [],
       ceilingTrace: [],
     );

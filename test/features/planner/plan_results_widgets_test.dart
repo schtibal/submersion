@@ -84,6 +84,7 @@ PlanOutcome _noDecoOutcome({
     otuTotal: 10,
     issues: const [],
     endTissue: const BuhlmannState(compartments: []),
+    surfacedTissue: const BuhlmannState(compartments: []),
     tissueTimeline: const [],
     ceilingTrace: const [],
   );
@@ -241,6 +242,7 @@ void main() {
         otuTotal: 10,
         issues: [],
         endTissue: BuhlmannState(compartments: []),
+        surfacedTissue: BuhlmannState(compartments: []),
         tissueTimeline: [],
         ceilingTrace: [],
       );
@@ -277,6 +279,7 @@ void main() {
       otuTotal: 10,
       issues: [],
       endTissue: BuhlmannState(compartments: []),
+      surfacedTissue: BuhlmannState(compartments: []),
       tissueTimeline: [],
       ceilingTrace: [],
     );
