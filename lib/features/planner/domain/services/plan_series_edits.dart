@@ -206,7 +206,11 @@ PlanSeries _fill(PlanSeries series, int index, Set<String> tankIds) {
     series,
     index,
     dive.copyWith(
-      state: dive.state.copyWith(tanks: tanks),
+      state: dive.state.copyWith(
+        tanks: tanks,
+        isDirty: true,
+        updatedAt: DateTime.now(),
+      ),
       pinnedTankIds: {...dive.pinnedTankIds, ...tankIds},
     ),
   );
