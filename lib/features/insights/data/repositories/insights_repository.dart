@@ -35,6 +35,7 @@ import 'package:submersion/features/insights/domain/calendar_day_matrix.dart';
 import 'package:submersion/features/insights/domain/conditions/conditions_row.dart';
 import 'package:submersion/features/insights/domain/entities/species_insights.dart';
 import 'package:submersion/features/insights/domain/focus/focus_factor_row.dart';
+import 'package:submersion/features/insights/domain/logbook_dive_counts.dart';
 import 'package:submersion/features/insights/domain/suit_thickness_stats.dart';
 import 'package:submersion/features/insights/domain/tank_configuration/tank_configuration.dart';
 import 'package:submersion/features/insights/domain/time_of_day_bucket.dart';
@@ -3013,17 +3014,18 @@ class InsightsRepository {
   /// Counts the dives the diver has explicitly excluded from statistics, for
   /// the Overview footnote.
   ///
-  /// Deliberately counts only `excluded_from_stats`, not the whole
-  /// [DiveStatsScope]: this footnote exists to explain the diver's own choice
-  /// back to them. A planned dive is not something they chose to exclude, so
-  /// folding it in would make the number confusing rather than clarifying.
+  /// Deliberately counts logged dives with `excluded_from_stats`, not
+  /// everything outside the [DiveStatsScope]: this footnote exists to explain
+  /// the diver's own choice back to them. A planned dive has not happened, so
+  /// counting one, flagged or not, would make the number confusing rather than
+  /// clarifying.
   // stats-scope-exempt: counts the excluded, by definition
   Future<int> countExcludedDives({String? diverId}) async {
     final diverFilter = diverId != null ? 'AND diver_id = ?' : '';
     final row = await _db
         .customSelect(
           'SELECT COUNT(*) AS c FROM dives '
-          'WHERE excluded_from_stats = 1 $diverFilter',
+          'WHERE excluded_from_stats = 1 AND is_planned = 0 $diverFilter',
           variables: diverId != null
               ? [Variable<String>(diverId)]
               : const <Variable<Object>>[],
@@ -3031,6 +3033,30 @@ class InsightsRepository {
         )
         .getSingle();
     return row.read<int>('c');
+  }
+
+  /// Counts the diver's logged dives and how many of them statistics include,
+  /// ignoring any view filter.
+  ///
+  /// Both come from one row so they agree on what a logged dive is: a planned
+  /// dive has not happened, so it is in neither, excluded or not.
+  Future<LogbookDiveCounts> countLogbookDives({String? diverId}) async {
+    final diverFilter = diverId != null ? 'AND d.diver_id = ?' : '';
+    final row = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS logged, '
+          'COUNT(*) FILTER (WHERE ${DiveStatsScope.predicate()}) AS counted '
+          'FROM dives d WHERE d.is_planned = 0 $diverFilter',
+          variables: diverId != null
+              ? [Variable<String>(diverId)]
+              : const <Variable<Object>>[],
+          readsFrom: {_db.dives},
+        )
+        .getSingle();
+    return LogbookDiveCounts(
+      logged: row.read<int>('logged'),
+      counted: row.read<int>('counted'),
+    );
   }
 
   // ============================================================================
