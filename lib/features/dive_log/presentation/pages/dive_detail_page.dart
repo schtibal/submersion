@@ -35,7 +35,6 @@ import 'package:submersion/features/data_quality/presentation/providers/quality_
 import 'package:submersion/core/constants/gas_consumption_display.dart';
 import 'package:submersion/core/constants/units.dart';
 import 'package:submersion/core/deco/altitude_calculator.dart';
-import 'package:submersion/core/providers/await_future.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/utils/elapsed_duration_format.dart';
 import 'package:submersion/core/utils/log_failure.dart';

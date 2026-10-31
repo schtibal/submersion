@@ -24,8 +24,8 @@ Phase 4 builds on phase 1 directly; phases 2 and 3 are not needed for it.
    `plan_series_notifier_test.dart`.
 4. **UI.** Logged dives in the series bar; `PlanLoggedDiveView` in place of
    the planner; `PlanFollowPrompt` under the bar; the Follow sheet offers
-   every logged dive and the Following chip follows the series; "Plan
-   repetitive dive" after "Replan this dive" in both dive detail menus.
+   every logged dive and the Following chip is gone; "Plan repetitive dive"
+   after "Replan this dive" in both dive detail menus.
    Strings in every locale. Tests: `plan_series_follow_ui_test.dart`,
    `follow_dive_test.dart`, `dive_detail_page_test.dart`.
 5. **Finish.** This record, screenshots (phone and desktop, light and dark),

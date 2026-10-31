@@ -59,14 +59,17 @@ class _PlanDiveDetailsCardState extends ConsumerState<PlanDiveDetailsCard> {
       planSeriesNotifierProvider.select((s) => s.selectedIndex),
     );
     // A first dive has an interval when it follows a logged dive, or when it
-    // is a replan seeded from the dive before the one it replans.
+    // is a replan of a dive with one before it, even if that dive's tissues
+    // could not be read.
     final followsDive = ref.watch(
       planSeriesNotifierProvider.select((s) => s.follow != null),
     );
-    final seeded = ref.watch(
-      divePlanNotifierProvider.select((s) => s.initialTissueState != null),
+    final carriesInterval = ref.watch(
+      divePlanNotifierProvider.select(
+        (s) => s.initialTissueState != null || s.surfaceInterval != null,
+      ),
     );
-    final hasInterval = index > 0 || followsDive || seeded;
+    final hasInterval = index > 0 || followsDive || carriesInterval;
 
     final l10n = context.l10n;
     final theme = Theme.of(context);
