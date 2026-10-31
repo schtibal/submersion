@@ -22,6 +22,7 @@ import 'package:submersion/features/dive_import/data/services/import_service_clo
 import 'package:submersion/features/dive_import/data/services/import_weight_mapper.dart';
 import 'package:submersion/features/dive_import/data/services/imported_profile_readers.dart';
 import 'package:submersion/features/dive_import/data/services/parsed_profile_event_mapper.dart';
+import 'package:submersion/features/dive_import/data/services/imported_gas_switches.dart';
 import 'package:submersion/features/dive_import/data/services/restored_source_attribution.dart';
 import 'package:submersion/features/dive_import/domain/import_source_file.dart';
 import 'package:submersion/features/dive_import/domain/resyncable_import_formats.dart';
@@ -57,7 +58,6 @@ import 'package:submersion/features/dive_log/domain/entities/computer_tissue_sna
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_custom_field.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_weight.dart';
-import 'package:submersion/features/dive_log/domain/entities/gas_switch.dart';
 import 'package:submersion/features/dive_sites/data/repositories/site_repository_impl.dart';
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/dive_types/data/repositories/dive_type_repository.dart';
@@ -484,11 +484,19 @@ class UddfEntityImporter {
   /// spends minutes there (issue #3216). Every other stage is local database
   /// work.
   ///
-  /// [preResolvedBuddyIds], [preResolvedTagIds] and [preResolvedEquipmentIds]
-  /// map source refs (uddfId/name) to EXISTING database ids for flagged
-  /// duplicates the reviewer chose not to import as new rows. Seeding the id
-  /// mappings with them makes dive linking resolve to the existing record
-  /// instead of silently dropping the association (#756).
+  /// [preResolvedBuddyIds], [preResolvedTagIds], [preResolvedEquipmentIds],
+  /// [preResolvedDiveCenterIds] and [preResolvedTripIds] map source refs
+  /// (uddfId/name) to EXISTING database ids for flagged duplicates the
+  /// reviewer chose not to import as new rows. Seeding the id mappings with
+  /// them makes dive linking resolve to the existing record instead of
+  /// silently dropping the association (#756, #3852).
+  ///
+  /// [preResolvedCertificationIds] does the same for the certifications a
+  /// course earned. It stays out of the mapping currency restores from: prefs
+  /// and events ride only with a certification this import created. A
+  /// certification that already belongs to a course is left there, because
+  /// linking moves it and courses have no dedup: a re-import would strip it
+  /// from the original course for that course's twin.
   ///
   /// [preResolvedDiveTypeIds] does the same for dive types, keyed by the id
   /// the file's dives reference. The review matches a type by name before
@@ -504,6 +512,9 @@ class UddfEntityImporter {
     Map<String, String> preResolvedTagIds = const {},
     Map<String, String> preResolvedEquipmentIds = const {},
     Map<String, String> preResolvedDiveTypeIds = const {},
+    Map<String, String> preResolvedDiveCenterIds = const {},
+    Map<String, String> preResolvedTripIds = const {},
+    Map<String, String> preResolvedCertificationIds = const {},
     ImportFormat? sourceFormat,
     Uint8List? sourceFileBytes,
     String? sourceFileName,
@@ -519,10 +530,10 @@ class UddfEntityImporter {
     );
 
     // ID mappings for cross-references
-    final tripIdMapping = <String, String>{};
+    final tripIdMapping = <String, String>{...preResolvedTripIds};
     final equipmentIdMapping = <String, String>{...preResolvedEquipmentIds};
     final buddyIdMapping = <String, String>{...preResolvedBuddyIds};
-    final diveCenterIdMapping = <String, String>{};
+    final diveCenterIdMapping = <String, String>{...preResolvedDiveCenterIds};
     final tagIdMapping = <String, String>{...preResolvedTagIds};
     final diveTypeIdMapping = <String, String>{...preResolvedDiveTypeIds};
     final siteIdMapping = <String, DiveSite>{};
@@ -867,7 +878,13 @@ class UddfEntityImporter {
             diverId,
             courseIdMapping,
             buddyIdMapping,
-            certIdMapping,
+            {
+              ...await _courselessCertifications(
+                preResolvedCertificationIds,
+                repositories.certificationRepository,
+              ),
+              ...certIdMapping,
+            },
             now,
             onProgress,
             certResolver,
@@ -2285,6 +2302,21 @@ class UddfEntityImporter {
 
   // -- Course import --
 
+  /// The entries of [preResolved] whose existing certification has no course
+  /// yet, the only ones a new course can link without taking them from
+  /// another.
+  Future<Map<String, String>> _courselessCertifications(
+    Map<String, String> preResolved,
+    CertificationRepository repository,
+  ) async {
+    final courseless = <String, String>{};
+    for (final MapEntry(key: ref, value: id) in preResolved.entries) {
+      final existing = await repository.getCertificationById(id);
+      if (existing != null && existing.courseId == null) courseless[ref] = id;
+    }
+    return courseless;
+  }
+
   Future<int> _importCourses(
     List<Map<String, dynamic>> items,
     Set<int> selected,
@@ -2809,12 +2841,12 @@ class UddfEntityImporter {
         if (directSiteId != null) linkedSite = siteIdMapping[directSiteId];
       }
 
-      // Link to imported trip
+      // Link to the imported or pre-resolved trip
       String? linkedTripId;
       final tripRef = diveData['tripRef'] as String?;
       if (tripRef != null) linkedTripId = tripIdMapping[tripRef];
 
-      // Link to imported dive center
+      // Link to the imported or pre-resolved dive center
       DiveCenter? linkedDiveCenter;
       final diveCenterRef = diveData['diveCenterRef'] as String?;
       if (diveCenterRef != null) {
@@ -3220,79 +3252,6 @@ class UddfEntityImporter {
         );
       }
 
-      // Insert gas switches
-      final gasSwitchesData =
-          diveData['gasSwitches'] as List<Map<String, dynamic>>?;
-      if (gasSwitchesData != null && gasSwitchesData.isNotEmpty) {
-        // Build lookups from both UDDF tank ID and UDDF gas mix UUID to the
-        // persisted tank row id. MacDive-style switches reference a gas mix
-        // UUID (via <switchmix ref>), while top-level <gasswitches>
-        // entries reference a tank UUID (via <tankref>); we accept either.
-        // FIT imports carry no refs at all and address tanks positionally
-        // via `tankIndex`.
-        final tankIdByRef = <String, String>{};
-        final tankIdByGasMixRef = <String, String>{};
-        final tanksData = diveData['tanks'] as List<Map<String, dynamic>>?;
-        if (tanksData != null) {
-          for (var i = 0; i < tanks.length && i < tanksData.length; i++) {
-            final tank = tanks[i];
-            final tankData = tanksData[i];
-            final ref = (tankData['uddfTankId'] as String?)?.trim();
-            if (ref != null && ref.isNotEmpty) {
-              tankIdByRef[ref] = tank.id;
-            }
-            final gasMixRef = (tankData['uddfGasMixRef'] as String?)?.trim();
-            // First tank linked to a given gas wins; later tanks sharing the
-            // same gas don't overwrite. This is a pragmatic resolution for
-            // dives where multiple tanks carry the same mix.
-            if (gasMixRef != null &&
-                gasMixRef.isNotEmpty &&
-                !tankIdByGasMixRef.containsKey(gasMixRef)) {
-              tankIdByGasMixRef[gasMixRef] = tank.id;
-            }
-          }
-        }
-
-        final switches = gasSwitchesData
-            .map((gs) {
-              final timestamp = gs['timestamp'] as int?;
-              if (timestamp == null) return null;
-              final tankRef = (gs['tankRef'] as String?)?.trim();
-              final gasMixRef = (gs['gasMixRef'] as String?)?.trim();
-              String? tankId;
-              if (tankRef != null && tankRef.isNotEmpty) {
-                tankId = tankIdByRef[tankRef];
-              }
-              if ((tankId == null || tankId.isEmpty) &&
-                  gasMixRef != null &&
-                  gasMixRef.isNotEmpty) {
-                tankId = tankIdByGasMixRef[gasMixRef];
-              }
-              if (tankId == null || tankId.isEmpty) {
-                final tankIndex = gs['tankIndex'] as int?;
-                if (tankIndex != null &&
-                    tankIndex >= 0 &&
-                    tankIndex < tanks.length) {
-                  tankId = tanks[tankIndex].id;
-                }
-              }
-              if (tankId == null || tankId.isEmpty) return null;
-              return GasSwitch(
-                id: _uuid.v4(),
-                diveId: diveId,
-                timestamp: timestamp,
-                tankId: tankId,
-                depth: gs['depth'] as double?,
-                createdAt: now,
-              );
-            })
-            .whereType<GasSwitch>()
-            .toList();
-        if (switches.isNotEmpty) {
-          await repos.diveRepository.insertGasSwitches(switches);
-        }
-      }
-
       // Persist profile events emitted by the parser. Currently supported (Slice C + C.2):
       // setpointChange, bookmark, safetyStopStart, decoStopStart, decoViolation,
       // ascentRateWarning, ppO2High, ppO2Low. Future slices may add more types as
@@ -3364,6 +3323,7 @@ class UddfEntityImporter {
           ? SourceDiver.unqualifyForFile(diverKey, sourceFileId)
           : diverKey;
 
+      var computerIdByOrdinal = const <int, String?>{};
       if (sourceEntries.isEmpty) {
         final dataSourceId = _uuid.v4();
 
@@ -3433,7 +3393,7 @@ class UddfEntityImporter {
             if (sourceEntries[i]['ordinal'] case final int ordinal)
               ordinal: restored[i].id.value,
         };
-        final computerIdByOrdinal = <int, String?>{
+        computerIdByOrdinal = {
           for (var i = 0; i < sourceEntries.length; i++)
             if (sourceEntries[i]['ordinal'] case final int ordinal)
               ordinal: restored[i].computerId.value,
@@ -3467,6 +3427,19 @@ class UddfEntityImporter {
             restored.single.id.value,
           );
         }
+      }
+
+      // After the source rows, never before: a switch names its computer by
+      // the ordinal of a <source>, which only they resolve (issue #3966).
+      final switches = importedGasSwitches(
+        diveData,
+        diveId: diveId,
+        tanks: tanks,
+        computerIdByOrdinal: computerIdByOrdinal,
+        now: now,
+      );
+      if (switches.isNotEmpty) {
+        await repos.diveRepository.insertGasSwitches(switches);
       }
 
       // Every further computer the dive was worn with (issue #2672). After
@@ -3825,7 +3798,7 @@ class UddfEntityImporter {
         ? unmatchedNamesValue.whereType<String>().toList()
         : <String>[];
     for (final buddyName in unmatchedNames) {
-      final buddy = await repository.findOrCreateByName(
+      final (:buddy, :created) = await repository.resolveByName(
         buddyName,
         diverId: diverId,
       );
@@ -3833,7 +3806,7 @@ class UddfEntityImporter {
         await repository.updateBuddy(buddy.copyWith(diverId: diverId));
       }
       infer(buddy.id, DiveRole.buddyId);
-      inlineIds.add(buddy.id);
+      if (created) inlineIds.add(buddy.id);
     }
 
     // Handle inline dive guide / divemaster names
@@ -3842,7 +3815,7 @@ class UddfEntityImporter {
         ? unmatchedGuideValue.whereType<String>().toList()
         : <String>[];
     for (final guideName in unmatchedGuides) {
-      final guide = await repository.findOrCreateByName(
+      final (buddy: guide, :created) = await repository.resolveByName(
         guideName,
         diverId: diverId,
       );
@@ -3850,7 +3823,7 @@ class UddfEntityImporter {
         await repository.updateBuddy(guide.copyWith(diverId: diverId));
       }
       infer(guide.id, DiveRole.diveGuideId);
-      inlineIds.add(guide.id);
+      if (created) inlineIds.add(guide.id);
     }
 
     // Exact roles from Submersion's private <buddyroles> block (issue

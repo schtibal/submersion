@@ -17,11 +17,10 @@ import 'package:submersion/features/buddies/domain/services/legacy_name_parser.d
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_times_sql.dart';
 import 'package:submersion/features/dive_log/data/repositories/profile_series_repository.dart';
+import 'package:submersion/features/dive_log/data/sql/dive_weight_sql.dart';
 import 'package:submersion/features/dive_log/data/sql/multi_cylinder_sac_sql.dart';
-import 'package:submersion/features/dive_log/domain/entities/dive.dart'
-    as domain;
-import 'package:submersion/features/dive_log/domain/entities/tank_shared_computers.dart';
 import 'package:submersion/features/dive_log/domain/models/dive_filter_state.dart';
+import 'package:submersion/features/dive_log/query/dive_filter_query.dart';
 import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
 import 'package:submersion/features/dive_sites/domain/entities/site_dive_statistics.dart';
 import 'package:submersion/features/dive_sites/query/site_query_entity.dart'
@@ -31,10 +30,12 @@ import 'package:submersion/features/insights/data/repositories/site_entry_method
 import 'package:submersion/features/insights/data/repositories/visibility_band_sql.dart';
 import 'package:submersion/features/insights/data/dive_filter_sql.dart';
 import 'package:submersion/features/insights/data/series_profile_aggregates.dart';
+import 'package:submersion/features/insights/data/tank_configuration_sql.dart';
 import 'package:submersion/features/insights/domain/calendar_day_matrix.dart';
 import 'package:submersion/features/insights/domain/conditions/conditions_row.dart';
 import 'package:submersion/features/insights/domain/entities/species_insights.dart';
 import 'package:submersion/features/insights/domain/focus/focus_factor_row.dart';
+import 'package:submersion/features/insights/domain/logbook_dive_counts.dart';
 import 'package:submersion/features/insights/domain/suit_thickness_stats.dart';
 import 'package:submersion/features/insights/domain/tank_configuration/tank_configuration.dart';
 import 'package:submersion/features/insights/domain/time_of_day_bucket.dart';
@@ -158,6 +159,10 @@ class InsightsRepository {
   final _log = LoggerService.forClass(InsightsRepository);
   final _profileSeries = ProfileSeriesRepository();
 
+  /// Late because the constructor builds a large graph of repositories, which
+  /// only a filtered [watchInsightsChanges] needs.
+  late final _diveRepository = DiveRepository();
+
   /// How many dives' packed series the profile aggregates read at once.
   ///
   /// The aggregates run over the whole filtered library, and a packed series
@@ -205,8 +210,9 @@ class InsightsRepository {
   /// stale after a sync applied a tank-pressure-only changeset, which never
   /// touches the `dives` row.
   ///
-  /// Narrower than [DiveRepository.watchDiveDetailChanges], which also fires on
-  /// media, tide records, and safety findings that no statistic reads.
+  /// Not [DiveRepository.watchDiveDetailChanges], which also fires on media,
+  /// tide records, and safety findings that no statistic reads, and misses
+  /// tables this one follows, such as `dive_profile_events`.
   ///
   /// Replaces `statisticsVersionProvider`, a counter incremented from exactly
   /// one line in the app (inside `PaginatedDiveListNotifier`), which merge,
@@ -215,11 +221,20 @@ class InsightsRepository {
   /// [DiveRepository.changeTickDebounce]-debounced so a multi-changeset sync
   /// recomputes the charts once on the settled state rather than once per
   /// intermediate commit.
-  Stream<void> watchInsightsChanges() => _db
+  ///
+  /// Pass the [filter] a provider scopes by to also follow the tables it reads
+  /// (#3894): a text search reaches tag, custom field and dive type names, so
+  /// renaming a tag changes which dives match without writing one. They join
+  /// this one debounced stream, never a second tick beside it, so a write to
+  /// both sets refreshes once.
+  Stream<void> watchInsightsChanges({DiveFilterState? filter}) => _db
       .tableUpdates(
         TableUpdateQuery.allOf([
           TableUpdateQuery.onTable(_db.dives),
           TableUpdateQuery.onTable(_db.diveProfileSeries),
+          // The deco card classifies a dive from its stop events, which a
+          // sync pull can write without touching the dive.
+          TableUpdateQuery.onTable(_db.diveProfileEvents),
           TableUpdateQuery.onTable(_db.diveTanks),
           // The tank configuration card reads which cylinders were switched
           // to and which recording is primary (#3421); a sync pull or a
@@ -250,6 +265,13 @@ class InsightsRepository {
           TableUpdateQuery.onTable(_db.siteTypes),
           TableUpdateQuery.onTable(_db.diveCenters),
           TableUpdateQuery.onTable(_db.trips),
+          // As the query compiler reports them, so a new filter field is
+          // followed without editing this list.
+          if (filter != null)
+            for (final table in _diveRepository.tablesNamed(
+              diveFilterTablesTouched(filter),
+            ))
+              TableUpdateQuery.onTable(table),
         ]),
       )
       .debounce(DiveRepository.changeTickDebounce);
@@ -1827,7 +1849,14 @@ class InsightsRepository {
   // Social & Buddies Statistics
   // ============================================================================
 
-  /// Get top buddies by dive count
+  /// Get top buddies by dive count.
+  ///
+  /// Counts distinct dives, because one buddy can hold several `dive_buddies`
+  /// links to a dive and those links are still one dive (issue #3895).
+  ///
+  /// A buddy excluded from the rankings is left out here rather than dropped
+  /// by the caller, so the [limit] is filled by buddies who rank (issue
+  /// #3624).
   Future<List<RankingItem>> getTopBuddies({
     String? diverId,
     int limit = 10,
@@ -1844,11 +1873,11 @@ class InsightsRepository {
         SELECT
           b.id,
           b.name,
-          COUNT(db.dive_id) AS dive_count
+          COUNT(DISTINCT db.dive_id) AS dive_count
         FROM buddies b
         JOIN dive_buddies db ON db.buddy_id = b.id
         JOIN dives d ON d.id = db.dive_id
-        WHERE 1=1 $diverFilter ${df.clause}
+        WHERE b.excluded_from_rankings = 0 $diverFilter ${df.clause}
         GROUP BY b.id
         ORDER BY dive_count DESC
         LIMIT ?
@@ -2553,7 +2582,8 @@ class InsightsRepository {
 
   /// Total lead carried on every dive in scope, in kilograms, ordered by date.
   ///
-  /// Sums the dive's weight rows. The monthly version this replaced averaged
+  /// Sums the dive's weight rows, or reads the legacy scalar when it has none
+  /// ([recordedWeightKgSql]). The monthly version this replaced averaged
   /// across rows, so a 4 kg belt plus 2 kg of trim weights was reported as
   /// 3 kg rather than the 6 kg actually carried.
   Future<List<TrendDataPoint>> getWeightPerDive({
@@ -2568,13 +2598,11 @@ class InsightsRepository {
       final results = await _db.customSelect('''
         SELECT d.id AS dive_id,
                d.dive_date_time AS dive_date_time,
-               SUM(dw.amount_kg) AS total_kg
+               ${recordedWeightKgSql('d')} AS total_kg
         FROM dives d
-        JOIN dive_weights dw ON dw.dive_id = d.id
         WHERE 1 = 1 $diverFilter ${df.clause}
-        GROUP BY d.id
-        HAVING total_kg IS NOT NULL
-        ORDER BY d.dive_date_time
+          AND total_kg IS NOT NULL
+        ORDER BY d.dive_date_time, d.id
         ''', variables: params.map((p) => Variable(p)).toList()).get();
 
       return results.map((row) {
@@ -2986,17 +3014,18 @@ class InsightsRepository {
   /// Counts the dives the diver has explicitly excluded from statistics, for
   /// the Overview footnote.
   ///
-  /// Deliberately counts only `excluded_from_stats`, not the whole
-  /// [DiveStatsScope]: this footnote exists to explain the diver's own choice
-  /// back to them. A planned dive is not something they chose to exclude, so
-  /// folding it in would make the number confusing rather than clarifying.
+  /// Deliberately counts logged dives with `excluded_from_stats`, not
+  /// everything outside the [DiveStatsScope]: this footnote exists to explain
+  /// the diver's own choice back to them. A planned dive has not happened, so
+  /// counting one, flagged or not, would make the number confusing rather than
+  /// clarifying.
   // stats-scope-exempt: counts the excluded, by definition
   Future<int> countExcludedDives({String? diverId}) async {
     final diverFilter = diverId != null ? 'AND diver_id = ?' : '';
     final row = await _db
         .customSelect(
           'SELECT COUNT(*) AS c FROM dives '
-          'WHERE excluded_from_stats = 1 $diverFilter',
+          'WHERE excluded_from_stats = 1 AND is_planned = 0 $diverFilter',
           variables: diverId != null
               ? [Variable<String>(diverId)]
               : const <Variable<Object>>[],
@@ -3004,6 +3033,30 @@ class InsightsRepository {
         )
         .getSingle();
     return row.read<int>('c');
+  }
+
+  /// Counts the diver's logged dives and how many of them statistics include,
+  /// ignoring any view filter.
+  ///
+  /// Both come from one row so they agree on what a logged dive is: a planned
+  /// dive has not happened, so it is in neither, excluded or not.
+  Future<LogbookDiveCounts> countLogbookDives({String? diverId}) async {
+    final diverFilter = diverId != null ? 'AND d.diver_id = ?' : '';
+    final row = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS logged, '
+          'COUNT(*) FILTER (WHERE ${DiveStatsScope.predicate()}) AS counted '
+          'FROM dives d WHERE d.is_planned = 0 $diverFilter',
+          variables: diverId != null
+              ? [Variable<String>(diverId)]
+              : const <Variable<Object>>[],
+          readsFrom: {_db.dives},
+        )
+        .getSingle();
+    return LogbookDiveCounts(
+      logged: row.read<int>('logged'),
+      counted: row.read<int>('counted'),
+    );
   }
 
   // ============================================================================

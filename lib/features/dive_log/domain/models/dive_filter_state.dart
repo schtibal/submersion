@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:submersion/core/query/domain/query_node.dart';
 import 'package:submersion/core/util/wall_clock_utc.dart';
 import 'package:submersion/features/equipment/domain/models/equipment_attr_condition.dart';
+import 'package:submersion/features/insights/domain/tank_configuration/tank_configuration.dart';
 
 /// Filter state for the dive list.
 ///
@@ -61,6 +62,11 @@ class DiveFilterState {
   /// True to restrict the list to dives where the diver's own role is not
   /// set (#3622). Lowered to the registry's `role` field, empty.
   final bool? noRoleOnly;
+
+  /// True to restrict the list to dives with no known entry method: none on
+  /// the dive, and none its site can stand in for (#3806). The dives the
+  /// entry method chart counts as Not recorded.
+  final bool? noEntryMethodOnly;
   final List<String> tagIds;
 
   /// Restricts results to dives whose [Dive.dateTime] falls on one of these
@@ -113,8 +119,22 @@ class DiveFilterState {
   final double? minVisibility;
   final double? maxVisibility;
 
-  /// Water types to keep (OR within the axis), matched on `dives.water_type`.
+  /// Water types to keep (OR within the axis), matched on the dive's
+  /// effective water type: its own, else its site's.
   final List<WaterType> waterTypes;
+
+  /// True to also keep dives with no effective water type (#3806), the dives
+  /// the water type chart counts as Not recorded. A choice within the
+  /// [waterTypes] axis, so it ORs with any types listed there.
+  final bool? noWaterType;
+
+  /// Base tank configurations to keep (OR within the axis), as the Tank
+  /// configuration card sorts dives (#3804).
+  final List<TankBaseConfiguration> tankConfigurations;
+
+  /// Tank extras to keep (OR within the axis). A dive can have several, so
+  /// this ANDs with [tankConfigurations] like any other pair of axes.
+  final List<TankConfigurationExtra> tankExtras;
 
   /// Species ids: keep dives with a sighting of ANY listed species.
   final List<String> speciesIds;
@@ -148,6 +168,7 @@ class DiveFilterState {
     this.decoOnly,
     this.noBuddyOnly,
     this.noRoleOnly,
+    this.noEntryMethodOnly,
     this.tagIds = const [],
     this.weekdays = const [],
     this.equipmentIds = const [],
@@ -168,6 +189,9 @@ class DiveFilterState {
     this.minVisibility,
     this.maxVisibility,
     this.waterTypes = const [],
+    this.noWaterType,
+    this.tankConfigurations = const [],
+    this.tankExtras = const [],
     this.speciesIds = const [],
     this.siteIds = const [],
     this.query,
@@ -215,6 +239,7 @@ class DiveFilterState {
     decoOnly != null,
     noBuddyOnly == true,
     noRoleOnly == true,
+    noEntryMethodOnly == true,
     tagIds.isNotEmpty,
     weekdays.isNotEmpty,
     equipmentIds.isNotEmpty,
@@ -230,7 +255,9 @@ class DiveFilterState {
     // Explore's axes (#2195); a bound pair counts once, like depth.
     minWaterTemp != null || maxWaterTemp != null,
     minVisibility != null || maxVisibility != null,
-    waterTypes.isNotEmpty,
+    waterTypes.isNotEmpty || noWaterType == true,
+    tankConfigurations.isNotEmpty,
+    tankExtras.isNotEmpty,
     speciesIds.isNotEmpty,
     siteIds.isNotEmpty,
     query != null,
@@ -263,6 +290,7 @@ class DiveFilterState {
           other.decoOnly == decoOnly &&
           other.noBuddyOnly == noBuddyOnly &&
           other.noRoleOnly == noRoleOnly &&
+          other.noEntryMethodOnly == noEntryMethodOnly &&
           listEquals(other.tagIds, tagIds) &&
           listEquals(other.weekdays, weekdays) &&
           listEquals(other.equipmentIds, equipmentIds) &&
@@ -283,6 +311,9 @@ class DiveFilterState {
           other.minVisibility == minVisibility &&
           other.maxVisibility == maxVisibility &&
           listEquals(other.waterTypes, waterTypes) &&
+          other.noWaterType == noWaterType &&
+          listEquals(other.tankConfigurations, tankConfigurations) &&
+          listEquals(other.tankExtras, tankExtras) &&
           listEquals(other.speciesIds, speciesIds) &&
           listEquals(other.siteIds, siteIds) &&
           other.query == query &&
@@ -303,6 +334,7 @@ class DiveFilterState {
     decoOnly,
     noBuddyOnly,
     noRoleOnly,
+    noEntryMethodOnly,
     Object.hashAll(tagIds),
     Object.hashAll(weekdays),
     Object.hashAll(equipmentIds),
@@ -323,6 +355,9 @@ class DiveFilterState {
     minVisibility,
     maxVisibility,
     Object.hashAll(waterTypes),
+    noWaterType,
+    Object.hashAll(tankConfigurations),
+    Object.hashAll(tankExtras),
     Object.hashAll(speciesIds),
     Object.hashAll(siteIds),
     query,
@@ -343,6 +378,7 @@ class DiveFilterState {
     bool? decoOnly,
     bool? noBuddyOnly,
     bool? noRoleOnly,
+    bool? noEntryMethodOnly,
     List<String>? tagIds,
     List<int>? weekdays,
     List<String>? equipmentIds,
@@ -363,6 +399,9 @@ class DiveFilterState {
     double? minVisibility,
     double? maxVisibility,
     List<WaterType>? waterTypes,
+    bool? noWaterType,
+    List<TankBaseConfiguration>? tankConfigurations,
+    List<TankConfigurationExtra>? tankExtras,
     List<String>? speciesIds,
     List<String>? siteIds,
     QueryNode? query,
@@ -380,6 +419,7 @@ class DiveFilterState {
     bool clearDecoOnly = false,
     bool clearNoBuddyOnly = false,
     bool clearNoRoleOnly = false,
+    bool clearNoEntryMethodOnly = false,
     bool clearTagIds = false,
     bool clearWeekdays = false,
     bool clearEquipmentIds = false,
@@ -400,6 +440,9 @@ class DiveFilterState {
     bool clearMinVisibility = false,
     bool clearMaxVisibility = false,
     bool clearWaterTypes = false,
+    bool clearNoWaterType = false,
+    bool clearTankConfigurations = false,
+    bool clearTankExtras = false,
     bool clearSpeciesIds = false,
     bool clearSiteIds = false,
     bool clearQuery = false,
@@ -418,6 +461,11 @@ class DiveFilterState {
           ? null
           : (maxVisibility ?? this.maxVisibility),
       waterTypes: clearWaterTypes ? const [] : (waterTypes ?? this.waterTypes),
+      noWaterType: clearNoWaterType ? null : (noWaterType ?? this.noWaterType),
+      tankConfigurations: clearTankConfigurations
+          ? const []
+          : (tankConfigurations ?? this.tankConfigurations),
+      tankExtras: clearTankExtras ? const [] : (tankExtras ?? this.tankExtras),
       speciesIds: clearSpeciesIds ? const [] : (speciesIds ?? this.speciesIds),
       siteIds: clearSiteIds ? const [] : (siteIds ?? this.siteIds),
       startDate: clearStartDate ? null : (startDate ?? this.startDate),
@@ -439,6 +487,9 @@ class DiveFilterState {
       decoOnly: clearDecoOnly ? null : (decoOnly ?? this.decoOnly),
       noBuddyOnly: clearNoBuddyOnly ? null : (noBuddyOnly ?? this.noBuddyOnly),
       noRoleOnly: clearNoRoleOnly ? null : (noRoleOnly ?? this.noRoleOnly),
+      noEntryMethodOnly: clearNoEntryMethodOnly
+          ? null
+          : (noEntryMethodOnly ?? this.noEntryMethodOnly),
       tagIds: clearTagIds ? const [] : (tagIds ?? this.tagIds),
       weekdays: clearWeekdays ? const [] : (weekdays ?? this.weekdays),
       equipmentIds: clearEquipmentIds

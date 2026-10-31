@@ -15,17 +15,28 @@
 /// `NativeDatabase.memory`. A query run on a connection
 /// without it fails loudly with "no such function".
 ///
-/// No Flutter imports; usable from the drift worker isolate.
+/// Runs on the drift worker isolate. The tank configuration classifier's
+/// imports reach `dart:ui`, so this file needs the Flutter engine's libraries;
+/// the worker has them because it runs in the app's process.
 library;
 
 import 'package:drift/drift.dart';
 import 'package:sqlite3/common.dart'
     show AllowedArgumentCount, CommonDatabase, SqliteArguments;
+import 'package:submersion/features/insights/data/tank_configuration_sql.dart';
 
 /// `unicode_lower(text)`: [text] lower-cased by Dart's `toLowerCase`, the
 /// same folding the Dart side of a comparison uses. NULL stays NULL and a
 /// number renders as text, as with `LOWER()`.
 const String kUnicodeLowerFunction = 'unicode_lower';
+
+/// `row_digest(value, ...)`: a hash of its arguments, for telling whether a
+/// row changed without carrying the row out of the worker isolate (#3815).
+///
+/// Comparable only within one connection: Dart seeds its hashes per isolate,
+/// so a digest is never stored or compared across a reconnect. SQLite caps a
+/// function at 127 arguments.
+const String kRowDigestFunction = 'row_digest';
 
 /// Registers the app's SQL functions on [db].
 void registerAppSqlFunctions(CommonDatabase db) {
@@ -35,6 +46,13 @@ void registerAppSqlFunctions(CommonDatabase db) {
     argumentCount: const AllowedArgumentCount(1),
     deterministic: true,
   );
+  db.createFunction(
+    functionName: kRowDigestFunction,
+    function: Object.hashAll,
+    argumentCount: const AllowedArgumentCount.any(),
+    deterministic: true,
+  );
+  registerTankConfigurationFunctions(db);
 }
 
 Object? _unicodeLower(SqliteArguments arguments) {
