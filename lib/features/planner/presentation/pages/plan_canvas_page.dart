@@ -17,6 +17,7 @@ import 'package:submersion/features/planner/data/repositories/dive_plan_reposito
 import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
     as domain;
 import 'package:submersion/features/planner/domain/services/plan_name_generator.dart';
+import 'package:submersion/features/planner/presentation/chart/plan_chart_geometry.dart';
 import 'package:submersion/features/planner/presentation/chart/plan_profile_chart.dart';
 import 'package:submersion/features/planner/presentation/panes/plan_editor_pane.dart';
 import 'package:submersion/features/planner/presentation/panes/plan_results_pane.dart';
@@ -123,7 +124,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     _notifier = ref.read(divePlanNotifierProvider.notifier);
     // A series is not a throwaway: leaving must not lose what cannot be saved.
     _isReplan = planState.sourceDiveId != null && saveAllowed;
-    final units = UnitFormatter(ref.watch(settingsProvider));
+    final units = ref.watch(unitFormatterProvider);
     final followAllowed = ref.watch(followAllowedProvider);
     // A plan opened via the :planId route is known-persisted, so short-circuit
     // before watching the (DB-backed) summaries provider; that avoids an
@@ -259,6 +260,10 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
                   'slate',
                   Icons.picture_as_pdf,
                   context.l10n.plannerCanvas_slate_menu,
+                  // The slate prints the computed schedule, and a plan with
+                  // no segments has none: it would be a header over empty
+                  // tables (#3795).
+                  enabled: planState.segments.isNotEmpty,
                 ),
                 _menuItem(
                   'share',
@@ -815,7 +820,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     // stale, so drop it rather than attach the wrong one.
     final notifier = ref.read(divePlanNotifierProvider.notifier);
     final outcome = ref.read(planOutcomeProvider);
-    final series = ref.read(planCanvasSeriesProvider);
+    final series = ref.read(planLiveCanvasSeriesProvider);
     final currentSite = ref.read(divePlanNotifierProvider).siteId == siteId
         ? visibleSite
         : null;
@@ -834,7 +839,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
       ],
       runtime: Duration(seconds: outcome.runtimeSeconds),
       maxDepth: outcome.maxDepth,
-      avgDepth: _timeWeightedAverageDepth(series),
+      avgDepth: PlanChartGeometry.meanDepthMeters(series.profile),
     );
 
     // The logged dive is a planned, unnumbered entry until the diver's
@@ -858,6 +863,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(context.l10n.plannerCanvas_convert_success),
+        persist: false,
         action: SnackBarAction(
           label: context.l10n.plannerCanvas_convert_view,
           // push, not go: `go` into the `/dives` child route would rebuild
@@ -867,18 +873,6 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
         ),
       ),
     );
-  }
-
-  static double _timeWeightedAverageDepth(PlanCanvasSeries series) {
-    final profile = series.profile;
-    if (profile.length < 2) return 0;
-    double weighted = 0;
-    for (var i = 1; i < profile.length; i++) {
-      final dt = profile[i].timeSeconds - profile[i - 1].timeSeconds;
-      weighted += dt * (profile[i].depth + profile[i - 1].depth) / 2;
-    }
-    final total = profile.last.timeSeconds - profile.first.timeSeconds;
-    return total > 0 ? weighted / total : 0;
   }
 
   Future<void> _deletePlan() async {

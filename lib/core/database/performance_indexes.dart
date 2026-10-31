@@ -126,6 +126,14 @@ const List<PerformanceIndex> kPerformanceIndexes = [
         'CREATE INDEX IF NOT EXISTS idx_dive_tanks_dive_id '
         'ON dive_tanks(dive_id)',
   ),
+  // The per-dive switch read of the tank configuration SQL functions
+  // (#3804), which would otherwise scan the table once per dive.
+  (
+    name: 'idx_gas_switches_dive_id',
+    ddl:
+        'CREATE INDEX IF NOT EXISTS idx_gas_switches_dive_id '
+        'ON gas_switches(dive_id)',
+  ),
   // v210: deleting a gear item, locally or from a peer's tombstone, finds
   // the cylinders linked to it; so does SQLite's own ON DELETE SET NULL.
   (
@@ -420,6 +428,14 @@ const List<PerformanceIndex> kPerformanceIndexes = [
     ddl:
         'CREATE INDEX IF NOT EXISTS idx_media_is_orphaned '
         'ON media(is_orphaned)',
+  ),
+  // Every per-dive and per-trip media read filters on dive_id and orders by
+  // taken_at (issue #3832).
+  (
+    name: 'idx_media_dive_taken',
+    ddl:
+        'CREATE INDEX IF NOT EXISTS idx_media_dive_taken '
+        'ON media(dive_id, taken_at)',
   ),
   (
     name: 'idx_checklist_template_items_template_id',

@@ -1382,6 +1382,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_action_dismiss => 'Dismiss';
 
   @override
+  String get common_action_dismissAll => 'Dismiss all';
+
+  @override
   String get equipment_setEdit_defaultSwitch_title => 'Default set';
 
   @override
@@ -3206,6 +3209,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buddies_field_nameHint => 'Enter buddy name';
 
   @override
+  String get buddies_field_excludedFromRankings =>
+      'Leave out of buddy rankings';
+
+  @override
+  String get buddies_field_excludedFromRankingsHint =>
+      'Dives together still count as buddy dives.';
+
+  @override
   String get buddies_field_nameRequired => 'Name *';
 
   @override
@@ -3559,6 +3570,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get buddies_stat_divesTogether => 'Dives Together';
+
+  @override
+  String get buddies_stat_excludedFromRankings => 'Left out of buddy rankings';
 
   @override
   String get buddies_stat_favoriteSite => 'Favorite Site';
@@ -5611,6 +5625,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courses_action_markCompleted => 'Mark as Completed';
 
   @override
+  String get courses_action_chooseDive => 'Choose dive';
+
+  @override
   String get courses_action_unlinkDive => 'Unlink dive';
 
   @override
@@ -5801,6 +5818,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courses_requirement_suggestions => 'Suggested dives';
+
+  @override
+  String get courses_requirement_allDives => 'All dives';
+
+  @override
+  String get courses_requirement_noDives => 'No dives to link';
+
+  @override
+  String courses_requirement_noDivesMatch(String query) {
+    return 'No dives match \"$query\"';
+  }
+
+  @override
+  String get courses_requirement_searchDives => 'Search dives';
 
   @override
   String get courses_requirements_empty =>
@@ -8518,7 +8549,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_filterChip_noBuddy => 'No Buddy';
 
   @override
+  String get diveLog_filterChip_noEntryMethod => 'No Entry Method';
+
+  @override
   String get diveLog_filterChip_noRole => 'No Role';
+
+  @override
+  String get diveLog_filterChip_noWaterType => 'No Water Type';
 
   @override
   String diveLog_filterChip_until(Object date) {
@@ -8583,6 +8620,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_filter_noBuddyOnly => 'No Buddy Assigned';
 
   @override
+  String get diveLog_filter_noEntryMethodOnly => 'No entry method recorded';
+
+  @override
   String get diveLog_filter_noRoleOnly => 'No Role Assigned';
 
   @override
@@ -8628,6 +8668,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_filter_sectionGasMix => 'Gas Mix (O₂%)';
 
   @override
+  String get diveLog_filter_sectionTankConfiguration => 'Tank configuration';
+
+  @override
+  String get diveLog_filter_sectionTankExtras => 'Tank extras';
+
+  @override
   String get diveLog_filter_sectionMinRating => 'Minimum Rating';
 
   @override
@@ -8642,6 +8688,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_filter_showOnlyNoBuddy =>
       'Show only dives without a buddy';
+
+  @override
+  String get diveLog_filter_showOnlyNoEntryMethod =>
+      'Show only dives with no known entry method';
 
   @override
   String get diveLog_filter_showOnlyNoRole =>
@@ -8666,6 +8716,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_legend_label_ceiling => 'Ceiling';
+
+  @override
+  String get diveLog_legend_label_ceilingCalculated => 'Ceiling (calc)';
 
   @override
   String get diveLog_legend_label_decoStops => 'Deco stops';
@@ -14954,6 +15007,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get equipment_detail_detailsTitle => 'Details';
 
   @override
+  String get equipment_detail_diveTimeLabel => 'Dive Time';
+
+  @override
   String equipment_detail_divesCountPlural(Object count) {
     return '$count dives';
   }
@@ -15969,6 +16025,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get equipment_location_kind_storage => 'Storage';
 
   @override
+  String get equipment_location_kind_diveCenter => 'Dive center';
+
+  @override
   String get equipment_location_kind_serviceShop => 'Service shop';
 
   @override
@@ -16196,6 +16255,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get equipment_locations_kindLabel => 'Kind';
+
+  @override
+  String get equipment_locations_savedCenterLabel => 'Saved dive center';
+
+  @override
+  String get equipment_locations_savedCenterNone => 'None';
+
+  @override
+  String get equipment_locations_savedCenterClear => 'Remove saved dive center';
 
   @override
   String get equipment_locations_notesLabel => 'Notes';
@@ -17543,6 +17611,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gasCalculators_blender_stepColumnAdded => 'Added';
+
+  @override
+  String get gasCalculators_blender_stepColumnTopUp => 'Top up';
 
   @override
   String get gasCalculators_blender_stepColumnPressure => 'Pressure';
@@ -20337,7 +20408,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plannerCanvas_range_title => 'Range table';
 
   @override
+  String get plannerCanvas_results_calculating => 'Calculating';
+
+  @override
+  String get plannerCanvas_results_failed => 'Could not be calculated';
+
+  @override
   String get plannerCanvas_results_noDeco => 'No decompression required';
+
+  @override
+  String get plannerCanvas_results_updating => 'Updating';
 
   @override
   String plannerCanvas_sac_useLogged(String sac) {
@@ -22764,6 +22844,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_cloudSync_status_syncError => 'Sync error';
+
+  @override
+  String get settings_cloudSync_status_signInNeeded => 'Sign-in needed';
+
+  @override
+  String settings_cloudSync_signInNeeded_message(String account) {
+    return '$account needs you to sign in again.';
+  }
 
   @override
   String get settings_cloudSync_status_syncing => 'Syncing...';
@@ -28545,6 +28633,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String insights_chart_barRowSemanticLabel(String count, String label) {
+    return '$label, $count';
+  }
+
+  @override
   String insights_chart_distributionSemanticLabel(Object count) {
     return 'Distribution pie chart with $count segments';
   }
@@ -29204,6 +29297,38 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String insights_focus_standouts_categoryAllRecorded(
+    int count,
+    String value,
+    String baseline,
+    String coverage,
+  ) {
+    return 'All $count were $value ($baseline of the $coverage with this recorded)';
+  }
+
+  @override
+  String insights_focus_standouts_categorySomeRecorded(
+    int count,
+    int total,
+    String value,
+    String baseline,
+    String coverage,
+  ) {
+    return '$count of $total were $value, against $baseline of the $coverage with this recorded';
+  }
+
+  @override
+  String insights_focus_standouts_categoryPartRecorded(
+    int count,
+    String groupCoverage,
+    String value,
+    String baseline,
+    String coverage,
+  ) {
+    return '$count of the $groupCoverage with this recorded were $value, against $baseline of the $coverage with this recorded';
+  }
+
+  @override
   String insights_focus_standouts_numeric(
     String factor,
     String difference,
@@ -29485,6 +29610,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get insights_profile_avgDescent => 'Avg Descent';
+
+  @override
+  String insights_profile_deco_analyzing(int analyzed, int total) {
+    return 'Analyzing dives: $analyzed of $total';
+  }
 
   @override
   String get insights_profile_deco_decoDives => 'Deco Dives';
@@ -37586,6 +37716,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_accounts_signInAgain => 'Sign in again';
 
   @override
+  String get settings_accounts_differentAccount_title =>
+      'That\'s a different account';
+
+  @override
+  String settings_accounts_differentAccount_body(
+    String expected,
+    String signedIn,
+  ) {
+    return 'Submersion uses $expected, but you signed in as $signedIn.';
+  }
+
+  @override
+  String settings_accounts_differentAccount_nothingSynced(String signedIn) {
+    return 'Nothing was synced, and $signedIn was not connected.';
+  }
+
+  @override
   String settings_accounts_usedHere(String features) {
     return 'Used on this device for $features';
   }
@@ -38754,6 +38901,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_detail_sacSegmentsNoPressure_subtitle =>
       'No tank pressure recorded during the dive';
+
+  @override
+  String get diveLog_detail_sacSegments_time => 'Time';
+
+  @override
+  String get diveLog_detail_sacSegments_phase => 'Phase';
+
+  @override
+  String get diveLog_detail_sacSegments_gas => 'Gas';
+
+  @override
+  String get diveLog_detail_sacSegments_depth => 'Depth';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseDescent => 'Descent';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseBottom => 'Bottom';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseAscent => 'Ascent';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseSafetyStop => 'Safety stop';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseDeco => 'Deco';
+
+  @override
+  String diveLog_detail_sacSegments_timeRange(String start, String end) {
+    return '$start-$end min';
+  }
+
+  @override
+  String diveLog_detail_sacSegments_axisMinutes(String minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String diveLog_detail_sacSegments_peak(String rate, String range) {
+    return 'Peak $rate at $range';
+  }
+
+  @override
+  String diveLog_detail_sacSegments_average(String rate) {
+    return 'Average $rate';
+  }
 
   @override
   String diveLog_detail_sacVolumeHint(String unit) {
@@ -47619,6 +47813,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String diveLog_filterChip_tankConfigCount(Object count) {
+    return '$count tank configurations';
+  }
+
+  @override
+  String diveLog_filterChip_tankExtrasCount(Object count) {
+    return '$count tank extras';
+  }
+
+  @override
   String get diveLog_filter_sectionSpecies => 'Marine life';
 
   @override
@@ -49859,7 +50063,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_profileEditor_selectRangeHint =>
-      'Select a range on the chart to enable operations';
+      'Drag across the chart to select a range and enable operations';
 
   @override
   String get diveLog_profileEditor_depthPlusOneMeter => 'Depth +1m';
@@ -49962,6 +50166,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_profileEditor_noProfileData => 'No profile data available';
+
+  @override
+  String get diveLog_profileEditor_timeShiftBlocked =>
+      'Can\'t shift: the selection has no room to move that way';
+
+  @override
+  String get diveLog_profileEditor_deleteAllBlocked =>
+      'Can\'t delete the whole profile';
+
+  @override
+  String get diveLog_profileEditor_smoothTooFewBlocked =>
+      'Can\'t smooth: select at least three samples';
 
   @override
   String get diveLog_profileEditor_undo => 'Undo';
@@ -51403,6 +51619,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_edit_summary_excluded => 'Excluded';
+
+  @override
+  String get insights_empty_allExcluded_title =>
+      'All your dives are excluded from statistics';
+
+  @override
+  String get insights_empty_allExcluded_subtitle =>
+      'They are still in your logbook. Edit a dive to count it again.';
 
   @override
   String insights_excludedDivesFootnote(int count) {
@@ -53158,6 +53382,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get numberInput_percentRange => 'Enter 0 to 100';
 
   @override
+  String get diveCenters_gearHere_title => 'Your gear here';
+
+  @override
   String get diveCenters_rental_sectionTitle => 'Rental gear';
 
   @override
@@ -53497,6 +53724,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get query_dives_hasProfile => 'Has profile';
+
+  @override
+  String get query_dives_tankConfig => 'Tank configuration';
+
+  @override
+  String get query_dives_stages => 'Stage(s)';
+
+  @override
+  String get query_dives_decoGas => 'Deco gas';
+
+  @override
+  String get query_dives_multiGas => 'Multi-gas';
 
   @override
   String get query_dives_id => 'Dive ID';

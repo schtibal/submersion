@@ -1395,6 +1395,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get common_action_dismiss => 'Verwerfen';
 
   @override
+  String get common_action_dismissAll => 'Alle verwerfen';
+
+  @override
   String get equipment_setEdit_defaultSwitch_title => 'Standard-Set';
 
   @override
@@ -3246,6 +3249,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get buddies_field_nameHint => 'Tauchpartnername eingeben';
 
   @override
+  String get buddies_field_excludedFromRankings =>
+      'Nicht in Buddy-Ranglisten anzeigen';
+
+  @override
+  String get buddies_field_excludedFromRankingsHint =>
+      'Gemeinsame Tauchgänge zählen weiterhin als Tauchgänge mit Buddy.';
+
+  @override
   String get buddies_field_nameRequired => 'Name *';
 
   @override
@@ -3605,6 +3616,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get buddies_stat_divesTogether => 'Gemeinsame Tauchgänge';
+
+  @override
+  String get buddies_stat_excludedFromRankings => 'Nicht in Buddy-Ranglisten';
 
   @override
   String get buddies_stat_favoriteSite => 'Lieblingsplatz';
@@ -5700,6 +5714,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get courses_action_markCompleted => 'Als abgeschlossen markieren';
 
   @override
+  String get courses_action_chooseDive => 'Tauchgang wählen';
+
+  @override
   String get courses_action_unlinkDive => 'Tauchgang trennen';
 
   @override
@@ -5895,6 +5912,20 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get courses_requirement_suggestions => 'Vorgeschlagene Tauchgänge';
+
+  @override
+  String get courses_requirement_allDives => 'Alle Tauchgänge';
+
+  @override
+  String get courses_requirement_noDives => 'Keine Tauchgänge zum Verknüpfen';
+
+  @override
+  String courses_requirement_noDivesMatch(String query) {
+    return 'Keine Tauchgänge für „$query“';
+  }
+
+  @override
+  String get courses_requirement_searchDives => 'Tauchgänge suchen';
 
   @override
   String get courses_requirements_empty =>
@@ -8650,7 +8681,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_filterChip_noBuddy => 'Kein Buddy';
 
   @override
+  String get diveLog_filterChip_noEntryMethod => 'Keine Einstiegsmethode';
+
+  @override
   String get diveLog_filterChip_noRole => 'Keine Rolle';
+
+  @override
+  String get diveLog_filterChip_noWaterType => 'Keine Wasserart';
 
   @override
   String diveLog_filterChip_until(Object date) {
@@ -8716,6 +8753,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_filter_noBuddyOnly => 'Kein Buddy zugewiesen';
 
   @override
+  String get diveLog_filter_noEntryMethodOnly =>
+      'Keine Einstiegsmethode erfasst';
+
+  @override
   String get diveLog_filter_noRoleOnly => 'Keine Rolle zugewiesen';
 
   @override
@@ -8764,6 +8805,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_filter_sectionGasMix => 'Gasgemisch (O₂%)';
 
   @override
+  String get diveLog_filter_sectionTankConfiguration => 'Flaschenkonfiguration';
+
+  @override
+  String get diveLog_filter_sectionTankExtras => 'Flaschen-Extras';
+
+  @override
   String get diveLog_filter_sectionMinRating => 'Mindestbewertung';
 
   @override
@@ -8778,6 +8825,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get diveLog_filter_showOnlyNoBuddy =>
       'Nur Tauchgänge ohne Buddy anzeigen';
+
+  @override
+  String get diveLog_filter_showOnlyNoEntryMethod =>
+      'Nur Tauchgänge ohne bekannte Einstiegsmethode anzeigen';
 
   @override
   String get diveLog_filter_showOnlyNoRole =>
@@ -8803,6 +8854,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get diveLog_legend_label_ceiling => 'Ceiling';
+
+  @override
+  String get diveLog_legend_label_ceilingCalculated => 'Ceiling (ber.)';
 
   @override
   String get diveLog_legend_label_decoStops => 'Dekostopps';
@@ -15167,6 +15221,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get equipment_detail_detailsTitle => 'Details';
 
   @override
+  String get equipment_detail_diveTimeLabel => 'Tauchzeit';
+
+  @override
   String equipment_detail_divesCountPlural(Object count) {
     return '$count Tauchgänge';
   }
@@ -16186,6 +16243,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get equipment_location_kind_storage => 'Lager';
 
   @override
+  String get equipment_location_kind_diveCenter => 'Tauchcenter';
+
+  @override
   String get equipment_location_kind_serviceShop => 'Servicewerkstatt';
 
   @override
@@ -16414,6 +16474,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get equipment_locations_kindLabel => 'Art';
+
+  @override
+  String get equipment_locations_savedCenterLabel =>
+      'Gespeichertes Tauchcenter';
+
+  @override
+  String get equipment_locations_savedCenterNone => 'Keines';
+
+  @override
+  String get equipment_locations_savedCenterClear =>
+      'Gespeichertes Tauchcenter entfernen';
 
   @override
   String get equipment_locations_notesLabel => 'Notizen';
@@ -17781,6 +17852,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get gasCalculators_blender_stepColumnAdded => 'Hinzufügen';
+
+  @override
+  String get gasCalculators_blender_stepColumnTopUp => 'Topup';
 
   @override
   String get gasCalculators_blender_stepColumnPressure => 'Druck';
@@ -20617,7 +20691,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get plannerCanvas_range_title => 'Bereichstabelle';
 
   @override
+  String get plannerCanvas_results_calculating => 'Wird berechnet';
+
+  @override
+  String get plannerCanvas_results_failed => 'Konnte nicht berechnet werden';
+
+  @override
   String get plannerCanvas_results_noDeco => 'Keine Dekompression erforderlich';
+
+  @override
+  String get plannerCanvas_results_updating => 'Wird aktualisiert';
 
   @override
   String plannerCanvas_sac_useLogged(String sac) {
@@ -23077,6 +23160,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settings_cloudSync_status_syncError => 'Synchronisierungsfehler';
+
+  @override
+  String get settings_cloudSync_status_signInNeeded => 'Anmeldung erforderlich';
+
+  @override
+  String settings_cloudSync_signInNeeded_message(String account) {
+    return '$account erfordert eine erneute Anmeldung.';
+  }
 
   @override
   String get settings_cloudSync_status_syncing => 'Wird synchronisiert...';
@@ -28975,6 +29066,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String insights_chart_barRowSemanticLabel(String count, String label) {
+    return '$label, $count';
+  }
+
+  @override
   String insights_chart_distributionSemanticLabel(Object count) {
     return 'Kreisdiagramm mit $count Segmenten';
   }
@@ -29643,6 +29739,38 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String insights_focus_standouts_categoryAllRecorded(
+    int count,
+    String value,
+    String baseline,
+    String coverage,
+  ) {
+    return 'Alle $count waren $value ($baseline der $coverage, bei denen dies erfasst ist)';
+  }
+
+  @override
+  String insights_focus_standouts_categorySomeRecorded(
+    int count,
+    int total,
+    String value,
+    String baseline,
+    String coverage,
+  ) {
+    return '$count von $total waren $value, gegenüber $baseline der $coverage, bei denen dies erfasst ist';
+  }
+
+  @override
+  String insights_focus_standouts_categoryPartRecorded(
+    int count,
+    String groupCoverage,
+    String value,
+    String baseline,
+    String coverage,
+  ) {
+    return '$count der $groupCoverage, bei denen dies erfasst ist, waren $value, gegenüber $baseline der $coverage, bei denen dies erfasst ist';
+  }
+
+  @override
   String insights_focus_standouts_numeric(
     String factor,
     String difference,
@@ -29927,6 +30055,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get insights_profile_avgDescent => 'Durchschn. Abstieg';
+
+  @override
+  String insights_profile_deco_analyzing(int analyzed, int total) {
+    return 'Tauchgänge werden analysiert: $analyzed von $total';
+  }
 
   @override
   String get insights_profile_deco_decoDives => 'Deko-Tauchgänge';
@@ -38148,6 +38281,23 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings_accounts_signInAgain => 'Erneut anmelden';
 
   @override
+  String get settings_accounts_differentAccount_title =>
+      'Das ist ein anderes Konto';
+
+  @override
+  String settings_accounts_differentAccount_body(
+    String expected,
+    String signedIn,
+  ) {
+    return 'Submersion verwendet $expected, angemeldet wurde aber $signedIn.';
+  }
+
+  @override
+  String settings_accounts_differentAccount_nothingSynced(String signedIn) {
+    return 'Es wurde nichts synchronisiert und $signedIn wurde nicht verbunden.';
+  }
+
+  @override
   String settings_accounts_usedHere(String features) {
     return 'Auf diesem Gerät genutzt für $features';
   }
@@ -39332,6 +39482,53 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get diveLog_detail_sacSegmentsNoPressure_subtitle =>
       'Kein Flaschendruck während des Tauchgangs erfasst';
+
+  @override
+  String get diveLog_detail_sacSegments_time => 'Zeit';
+
+  @override
+  String get diveLog_detail_sacSegments_phase => 'Phase';
+
+  @override
+  String get diveLog_detail_sacSegments_gas => 'Gas';
+
+  @override
+  String get diveLog_detail_sacSegments_depth => 'Tiefe';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseDescent => 'Abstieg';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseBottom => 'Grund';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseAscent => 'Aufstieg';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseSafetyStop => 'Sicherheitsstopp';
+
+  @override
+  String get diveLog_detail_sacSegments_phaseDeco => 'Deko';
+
+  @override
+  String diveLog_detail_sacSegments_timeRange(String start, String end) {
+    return '$start-$end Min.';
+  }
+
+  @override
+  String diveLog_detail_sacSegments_axisMinutes(String minutes) {
+    return '$minutes Min.';
+  }
+
+  @override
+  String diveLog_detail_sacSegments_peak(String rate, String range) {
+    return 'Spitze $rate bei $range';
+  }
+
+  @override
+  String diveLog_detail_sacSegments_average(String rate) {
+    return 'Durchschnitt $rate';
+  }
 
   @override
   String diveLog_detail_sacVolumeHint(String unit) {
@@ -48238,6 +48435,16 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String diveLog_filterChip_tankConfigCount(Object count) {
+    return '$count Flaschenkonfigurationen';
+  }
+
+  @override
+  String diveLog_filterChip_tankExtrasCount(Object count) {
+    return '$count Flaschen-Extras';
+  }
+
+  @override
   String get diveLog_filter_sectionSpecies => 'Meereslebewesen';
 
   @override
@@ -50523,7 +50730,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get diveLog_profileEditor_selectRangeHint =>
-      'Wählen Sie im Diagramm einen Bereich aus, um Aktionen zu aktivieren';
+      'Ziehen Sie über das Diagramm, um einen Bereich auszuwählen und Aktionen zu aktivieren';
 
   @override
   String get diveLog_profileEditor_depthPlusOneMeter => 'Tiefe +1 m';
@@ -50627,6 +50834,18 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get diveLog_profileEditor_noProfileData =>
       'Keine Profildaten verfügbar';
+
+  @override
+  String get diveLog_profileEditor_timeShiftBlocked =>
+      'Verschieben nicht möglich: Die Auswahl hat in dieser Richtung keinen Platz';
+
+  @override
+  String get diveLog_profileEditor_deleteAllBlocked =>
+      'Das gesamte Profil kann nicht gelöscht werden';
+
+  @override
+  String get diveLog_profileEditor_smoothTooFewBlocked =>
+      'Glätten nicht möglich: Wählen Sie mindestens drei Messpunkte aus';
 
   @override
   String get diveLog_profileEditor_undo => 'Rückgängig';
@@ -52110,6 +52329,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get diveLog_edit_summary_excluded => 'Ausgeschlossen';
+
+  @override
+  String get insights_empty_allExcluded_title =>
+      'Alle deine Tauchgänge sind von Statistiken ausgeschlossen';
+
+  @override
+  String get insights_empty_allExcluded_subtitle =>
+      'Sie bleiben in deinem Logbuch. Bearbeite einen Tauchgang, um ihn wieder mitzuzählen.';
 
   @override
   String insights_excludedDivesFootnote(int count) {
@@ -53897,6 +54124,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get numberInput_percentRange => 'Geben Sie 0 bis 100 ein';
 
   @override
+  String get diveCenters_gearHere_title => 'Eigene Ausrüstung hier';
+
+  @override
   String get diveCenters_rental_sectionTitle => 'Leihausrüstung';
 
   @override
@@ -54238,6 +54468,18 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get query_dives_hasProfile => 'Hat Profil';
+
+  @override
+  String get query_dives_tankConfig => 'Flaschenkonfiguration';
+
+  @override
+  String get query_dives_stages => 'Stage(s)';
+
+  @override
+  String get query_dives_decoGas => 'Dekogas';
+
+  @override
+  String get query_dives_multiGas => 'Mehrere Gase';
 
   @override
   String get query_dives_id => 'Tauchgangs-ID';

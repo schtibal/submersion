@@ -778,6 +778,8 @@
   },
   "diveLog_edit_geofenceSuggestion_apply": "Apply",
   "common_action_dismiss": "Dismiss",
+  "common_action_dismissAll": "Dismiss all",
+  "@common_action_dismissAll": {"description": "Button on a status message that closes it and every message waiting behind it"},
   "equipment_setEdit_defaultSwitch_title": "Default set",
   "equipment_setEdit_defaultSwitch_subtitle": "Auto-applied to new dives that have no equipment yet",
   "equipment_setEdit_computerAutoApplySwitch_title": "Apply when this set's computer is imported",
@@ -1831,6 +1833,8 @@
   "buddies_field_linkedProfile": "Linked profile",
   "buddies_field_linkedProfileNone": "Not linked",
   "buddies_field_nameHint": "Enter buddy name",
+  "buddies_field_excludedFromRankings": "Leave out of buddy rankings",
+  "buddies_field_excludedFromRankingsHint": "Dives together still count as buddy dives.",
   "buddies_field_nameRequired": "Name *",
   "buddies_field_notes": "Notes",
   "buddies_field_notesHint": "Add notes about this buddy...",
@@ -2041,6 +2045,7 @@
   "buddies_section_notes": "Notes",
   "buddies_section_sharedDives": "Shared Dives",
   "buddies_stat_divesTogether": "Dives Together",
+  "buddies_stat_excludedFromRankings": "Left out of buddy rankings",
   "buddies_stat_favoriteSite": "Favorite Site",
   "buddies_stat_firstDive": "First Dive",
   "buddies_stat_lastDive": "Last Dive",
@@ -3465,6 +3470,7 @@
   "courses_action_editRequirement": "Edit requirement",
   "courses_action_exportTrainingLog": "Export Training Log",
   "courses_action_markCompleted": "Mark as Completed",
+  "courses_action_chooseDive": "Choose dive",
   "courses_action_unlinkDive": "Unlink dive",
   "courses_action_moreOptions": "More options",
   "courses_action_retry": "Retry",
@@ -3536,6 +3542,17 @@
   "courses_requirement_kind_checklist": "Check-off item",
   "courses_requirement_kind_dive": "Dive requirement",
   "courses_requirement_suggestions": "Suggested dives",
+  "courses_requirement_allDives": "All dives",
+  "courses_requirement_noDives": "No dives to link",
+  "courses_requirement_noDivesMatch": "No dives match \"{query}\"",
+  "@courses_requirement_noDivesMatch": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_requirement_searchDives": "Search dives",
   "courses_requirements_empty": "Track adventure dives, prerequisites, and check-offs for this course.",
   "courses_requirements_progress": "{satisfied} of {total} complete",
   "courses_section_details": "Course Details",
@@ -4980,7 +4997,9 @@
   "diveLog_filterChip_favorites": "Favorites",
   "diveLog_filterChip_from": "From {date}",
   "diveLog_filterChip_noBuddy": "No Buddy",
+  "diveLog_filterChip_noEntryMethod": "No Entry Method",
   "diveLog_filterChip_noRole": "No Role",
+  "diveLog_filterChip_noWaterType": "No Water Type",
   "diveLog_filterChip_until": "Until {date}",
   "diveLog_filter_allSites": "All sites",
   "diveLog_filter_allTypes": "All types",
@@ -5001,6 +5020,7 @@
   "diveLog_filter_max": "Max",
   "diveLog_filter_min": "Min",
   "diveLog_filter_noBuddyOnly": "No Buddy Assigned",
+  "diveLog_filter_noEntryMethodOnly": "No entry method recorded",
   "diveLog_filter_noRoleOnly": "No Role Assigned",
   "diveLog_filter_noTagsYet": "No tags created yet",
   "diveLog_filter_presetAllTime": "All time",
@@ -5016,11 +5036,14 @@
   "diveLog_filter_sectionDiveType": "Dive Type",
   "diveLog_filter_sectionDuration": "Duration (minutes)",
   "diveLog_filter_sectionGasMix": "Gas Mix (O₂%)",
+  "diveLog_filter_sectionTankConfiguration": "Tank configuration",
+  "diveLog_filter_sectionTankExtras": "Tank extras",
   "diveLog_filter_sectionMinRating": "Minimum Rating",
   "diveLog_filter_sectionTags": "Tags",
   "diveLog_filter_sectionWeekdays": "Weekdays",
   "diveLog_filter_showOnlyFavorites": "Show only favorite dives",
   "diveLog_filter_showOnlyNoBuddy": "Show only dives without a buddy",
+  "diveLog_filter_showOnlyNoEntryMethod": "Show only dives with no known entry method",
   "diveLog_filter_showOnlyNoRole": "Show only dives where your role is not set",
   "diveLog_filter_startDate": "Start Date",
   "diveLog_fullscreenProfile_close": "Close fullscreen",
@@ -5028,6 +5051,7 @@
   "diveLog_legend_label_ascentRate": "Ascent Rate",
   "diveLog_legend_label_ascentRateLine": "Ascent Rate Line",
   "diveLog_legend_label_ceiling": "Ceiling",
+  "diveLog_legend_label_ceilingCalculated": "Ceiling (calc)",
   "diveLog_legend_label_decoStops": "Deco stops",
   "diveLog_legend_label_cns": "CNS%",
   "diveLog_legend_label_depth": "Depth",
@@ -8955,6 +8979,7 @@
   "equipment_deleteDialog_title": "Delete Equipment",
   "equipment_detail_brandLabel": "Brand",
   "equipment_detail_detailsTitle": "Details",
+  "equipment_detail_diveTimeLabel": "Dive Time",
   "equipment_detail_divesCountPlural": "{count} dives",
   "equipment_detail_divesCountSingular": "{count} dive",
   "equipment_detail_divesLabel": "Dives",
@@ -9571,6 +9596,8 @@
   "equipment_filter_section_category": "Category",
   "equipment_location_kind_storage": "Storage",
   "@equipment_location_kind_storage": {"description": "Kind of place where gear is kept: a shelf, bin, locker or room"},
+  "equipment_location_kind_diveCenter": "Dive center",
+  "@equipment_location_kind_diveCenter": {"description": "Kind of place: a dive center or shop where the diver leaves gear between dives"},
   "equipment_location_kind_serviceShop": "Service shop",
   "@equipment_location_kind_serviceShop": {"description": "Kind of place: a shop or technician servicing gear"},
   "equipment_location_kind_person": "Person",
@@ -9689,6 +9716,12 @@
   "@equipment_locations_duplicateWarning": {"description": "Warning under a place name that matches another of the diver's places; saving is still allowed"},
   "equipment_locations_kindLabel": "Kind",
   "@equipment_locations_kindLabel": {"description": "Label of a place's kind selector"},
+  "equipment_locations_savedCenterLabel": "Saved dive center",
+  "@equipment_locations_savedCenterLabel": {"description": "Label of the field linking a place to one of the diver's saved dive centers"},
+  "equipment_locations_savedCenterNone": "None",
+  "@equipment_locations_savedCenterNone": {"description": "Value of the saved dive center field when no center is linked"},
+  "equipment_locations_savedCenterClear": "Remove saved dive center",
+  "@equipment_locations_savedCenterClear": {"description": "Tooltip of the button that removes the link to a saved dive center"},
   "equipment_locations_notesLabel": "Notes",
   "@equipment_locations_notesLabel": {"description": "Label of a place's notes field"},
   "equipment_locations_notesHint": "Address, phone, locker number",
@@ -10648,6 +10681,7 @@
   "gasCalculators_blender_stepStartLabel": "Start",
   "gasCalculators_blender_stepColumnAction": "Action",
   "gasCalculators_blender_stepColumnAdded": "Added",
+  "gasCalculators_blender_stepColumnTopUp": "Top up",
   "gasCalculators_blender_stepColumnPressure": "Pressure",
   "gasCalculators_blender_stepColumnMix": "Mix",
   "gasCalculators_blender_settlesTo": "Settles to {pressure} at {temperature}",
@@ -12967,7 +13001,10 @@
   "plannerCanvas_rates_descent": "Descent rate",
   "plannerCanvas_rates_title": "Rates",
   "plannerCanvas_range_title": "Range table",
+  "plannerCanvas_results_calculating": "Calculating",
+  "plannerCanvas_results_failed": "Could not be calculated",
   "plannerCanvas_results_noDeco": "No decompression required",
+  "plannerCanvas_results_updating": "Updating",
   "plannerCanvas_sac_useLogged": "Use logged average ({sac})",
   "@plannerCanvas_sac_useLogged": {
     "placeholders": {
@@ -14156,6 +14193,9 @@
   "settings_cloudSync_status_readyToSync": "Ready to sync",
   "settings_cloudSync_status_syncComplete": "Sync complete",
   "settings_cloudSync_status_syncError": "Sync error",
+  "settings_cloudSync_status_signInNeeded": "Sign-in needed",
+  "settings_cloudSync_signInNeeded_message": "{account} needs you to sign in again.",
+  "@settings_cloudSync_signInNeeded_message": {"description": "Cloud Sync status card while the account needs signing in again; account is its name", "placeholders": {"account": {"type": "String"}}},
   "settings_cloudSync_status_syncing": "Syncing...",
   "settings_cloudSync_storageSettings": "Storage Settings",
   "settings_cloudSync_syncNow": "Sync Now",
@@ -16778,6 +16818,8 @@
   "insights_category_timePatterns_subtitle": "When you dive",
   "insights_category_timePatterns_title": "Time Patterns",
   "insights_chart_barSemanticLabel": "Bar chart with {count} categories",
+  "insights_chart_barRowSemanticLabel": "{label}, {count}",
+  "@insights_chart_barRowSemanticLabel": {"description": "Screen reader label of a tappable bar chart row", "placeholders": {"count": {"type": "String"}, "label": {"type": "String"}}},
   "insights_chart_distributionSemanticLabel": "Distribution pie chart with {count} segments",
   "insights_chart_multiTrendSemanticLabel": "Multi-trend line chart comparing {seriesNames}",
   "insights_chart_noBarData": "No data available",
@@ -17048,6 +17090,35 @@
       "baseline": { "type": "String" }
     }
   },
+  "insights_focus_standouts_categoryAllRecorded": "All {count} were {value} ({baseline} of the {coverage} with this recorded)",
+  "@insights_focus_standouts_categoryAllRecorded": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "value": { "type": "String" },
+      "baseline": { "type": "String" },
+      "coverage": { "type": "String" }
+    }
+  },
+  "insights_focus_standouts_categorySomeRecorded": "{count} of {total} were {value}, against {baseline} of the {coverage} with this recorded",
+  "@insights_focus_standouts_categorySomeRecorded": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "total": { "type": "int" },
+      "value": { "type": "String" },
+      "baseline": { "type": "String" },
+      "coverage": { "type": "String" }
+    }
+  },
+  "insights_focus_standouts_categoryPartRecorded": "{count} of the {groupCoverage} with this recorded were {value}, against {baseline} of the {coverage} with this recorded",
+  "@insights_focus_standouts_categoryPartRecorded": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "groupCoverage": { "type": "String" },
+      "value": { "type": "String" },
+      "baseline": { "type": "String" },
+      "coverage": { "type": "String" }
+    }
+  },
   "insights_focus_standouts_numeric": "{factor} {difference} {direction} ({group} vs {baseline})",
   "@insights_focus_standouts_numeric": {
     "placeholders": {
@@ -17136,6 +17207,7 @@
   "insights_profile_ascentDescent_title": "Average Ascent & Descent Rates",
   "insights_profile_avgAscent": "Avg Ascent",
   "insights_profile_avgDescent": "Avg Descent",
+  "insights_profile_deco_analyzing": "Analyzing dives: {analyzed} of {total}",
   "insights_profile_deco_decoDives": "Deco Dives",
   "insights_profile_deco_decoLabel": "Deco",
   "insights_profile_deco_decoRate": "Deco Rate",
@@ -17507,6 +17579,16 @@
       },
       "topCount": {
         "type": "Object"
+      }
+    }
+  },
+  "@insights_profile_deco_analyzing": {
+    "placeholders": {
+      "analyzed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
     }
   },
@@ -23339,6 +23421,11 @@
   "settings_accounts_continue": "Continue",
   "settings_accounts_add": "Add account",
   "settings_accounts_signInAgain": "Sign in again",
+  "settings_accounts_differentAccount_title": "That's a different account",
+  "settings_accounts_differentAccount_body": "Submersion uses {expected}, but you signed in as {signedIn}.",
+  "settings_accounts_differentAccount_nothingSynced": "Nothing was synced, and {signedIn} was not connected.",
+  "@settings_accounts_differentAccount_body": {"description": "Dialog after signing in to a different account than the one in use; both are addresses", "placeholders": {"expected": {"type": "String"}, "signedIn": {"type": "String"}}},
+  "@settings_accounts_differentAccount_nothingSynced": {"description": "Second paragraph of that dialog; signedIn is the other address", "placeholders": {"signedIn": {"type": "String"}}},
   "settings_accounts_usedHere": "Used on this device for {features}",
   "@settings_accounts_usedHere": {"placeholders": {"features": {"type": "String"}}},
   "settings_accounts_folders": "Folders",
@@ -23872,6 +23959,60 @@
   "diveLog_detail_altitudeMismatch_subtitle": "This site records an altitude but the dive has none set, so decompression analysis assumed sea level. Set the dive's altitude to correct it.",
   "diveLog_detail_sacSegmentsNoPressure": "Only start and end tank pressures were recorded, so gas use can't be split into segments. A breakdown needs pressure readings taken during the dive, such as from an air-integrated transmitter. The whole-dive average appears under Cylinders.",
   "diveLog_detail_sacSegmentsNoPressure_subtitle": "No tank pressure recorded during the dive",
+  "diveLog_detail_sacSegments_time": "Time",
+  "@diveLog_detail_sacSegments_time": {
+    "description": "Heading of the time chart and of the duration column in the gas consumption by segment card"
+  },
+  "diveLog_detail_sacSegments_phase": "Phase",
+  "diveLog_detail_sacSegments_gas": "Gas",
+  "diveLog_detail_sacSegments_depth": "Depth",
+  "diveLog_detail_sacSegments_phaseDescent": "Descent",
+  "diveLog_detail_sacSegments_phaseBottom": "Bottom",
+  "diveLog_detail_sacSegments_phaseAscent": "Ascent",
+  "diveLog_detail_sacSegments_phaseSafetyStop": "Safety stop",
+  "diveLog_detail_sacSegments_phaseDeco": "Deco",
+  "diveLog_detail_sacSegments_timeRange": "{start}-{end} min",
+  "@diveLog_detail_sacSegments_timeRange": {
+    "description": "A stretch of the dive in minutes from its start, such as 10-15 min",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_detail_sacSegments_axisMinutes": "{minutes} min",
+  "@diveLog_detail_sacSegments_axisMinutes": {
+    "description": "Last label on the time axis of the gas consumption by segment chart",
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_detail_sacSegments_peak": "Peak {rate} at {range}",
+  "@diveLog_detail_sacSegments_peak": {
+    "description": "Shown under the time chart when no segment is selected",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_detail_sacSegments_average": "Average {rate}",
+  "@diveLog_detail_sacSegments_average": {
+    "description": "Collapsed subtitle of the gas consumption by segment card",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
   "diveLog_detail_sacVolumeHint": "Add a cylinder volume to show RMV in {unit}",
   "@diveLog_detail_sacVolumeHint": {
     "placeholders": {
@@ -28050,6 +28191,8 @@
   "diveLog_filterChip_waterTempMax": "Water under {value}{unit}",
   "@diveLog_filterChip_waterTempMax": {"placeholders": {"value": {"type": "String"}, "unit": {"type": "String"}}},
   "diveLog_filterChip_waterTypeCount": "{count} water types",
+  "diveLog_filterChip_tankConfigCount": "{count} tank configurations",
+  "diveLog_filterChip_tankExtrasCount": "{count} tank extras",
   "diveLog_filter_sectionSpecies": "Marine life",
   "diveLog_filter_sectionVisibilityUnit": "Visibility ({unit})",
   "diveLog_filter_sectionWaterTempUnit": "Water temperature ({unit})",
@@ -29487,7 +29630,7 @@
   "enum_profileMetric_cns_short": "CNS",
   "enum_profileMetric_otu_short": "OTU",
   "diveLog_profileEditor_rangeOperations": "Range Operations",
-  "diveLog_profileEditor_selectRangeHint": "Select a range on the chart to enable operations",
+  "diveLog_profileEditor_selectRangeHint": "Drag across the chart to select a range and enable operations",
   "diveLog_profileEditor_depthPlusOneMeter": "Depth +1m",
   "diveLog_profileEditor_depthMinusOneMeter": "Depth -1m",
   "diveLog_profileEditor_timePlusFiveSeconds": "Time +5s",
@@ -29517,6 +29660,9 @@
   "diveLog_profileEditor_saveFailed": "Failed to save profile: {error}",
   "diveLog_profileEditor_errorLoadingDive": "Error loading dive: {error}",
   "diveLog_profileEditor_noProfileData": "No profile data available",
+  "diveLog_profileEditor_timeShiftBlocked": "Can't shift: the selection has no room to move that way",
+  "diveLog_profileEditor_deleteAllBlocked": "Can't delete the whole profile",
+  "diveLog_profileEditor_smoothTooFewBlocked": "Can't smooth: select at least three samples",
   "diveLog_profileEditor_undo": "Undo",
   "diveLog_profileEditor_mode_select": "Select",
   "diveLog_profileEditor_mode_outlier": "Outlier",
@@ -31046,6 +31192,14 @@
   "@diveLog_edit_summary_excluded": {
     "description": "Collapsed summary fragment: dive excluded from statistics"
   },
+  "insights_empty_allExcluded_title": "All your dives are excluded from statistics",
+  "insights_empty_allExcluded_subtitle": "They are still in your logbook. Edit a dive to count it again.",
+  "@insights_empty_allExcluded_title": {
+    "description": "Shown when logged dives exist but every one is excluded from statistics"
+  },
+  "@insights_empty_allExcluded_subtitle": {
+    "description": "Below the all-excluded title: the dives are safe and how to count one again"
+  },
   "insights_excludedDivesFootnote": "{count, plural, one{1 dive excluded from statistics} other{{count} dives excluded from statistics}}",
   "@insights_excludedDivesFootnote": {
     "description": "Overview footnote naming how many dives are excluded",
@@ -32121,6 +32275,8 @@
   "numberInput_notNegative": "Enter 0 or more",
   "numberInput_atLeastOne": "Enter 1 or more",
   "numberInput_percentRange": "Enter 0 to 100",
+  "diveCenters_gearHere_title": "Your gear here",
+  "@diveCenters_gearHere_title": {"description": "Heading on a dive center's page listing the diver's own gear left at that center"},
   "diveCenters_rental_sectionTitle": "Rental gear",
   "diveCenters_rental_lastTimeAt": "Last time at {center}",
   "@diveCenters_rental_lastTimeAt": {"placeholders": {"center": {"type": "Object"}}},
@@ -32314,6 +32470,14 @@
   "@query_dives_gear": {"description": "Field label in the query builder"},
   "query_dives_hasProfile": "Has profile",
   "@query_dives_hasProfile": {"description": "Field label in the query builder"},
+  "query_dives_tankConfig": "Tank configuration",
+  "@query_dives_tankConfig": {"description": "Field label in the query builder"},
+  "query_dives_stages": "Stage(s)",
+  "@query_dives_stages": {"description": "Field label in the query builder"},
+  "query_dives_decoGas": "Deco gas",
+  "@query_dives_decoGas": {"description": "Field label in the query builder"},
+  "query_dives_multiGas": "Multi-gas",
+  "@query_dives_multiGas": {"description": "Field label in the query builder"},
   "query_dives_id": "Dive ID",
   "@query_dives_id": {"description": "Field label in the query builder"},
   "query_dives_legacyBuddy": "Buddy (legacy text)",
