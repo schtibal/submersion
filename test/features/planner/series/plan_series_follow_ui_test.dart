@@ -376,6 +376,37 @@ void main() {
     expect(await done, isNotNull);
   });
 
+  testWidgets('a follow finishes when its load is invalidated part way', (
+    tester,
+  ) async {
+    // Issue #3807: read without a listener, an invalidated load is cancelled
+    // and never completes, leaving the Follow sheet spinning.
+    final analysis = Completer<ProfileAnalysis?>();
+    late WidgetRef callerRef;
+    await tester.pumpWidget(
+      testApp(
+        overrides: followOverrides(dayDives, (ref, id) => analysis.future),
+        locale: const Locale('en'),
+        child: Consumer(
+          builder: (_, ref, _) {
+            callerRef = ref;
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+
+    var finished = false;
+    unawaited(followLoggedDive(callerRef, 'd41').then((_) => finished = true));
+    await tester.pump();
+    callerRef.invalidate(seriesFollowProvider('d41'));
+    await tester.pump();
+    analysis.complete(null);
+    await tester.pumpAndSettle();
+
+    expect(finished, isTrue);
+  });
+
   testWidgets('a settings change while the planner is away is picked up on '
       'its return', (tester) async {
     tester.view.physicalSize = const Size(1400, 900);

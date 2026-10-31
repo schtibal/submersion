@@ -35,6 +35,7 @@ import 'package:submersion/features/data_quality/presentation/providers/quality_
 import 'package:submersion/core/constants/gas_consumption_display.dart';
 import 'package:submersion/core/constants/units.dart';
 import 'package:submersion/core/deco/altitude_calculator.dart';
+import 'package:submersion/core/providers/await_future.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/utils/elapsed_duration_format.dart';
 import 'package:submersion/core/utils/log_failure.dart';
@@ -1791,7 +1792,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
   /// load, or leaving the page during it, leaves that plan alone.
   Future<void> _planRepetitiveDive(Dive dive) async {
     if (!await _confirmReplacingPlan()) return;
-    await ref.read(seriesFollowProvider(dive.id).future);
+    await ref.container.awaitFuture(seriesFollowProvider(dive.id).future);
     if (!mounted) return;
     ref.read(divePlanNotifierProvider.notifier).newPlan();
     await followLoggedDive(ref, dive.id);

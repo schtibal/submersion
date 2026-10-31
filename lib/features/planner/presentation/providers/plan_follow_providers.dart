@@ -1,3 +1,4 @@
+import 'package:submersion/core/providers/await_future.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_log/data/services/profile_analysis_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
@@ -69,7 +70,9 @@ Future<SeriesFollow?> followLoggedDive(
   DateTime? now,
 }) async {
   final notifier = ref.read(planSeriesNotifierProvider.notifier);
-  final follow = await ref.read(seriesFollowProvider(diveId).future);
+  final follow = await ref.container.awaitFuture(
+    seriesFollowProvider(diveId).future,
+  );
   if (follow == null) return null;
   notifier.followDive(
     follow,
