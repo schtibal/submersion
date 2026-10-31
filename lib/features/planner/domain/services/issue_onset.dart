@@ -16,18 +16,27 @@ class RuntimeIncrement {
   final double amount;
 }
 
-/// The runtime at which [start] plus [increments] (in dive order) first
-/// reaches [threshold], each increment accruing evenly over its duration.
-/// 0 when [start] is already there, as for a repetitive dive that begins
-/// with the exposure earlier dives left; null when it is never reached.
+/// The runtime at which [start] plus [increments] first reaches [threshold],
+/// each increment accruing evenly over its duration. Increments are read in
+/// dive order, whatever order they were charged in, with a lump ahead of a
+/// stretch starting at the same moment. 0 when [start] is already there, as
+/// for a repetitive dive that begins with the exposure earlier dives left;
+/// null when it is never reached.
 int? runtimeReaching(
   Iterable<RuntimeIncrement> increments, {
   required double threshold,
   double start = 0,
 }) {
   if (start >= threshold) return 0;
+  final inDiveOrder = [...increments]
+    ..sort((a, b) {
+      final byStart = a.startRuntime.compareTo(b.startRuntime);
+      return byStart != 0
+          ? byStart
+          : a.durationSeconds.compareTo(b.durationSeconds);
+    });
   var total = start;
-  for (final step in increments) {
+  for (final step in inDiveOrder) {
     final after = total + step.amount;
     if (after >= threshold && step.amount > 0) {
       final fraction = (threshold - total) / step.amount;

@@ -135,6 +135,32 @@ void main() {
     });
   });
 
+  group('issueMarkerTarget', () {
+    const chart = Size(500, 400);
+
+    test('is a 48 px square centred on the sign', () {
+      const glyph = Rect.fromLTWH(200, 200, 14, 12);
+      final target = issueMarkerTarget(glyph, chart);
+      expect(target.size, const Size(48, 48));
+      expect(target.center, glyph.center);
+    });
+
+    test('stays whole beside the edge of the chart', () {
+      // A marker at the surface sits right under the top of the plot, where
+      // the box would otherwise reach past the chart and be clipped.
+      const surface = Rect.fromLTWH(200, 17, 14, 12);
+      final target = issueMarkerTarget(surface, chart);
+      expect(target.size, const Size(48, 48));
+      expect(target.top, 0);
+
+      const atTheEnd = Rect.fromLTWH(474, 390, 14, 12);
+      final corner = issueMarkerTarget(atTheEnd, chart);
+      expect(corner.size, const Size(48, 48));
+      expect(corner.right, chart.width);
+      expect(corner.bottom, chart.height);
+    });
+  });
+
   group('on the chart', () {
     Widget harness({List<Override> overrides = const []}) => testApp(
       overrides: [
@@ -172,6 +198,23 @@ void main() {
       final origin = tester.getTopLeft(find.byType(PlanProfileChart));
       return origin + markerPainter(tester).placed[index].glyph.center;
     }
+
+    testWidgets('a screen reader gets the same 48 px target as a fingertip', (
+      tester,
+    ) async {
+      await seed(tester);
+      final targets = find.descendant(
+        of: find.byType(PlanIssueMarkerLayer),
+        matching: find.byWidgetPredicate(
+          (w) => w is Semantics && w.properties.onTap != null,
+        ),
+      );
+      expect(targets, findsWidgets);
+      for (final target in targets.evaluate()) {
+        expect(target.size!.width, moreOrLessEquals(48));
+        expect(target.size!.height, moreOrLessEquals(48));
+      }
+    });
 
     testWidgets('a plan with warnings shows them on the profile', (
       tester,

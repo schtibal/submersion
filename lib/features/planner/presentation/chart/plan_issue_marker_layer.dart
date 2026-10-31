@@ -130,6 +130,21 @@ int? hitTestIssueMarker(
   return best;
 }
 
+/// Where a screen reader's target for [glyph] goes: the same 48 px square a
+/// fingertip gets, moved back inside [size] so the layer's edge never cuts
+/// it short, as it would for a marker at the surface.
+Rect issueMarkerTarget(Rect glyph, Size size) {
+  const target = Size.square(kMinInteractiveDimension);
+  final corner = glyph.center - target.center(Offset.zero);
+  final left = corner.dx
+      .clamp(0.0, math.max(0.0, size.width - target.width))
+      .toDouble();
+  final top = corner.dy
+      .clamp(0.0, math.max(0.0, size.height - target.height))
+      .toDouble();
+  return Offset(left, top) & target;
+}
+
 /// Draws the warning markers over the chart, gives each one to screen
 /// readers, and shows the warnings of the [activeIndex] marker in a small
 /// card beside it. It takes no pointer input itself: the chart's own
@@ -157,49 +172,51 @@ class PlanIssueMarkerLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final active = activeIndex;
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: CustomPaint(
-            key: const Key('planChartIssueMarkers'),
-            painter: PlanIssueMarkerPainter(
-              placed: placed,
-              colors: [
-                for (final p in placed)
-                  planIssueSeverityColor(scheme, p.marker.severity),
-              ],
-              highlighted: [for (final p in placed) p.highlighted],
-              outline: palette.backdrop,
-            ),
-          ),
-        ),
-        for (var i = 0; i < placed.length; i++)
-          Positioned.fromRect(
-            rect: placed[i].glyph.inflate(8),
-            child: Semantics(
-              button: true,
-              label: _semanticsLabel(context, placed[i]),
-              onTap: () => onActivate(i),
-              child: const SizedBox.expand(),
-            ),
-          ),
-        if (active != null && active < placed.length)
+    return LayoutBuilder(
+      builder: (context, constraints) => Stack(
+        children: [
           Positioned.fill(
-            child: IgnorePointer(
-              child: ExcludeSemantics(
-                child: CustomSingleChildLayout(
-                  delegate: _PopupLayout(placed[active].footprint),
-                  child: _IssuePopup(
-                    key: const Key('planChartIssuePopup'),
-                    placed: placed[active],
-                    palette: palette,
-                    units: units,
+            child: CustomPaint(
+              key: const Key('planChartIssueMarkers'),
+              painter: PlanIssueMarkerPainter(
+                placed: placed,
+                colors: [
+                  for (final p in placed)
+                    planIssueSeverityColor(scheme, p.marker.severity),
+                ],
+                highlighted: [for (final p in placed) p.highlighted],
+                outline: palette.backdrop,
+              ),
+            ),
+          ),
+          for (var i = 0; i < placed.length; i++)
+            Positioned.fromRect(
+              rect: issueMarkerTarget(placed[i].glyph, constraints.biggest),
+              child: Semantics(
+                button: true,
+                label: _semanticsLabel(context, placed[i]),
+                onTap: () => onActivate(i),
+                child: const SizedBox.expand(),
+              ),
+            ),
+          if (active != null && active < placed.length)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: ExcludeSemantics(
+                  child: CustomSingleChildLayout(
+                    delegate: _PopupLayout(placed[active].footprint),
+                    child: _IssuePopup(
+                      key: const Key('planChartIssuePopup'),
+                      placed: placed[active],
+                      palette: palette,
+                      units: units,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

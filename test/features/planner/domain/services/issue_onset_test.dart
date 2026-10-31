@@ -38,6 +38,17 @@ void main() {
       ];
       expect(runtimeReaching(lump, threshold: 20), 300);
     });
+
+    test('reads increments in dive order, however they were charged', () {
+      // Problem-solving gas is charged after every authored leg, though it
+      // falls where the bottom ends: ahead of the ascent listed before it.
+      const charged = [
+        RuntimeIncrement(startRuntime: 0, durationSeconds: 300, amount: 10),
+        RuntimeIncrement(startRuntime: 300, durationSeconds: 300, amount: 10),
+        RuntimeIncrement(startRuntime: 300, durationSeconds: 0, amount: 50),
+      ];
+      expect(runtimeReaching(charged, threshold: 15), 300);
+    });
   });
 
   group('legOnsetRuntime', () {

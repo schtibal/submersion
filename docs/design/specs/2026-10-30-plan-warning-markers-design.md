@@ -41,7 +41,7 @@ depth at `atRuntime`.
 | ppO2 over the working or deco limit, hypoxic gas, END, gas density, diluent MOD | the point on the leg where the limit is first passed (`legOnsetRuntime`) |
 | ceiling violated | the breach the ceiling replay found |
 | CNS warning or critical, OTU | where the running total, including what earlier dives carried in, first reaches the threshold (`runtimeReaching`) |
-| reserve, minimum gas, out of gas | where the cylinder's pressure first drops below that limit |
+| reserve, minimum gas, out of gas | where the cylinder's pressure first drops below that limit. Problem-solving gas counts as one lump where the diver leaves the bottom, and metabolic O2 counts only while on the loop |
 | a hand-set MOD over its limit | the first schedule row breathed from that cylinder |
 | no deco gas, no bailout carried, no usable gas in a fill | no single moment: list only |
 
@@ -115,7 +115,8 @@ below, else above.
 - Touch hit targets reach 24 px around a marker, the 48 px a fingertip
   needs. Mouse targets reach 16 px.
 - Each marker is a screen-reader button labelled with its time, depth and
-  warnings.
+  warnings. Its target is the same 48 px, moved inside the chart when a
+  marker sits by the edge, so it is never clipped short.
 - Colours come from the theme (`planIssueSeverityColor`), the same as the
   warnings list.
 

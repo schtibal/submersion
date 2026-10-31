@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_planner/domain/entities/plan_segment.dart';
 import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
@@ -61,6 +62,39 @@ domain.DivePlan _plan({
 
 PlanIssue _issue(PlanOutcome outcome, PlanIssueType type) =>
     outcome.issues.firstWhere((i) => i.type == type);
+
+/// A CCR plan, for the legs a per-segment override takes off the loop.
+domain.DivePlan _ccrPlan({
+  required List<DiveTank> tanks,
+  required List<PlanSegment> segments,
+  double reservePressure = 50,
+}) => domain.DivePlan(
+  id: 'plan-ccr-onset',
+  name: 'CCR onset',
+  mode: domain.PlanMode.ccr,
+  problemSolvingMinutes: 0,
+  reservePressure: reservePressure,
+  tanks: tanks,
+  segments: segments,
+  createdAt: DateTime(2026, 10, 28),
+  updatedAt: DateTime(2026, 10, 28),
+);
+
+const _diluent = DiveTank(
+  id: 'dil',
+  volume: 3,
+  startPressure: 200,
+  gasMix: _air,
+  role: TankRole.diluent,
+);
+
+const _oxygen = DiveTank(
+  id: 'o2',
+  volume: 3,
+  startPressure: 200,
+  gasMix: GasMix(o2: 100),
+  role: TankRole.oxygenSupply,
+);
 
 void main() {
   const engine = PlanEngine();
@@ -168,6 +202,206 @@ void main() {
       (i) => i.type == PlanIssueType.ppO2Critical && i.segmentId == 'down',
     );
     expect(issue.atRuntime, closeTo(30, 2));
+  });
+
+  test('problem-solving gas counts from where the bottom ends', () {
+    // The gas is charged once every authored leg is, yet the diver needs it
+    // in hand on leaving the bottom, so the ascent after it must not be read
+    // first. The reserve here falls between the bottom's end and the ascent's.
+    final outcome = engine.compute(
+      domain.DivePlan(
+        id: 'plan-lump',
+        name: 'Lump',
+        gfLow: 40,
+        gfHigh: 80,
+        reservePressure: 213,
+        problemSolvingMinutes: 4,
+        tanks: const [
+          DiveTank(id: 'back', volume: 24, startPressure: 232, gasMix: _air),
+        ],
+        segments: [
+          PlanSegment.travel(
+            id: 'down',
+            fromDepth: 0,
+            targetDepth: 30,
+            tankId: 'back',
+            gasMix: _air,
+            order: 0,
+            ratePerMinute: 20,
+          ),
+          PlanSegment.hold(
+            id: 'bottom',
+            depth: 30,
+            durationMinutes: 5,
+            tankId: 'back',
+            gasMix: _air,
+            order: 1,
+          ),
+          PlanSegment.travel(
+            id: 'up',
+            fromDepth: 30,
+            targetDepth: 10,
+            tankId: 'back',
+            gasMix: _air,
+            order: 2,
+            ratePerMinute: 10,
+          ),
+        ],
+        createdAt: DateTime(2026, 10, 28),
+        updatedAt: DateTime(2026, 10, 28),
+      ),
+    );
+    expect(_issue(outcome, PlanIssueType.gasReserveViolation).atRuntime, 390);
+  });
+
+  group('a CCR plan with a leg off the loop', () {
+    final descent = PlanSegment.travel(
+      id: 'down',
+      fromDepth: 0,
+      targetDepth: 30,
+      tankId: 'dil',
+      gasMix: _air,
+      order: 0,
+      ratePerMinute: 18,
+    );
+
+    test('a hypoxic gas is judged on what that leg breathes', () {
+      // The plan's setpoint would keep the loop well oxygenated, but this
+      // leg is breathed off a 10% cylinder: under 0.16 bar above about 6 m.
+      const hypoxic = GasMix(o2: 10, he: 50);
+      final outcome = engine.compute(
+        _ccrPlan(
+          tanks: const [
+            _diluent,
+            _oxygen,
+            DiveTank(
+              id: 'bo',
+              volume: 12,
+              startPressure: 200,
+              gasMix: hypoxic,
+              role: TankRole.bailout,
+            ),
+          ],
+          segments: [
+            descent,
+            PlanSegment.travel(
+              id: 'up',
+              fromDepth: 30,
+              targetDepth: 3,
+              tankId: 'bo',
+              gasMix: hypoxic,
+              order: 1,
+              ratePerMinute: 9,
+              diveModeOverride: domain.PlanMode.oc,
+            ),
+          ],
+        ),
+      );
+      final issue = _issue(outcome, PlanIssueType.hypoxicGas);
+      expect(issue.segmentId, 'up');
+      // 100 s down, then 24 m of the 27 m ascent's 180 s.
+      expect(issue.atRuntime, closeTo(260, 10));
+    });
+
+    test('a cylinder breathed off the loop runs out during that leg', () {
+      final outcome = engine.compute(
+        _ccrPlan(
+          tanks: const [
+            _diluent,
+            _oxygen,
+            DiveTank(
+              id: 'bo',
+              volume: 3,
+              startPressure: 100,
+              gasMix: _air,
+              role: TankRole.bailout,
+            ),
+          ],
+          segments: [
+            descent,
+            PlanSegment.hold(
+              id: 'off-loop',
+              depth: 30,
+              durationMinutes: 20,
+              tankId: 'bo',
+              gasMix: _air,
+              order: 1,
+              diveModeOverride: domain.PlanMode.oc,
+            ),
+          ],
+        ),
+      );
+      final issue = _issue(outcome, PlanIssueType.gasOut);
+      expect(issue.tankId, 'bo');
+      // About 300 L at 15 L/min and 4 bar: five minutes into the leg.
+      expect(issue.atRuntime, closeTo(100 + 300, 30));
+    });
+
+    test('metabolic O2 stops counting while the diver is off the loop', () {
+      final outcome = engine.compute(
+        _ccrPlan(
+          tanks: const [
+            _diluent,
+            DiveTank(
+              id: 'o2',
+              volume: 0.5,
+              startPressure: 100,
+              gasMix: GasMix(o2: 100),
+              role: TankRole.oxygenSupply,
+            ),
+            DiveTank(
+              id: 'bo',
+              volume: 24,
+              startPressure: 200,
+              gasMix: _air,
+              role: TankRole.bailout,
+            ),
+          ],
+          segments: [
+            PlanSegment.travel(
+              id: 'down',
+              fromDepth: 0,
+              targetDepth: 6,
+              tankId: 'dil',
+              gasMix: _air,
+              order: 0,
+              ratePerMinute: 18,
+            ),
+            PlanSegment.hold(
+              id: 'on-loop',
+              depth: 6,
+              durationMinutes: 5,
+              tankId: 'dil',
+              gasMix: _air,
+              order: 1,
+            ),
+            PlanSegment.hold(
+              id: 'off-loop',
+              depth: 6,
+              durationMinutes: 30,
+              tankId: 'bo',
+              gasMix: _air,
+              order: 2,
+              diveModeOverride: domain.PlanMode.oc,
+            ),
+            PlanSegment.hold(
+              id: 'back-on-loop',
+              depth: 6,
+              durationMinutes: 30,
+              tankId: 'dil',
+              gasMix: _air,
+              order: 3,
+            ),
+          ],
+        ),
+      );
+      final issue = _issue(outcome, PlanIssueType.gasReserveViolation);
+      expect(issue.tankId, 'o2');
+      // 50 bar of O2 in 0.5 L is about 26 L, so 26 minutes on the loop at
+      // 1 L/min: the first 5 and 21 of the last 30, with the half hour off
+      // it in between.
+      expect(issue.atRuntime, closeTo(20 + 300 + 1800 + 1260, 60));
+    });
   });
 
   test('a missing deco gas has no moment of its own', () {

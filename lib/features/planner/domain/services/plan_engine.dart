@@ -1364,7 +1364,7 @@ class PlanEngine {
       charge(
         bottomLeg.tankId,
         config.problemSolvingLiters(plan, environment),
-        atRuntime: _runtimeAfter(legs, bottomLeg),
+        atRuntime: _bottomEndRuntime(plan, legs, bottomLeg),
         seconds: 0,
       );
     }
@@ -1445,12 +1445,22 @@ class PlanEngine {
     return bottomLeg;
   }
 
-  /// The runtime [leg] of [legs] ends at, in seconds; 0 without one.
-  static int _runtimeAfter(List<ResolvedLeg> legs, ResolvedLeg? leg) {
+  /// The runtime the bottom ends at, given [bottomLeg], the last of [legs] at
+  /// [plan]'s max depth: the end of that leg, or its start when it is the
+  /// ascent leaving that depth. 0 without one.
+  static int _bottomEndRuntime(
+    domain.DivePlan plan,
+    List<ResolvedLeg> legs,
+    ResolvedLeg? bottomLeg,
+  ) {
     var elapsed = 0;
-    for (final candidate in legs) {
-      elapsed += candidate.durationSeconds;
-      if (identical(candidate, leg)) return elapsed;
+    for (final leg in legs) {
+      if (identical(leg, bottomLeg)) {
+        return leg.endDepth >= plan.maxDepth - 0.1
+            ? elapsed + leg.durationSeconds
+            : elapsed;
+      }
+      elapsed += leg.durationSeconds;
     }
     return 0;
   }
@@ -1520,7 +1530,7 @@ class PlanEngine {
     charge(
       bottomLeg?.tankId,
       config.problemSolvingLiters(plan, environment),
-      atRuntime: _runtimeAfter(legs, bottomLeg),
+      atRuntime: _bottomEndRuntime(plan, legs, bottomLeg),
       seconds: 0,
     );
 
@@ -1916,11 +1926,13 @@ class PlanEngine {
       }
 
       // Mode-aware: the CCR loop holds the setpoint, so hypoxia only fires
-      // when the in-force setpoint itself is hypoxic.
+      // when the in-force setpoint itself is hypoxic. A segment off the loop
+      // breathes its own gas, so its override decides.
       double inspiredO2At(double depth) => _breathingFor(
         plan,
         segment.gasMix,
         depth,
+        segment: segment,
       ).inspiredAt(environment.pressureAtDepth(depth)).pO2;
       final inspiredO2 = inspiredO2At(shallowerEnd);
       if (inspiredO2 < 0.16) {
@@ -2169,8 +2181,8 @@ class PlanEngine {
   }
 
   /// The runtime at which [usage]'s cylinder first drops to [pressureBar],
-  /// from its [draws] in dive order; null when the cylinder has no size or
-  /// start pressure to measure from (#3738).
+  /// from its [draws]; null when the cylinder has no size or start pressure
+  /// to measure from (#3738).
   int? _drawOnset(
     domain.DivePlan plan,
     PlanTankUsage usage,
@@ -2672,7 +2684,7 @@ class PlanEngine {
   }
 }
 
-/// Tank consumption plus each cylinder's draws in dive order, the draws
+/// Tank consumption plus each cylinder's draws, the draws
 /// placing its reserve and minimum gas in time (#3738).
 typedef _TankUsageResult = ({
   List<PlanTankUsage> usages,
