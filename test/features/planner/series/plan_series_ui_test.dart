@@ -371,6 +371,25 @@ void main() {
     expect(field.controller!.text, '2:00');
   });
 
+  testWidgets('a replan with no dive before it shows no interval', (
+    tester,
+  ) async {
+    await pumpPlan(tester, const Size(1400, 900));
+    final notifier = containerOf(
+      tester,
+    ).read(divePlanNotifierProvider.notifier);
+    notifier.loadPlan(
+      containerOf(
+        tester,
+      ).read(divePlanNotifierProvider).copyWith(sourceDiveId: 'logged'),
+    );
+    await tester.pumpAndSettle();
+
+    final field = tester.widget<TextField>(siField());
+    expect(field.enabled, isFalse);
+    expect(field.controller!.text, isEmpty);
+  });
+
   testWidgets('an invalid surface interval is flagged, not applied', (
     tester,
   ) async {

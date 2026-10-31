@@ -285,10 +285,5 @@ final seriesFillPressuresProvider = Provider<Map<String, double>>((ref) {
   final series = ref.watch(planSeriesNotifierProvider);
   final index = series.selectedIndex;
   if (index == 0 && series.follow == null) return const {};
-  return {
-    for (final tank in series.selected.state.tanks)
-      if (edits.fullPressureFor(series, index, tank.id) case final full?
-          when (tank.startPressure ?? 0) < full)
-        tank.id: full,
-  };
+  return edits.fillPressures(series, index);
 });

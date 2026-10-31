@@ -229,10 +229,28 @@ void main() {
       expect(filled.pinnedTankIds, {back.id});
     });
 
-    test('Fill all tanks fills and pins every tank', () {
-      final filled = fillAllTanks(series, 1).dives[1];
+    PlanSeries carried({double backPressure = 120}) => updateDiveState(
+      series,
+      1,
+      dive.state.copyWith(
+        tanks: [
+          back.copyWith(startPressure: backPressure),
+          stage.copyWith(startPressure: 90),
+        ],
+      ),
+      pinTypedPressures: false,
+    );
+
+    test('Fill all tanks fills and pins every tank below its fill', () {
+      final filled = fillAllTanks(carried(), 1).dives[1];
       expect(filled.state.tanks.map((t) => t.startPressure), [220, 200]);
       expect(filled.pinnedTankIds, {back.id, stage.id});
+    });
+
+    test('Fill all tanks leaves a tank above its fill as it is', () {
+      final filled = fillAllTanks(carried(backPressure: 232), 1).dives[1];
+      expect(filled.state.tanks.map((t) => t.startPressure), [232, 200]);
+      expect(filled.pinnedTankIds, {stage.id});
     });
 
     test('Fill and Fill all tanks leave the plan to be saved', () {
