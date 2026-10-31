@@ -9,8 +9,8 @@ const defaultSeriesSurfaceInterval = Duration(hours: 1);
 ///
 /// [state] holds the dive's own inputs, its surface interval included
 /// ([DivePlanState.surfaceInterval], the gap since the previous dive). What
-/// it carries in from the dives before it - tissues, CNS, OTU, tank start
-/// pressures - is derived by the series calculator, never edited here.
+/// it carries in from the dives before it (tissues, CNS, OTU, tank start
+/// pressures) is derived by the series calculator, never edited here.
 class PlanSeriesDive extends Equatable {
   final DivePlanState state;
 

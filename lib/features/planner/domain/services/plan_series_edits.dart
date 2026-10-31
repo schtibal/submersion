@@ -181,14 +181,23 @@ double? fullPressureFor(PlanSeries series, int index, String tankId) {
   return tank!.startPressure ?? tank.workingPressure;
 }
 
+/// The tanks of the dive at [index] below their fill, with the pressure Fill
+/// takes each to.
+Map<String, double> fillPressures(PlanSeries series, int index) => {
+  for (final tank in series.dives[index].state.tanks)
+    if (fullPressureFor(series, index, tank.id) case final full?
+        when (tank.startPressure ?? 0) < full)
+      tank.id: full,
+};
+
 /// Fills one tank of the dive at [index] and pins it.
 PlanSeries fillTank(PlanSeries series, int index, String tankId) =>
     _fill(series, index, {tankId});
 
-/// Fills every tank of the dive at [index] and pins them.
-PlanSeries fillAllTanks(PlanSeries series, int index) => _fill(series, index, {
-  for (final tank in series.dives[index].state.tanks) tank.id,
-});
+/// Fills every tank of the dive at [index] below its fill and pins them. A
+/// tank set above its fill keeps its pressure.
+PlanSeries fillAllTanks(PlanSeries series, int index) =>
+    _fill(series, index, fillPressures(series, index).keys.toSet());
 
 PlanSeries _fill(PlanSeries series, int index, Set<String> tankIds) {
   final dive = series.dives[index];

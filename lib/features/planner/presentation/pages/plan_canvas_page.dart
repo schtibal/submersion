@@ -100,7 +100,9 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     final notifier = _notifier;
     super.dispose();
     if (_isReplan && notifier != null) {
-      Future.microtask(notifier.newPlan);
+      Future.microtask(() {
+        if (notifier.mounted) notifier.newPlan();
+      });
     }
   }
 
@@ -126,13 +128,15 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     // avoidable subscription/fetch in the common edit-a-saved-plan case. The
     // summaries watch only runs for a new plan, where it flips the Delete item
     // on once the plan is first saved.
+    // A series offers none: the route's plan may not be the dive on screen.
     final canDelete =
-        widget.planId != null ||
-        planIsPersisted(
-          planState.id,
-          ref.watch(divePlanSummariesProvider).valueOrNull ??
-              const <domain.DivePlanSummary>[],
-        );
+        saveAllowed &&
+        (widget.planId != null ||
+            planIsPersisted(
+              planState.id,
+              ref.watch(divePlanSummariesProvider).valueOrNull ??
+                  const <domain.DivePlanSummary>[],
+            ));
 
     return Scaffold(
       appBar: AppBar(

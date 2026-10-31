@@ -203,11 +203,11 @@ class DivePlan extends Equatable {
 
   /// CNS% this dive starts with: the exposure earlier dives in a repetitive
   /// series leave behind, already decayed over [surfaceInterval] (issue
-  /// #3565). An engine input only - not persisted, 0 for a fresh diver.
+  /// #3565). An engine input only: not persisted, 0 for a fresh diver.
   final double startCns;
 
   /// OTU this dive starts with: the day's exposure from earlier dives in a
-  /// repetitive series (issue #3565). An engine input only - not persisted,
+  /// repetitive series (issue #3565). An engine input only: not persisted,
   /// 0 for a fresh diver.
   final double startOtu;
 
