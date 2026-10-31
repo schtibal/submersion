@@ -49958,7 +49958,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_profileEditor_selectRangeHint =>
-      'Select a range on the chart to enable operations';
+      'Drag across the chart to select a range and enable operations';
 
   @override
   String get diveLog_profileEditor_depthPlusOneMeter => 'Depth +1m';
@@ -50061,6 +50061,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_profileEditor_noProfileData => 'No profile data available';
+
+  @override
+  String get diveLog_profileEditor_timeShiftBlocked =>
+      'Can\'t shift: the selection has no room to move that way';
+
+  @override
+  String get diveLog_profileEditor_deleteAllBlocked =>
+      'Can\'t delete the whole profile';
+
+  @override
+  String get diveLog_profileEditor_smoothTooFewBlocked =>
+      'Can\'t smooth: select at least three samples';
 
   @override
   String get diveLog_profileEditor_undo => 'Undo';

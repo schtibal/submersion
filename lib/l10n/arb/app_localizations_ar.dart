@@ -51376,7 +51376,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_profileEditor_selectRangeHint =>
-      'حدّد نطاقًا على الرسم البياني لتفعيل العمليات';
+      'اسحب على الرسم البياني لتحديد نطاق وتفعيل العمليات';
 
   @override
   String get diveLog_profileEditor_depthPlusOneMeter => 'العمق +1m';
@@ -51484,6 +51484,18 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get diveLog_profileEditor_noProfileData =>
       'لا تتوفر بيانات ملف الغوصة';
+
+  @override
+  String get diveLog_profileEditor_timeShiftBlocked =>
+      'تعذّرت الإزاحة: لا توجد مساحة للتحديد في هذا الاتجاه';
+
+  @override
+  String get diveLog_profileEditor_deleteAllBlocked =>
+      'تعذّر حذف ملف الغوصة بالكامل';
+
+  @override
+  String get diveLog_profileEditor_smoothTooFewBlocked =>
+      'تعذّر التنعيم: حدّد ثلاث قراءات على الأقل';
 
   @override
   String get diveLog_profileEditor_undo => 'تراجع';

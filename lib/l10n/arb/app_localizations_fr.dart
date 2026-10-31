@@ -50859,7 +50859,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get diveLog_profileEditor_selectRangeHint =>
-      'Sélectionnez une plage sur le graphique pour activer les opérations';
+      'Faites glisser sur le graphique pour sélectionner une plage et activer les opérations';
 
   @override
   String get diveLog_profileEditor_depthPlusOneMeter => 'Prof. +1 m';
@@ -50966,6 +50966,18 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get diveLog_profileEditor_noProfileData =>
       'Aucune donnée de profil disponible';
+
+  @override
+  String get diveLog_profileEditor_timeShiftBlocked =>
+      'Décalage impossible : la sélection n\'a pas de place dans cette direction';
+
+  @override
+  String get diveLog_profileEditor_deleteAllBlocked =>
+      'Impossible de supprimer tout le profil';
+
+  @override
+  String get diveLog_profileEditor_smoothTooFewBlocked =>
+      'Lissage impossible : sélectionnez au moins trois relevés';
 
   @override
   String get diveLog_profileEditor_undo => 'Annuler';

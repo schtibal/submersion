@@ -50421,7 +50421,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_profileEditor_selectRangeHint =>
-      'Selecteer een bereik op de grafiek om bewerkingen in te schakelen';
+      'Sleep over de grafiek om een bereik te selecteren en bewerkingen in te schakelen';
 
   @override
   String get diveLog_profileEditor_depthPlusOneMeter => 'Diepte +1 m';
@@ -50526,6 +50526,18 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get diveLog_profileEditor_noProfileData =>
       'Geen profielgegevens beschikbaar';
+
+  @override
+  String get diveLog_profileEditor_timeShiftBlocked =>
+      'Verschuiven niet mogelijk: de selectie heeft geen ruimte in die richting';
+
+  @override
+  String get diveLog_profileEditor_deleteAllBlocked =>
+      'Het volledige profiel kan niet worden verwijderd';
+
+  @override
+  String get diveLog_profileEditor_smoothTooFewBlocked =>
+      'Afvlakken niet mogelijk: selecteer minstens drie metingen';
 
   @override
   String get diveLog_profileEditor_undo => 'Ongedaan maken';

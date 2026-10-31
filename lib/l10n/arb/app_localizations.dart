@@ -80391,7 +80391,7 @@ abstract class AppLocalizations {
   /// No description provided for @diveLog_profileEditor_selectRangeHint.
   ///
   /// In en, this message translates to:
-  /// **'Select a range on the chart to enable operations'**
+  /// **'Drag across the chart to select a range and enable operations'**
   String get diveLog_profileEditor_selectRangeHint;
 
   /// Profile editor button: shift the selected segment 1 metre shallower. The shift is always exactly one metre because dive profiles are stored in metres, so keep the metric unit in the translation.
@@ -80567,6 +80567,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No profile data available'**
   String get diveLog_profileEditor_noProfileData;
+
+  /// No description provided for @diveLog_profileEditor_timeShiftBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t shift: the selection has no room to move that way'**
+  String get diveLog_profileEditor_timeShiftBlocked;
+
+  /// No description provided for @diveLog_profileEditor_deleteAllBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t delete the whole profile'**
+  String get diveLog_profileEditor_deleteAllBlocked;
+
+  /// No description provided for @diveLog_profileEditor_smoothTooFewBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t smooth: select at least three samples'**
+  String get diveLog_profileEditor_smoothTooFewBlocked;
 
   /// Tooltip for the profile editor's undo button.
   ///
