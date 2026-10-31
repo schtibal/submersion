@@ -102,19 +102,40 @@ void main() {
   test('ppO2 starts where the descent passes the working limit', () {
     // EAN32 reaches ppO2 1.4 at 33.75 m; descending at 20 m/min that is
     // 101 s into the dive, well before the 120 s descent ends.
-    final outcome = engine.compute(_plan(gas: _ean32));
+    final outcome = engine.compute(_plan(gas: _ean32, depth: 37));
     final issue = _issue(outcome, PlanIssueType.ppO2High);
-    expect(issue.atRuntime, closeTo(101, 2));
+    expect(issue.atRuntime, closeTo(100, 2));
     // The message still names the deepest point of the leg.
-    expect(issue.atDepth, 40);
+    expect(issue.atDepth, 37);
+  });
+
+  test('a ppO2 limit is passed where the plan\'s own water puts it', () {
+    // At altitude in fresh water 1.4 bar on EAN32 sits about 4 m deeper than
+    // 10 m per bar says, and the warning itself is judged in this water.
+    final plan = _plan(
+      gas: _ean32,
+    ).copyWith(altitude: 3000.0, salinityPpt: 0.0);
+    final environment = PlanEngine.environmentFor(plan);
+    final surface = environment.pressureAtDepth(0);
+    final barPerMeter = (environment.pressureAtDepth(10) - surface) / 10;
+    final limitDepth = (1.4 / 0.32 - surface) / barPerMeter;
+
+    final issue = engine
+        .compute(plan)
+        .issues
+        .firstWhere(
+          (i) => i.type == PlanIssueType.ppO2High && i.segmentId == 'down',
+        );
+    // Three seconds a metre at 20 m/min.
+    expect(issue.atRuntime, closeTo(limitDepth * 3, 2));
   });
 
   test('a level leg already over the limit starts at the leg', () {
-    final outcome = engine.compute(_plan(gas: _ean32));
+    final outcome = engine.compute(_plan(gas: _ean32, depth: 37));
     final onBottom = outcome.issues.where(
       (i) => i.type == PlanIssueType.ppO2High && i.segmentId == 'bottom',
     );
-    expect(onBottom.single.atRuntime, 120);
+    expect(onBottom.single.atRuntime, 111);
   });
 
   test('END starts where the descent passes the END limit', () {

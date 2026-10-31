@@ -717,10 +717,11 @@ class PlanEngine {
       environment: environment,
       policy: policy,
     );
-    // Deliberately flat (issue #3580 scope cut, see PlanCalculatorService's
-    // matching comment): O2ToxicityCalculator is a general-purpose, widely
-    // shared utility, used here only for CNS/OTU accumulation, not for the
-    // deco ppO2 critical/warning PlanIssue check below, which IS band-aware
+    // Deliberately the flat limits (issue #3580 scope cut, see
+    // PlanCalculatorService's matching comment): O2ToxicityCalculator is a
+    // general-purpose, widely shared utility, used here only for CNS/OTU
+    // accumulation from a ppO2 in the plan's water, not for the deco ppO2
+    // critical/warning PlanIssue check below, which IS band-aware
     // (config.decoLimits.ppO2For).
     final o2Calc = O2ToxicityCalculator(
       ppO2WarningThreshold: config.ppO2Working,
@@ -810,8 +811,10 @@ class PlanEngine {
       timeline.add((runtime, state as BuhlmannState));
 
       final deeperEnd = leg.deeperEnd;
-      // OC ppO2 keeps the legacy ambient x fraction convention; loop ppO2 is
-      // the inspired (setpoint/CMF) value.
+      final fO2 = segment.gasMix.o2 / 100.0;
+      // OC ppO2 is ambient x fraction in the plan's water, as the schedule
+      // shows it (issue #3913); loop ppO2 is the inspired (setpoint/CMF)
+      // value.
       final segmentMaxPpO2 = segmentIsLoop
           ? _breathingFor(
               plan,
@@ -819,18 +822,12 @@ class PlanEngine {
               deeperEnd,
               segment: segment,
             ).inspiredAt(environment.pressureAtDepth(deeperEnd)).pO2
-          : O2ToxicityCalculator.calculatePpO2(
-              deeperEnd,
-              segment.gasMix.o2 / 100.0,
-            );
+          : environment.pressureAtDepth(deeperEnd) * fO2;
       if (segmentMaxPpO2 > maxPpO2) maxPpO2 = segmentMaxPpO2;
 
       final avgPpO2 = segmentIsLoop
           ? breathing.inspiredAt(environment.pressureAtDepth(leg.avgDepth)).pO2
-          : O2ToxicityCalculator.calculatePpO2(
-              leg.avgDepth,
-              segment.gasMix.o2 / 100.0,
-            );
+          : environment.pressureAtDepth(leg.avgDepth) * fO2;
       final legCns = o2Calc.calculateCnsForSegment(
         avgPpO2,
         segment.durationSeconds,
@@ -1834,9 +1831,7 @@ class PlanEngine {
       // under that setting, otherwise the flat ppO2Deco, same as before.
       // Only used for display here - the breach check itself goes through
       // decoCeilingBreachedFor, which compares depth directly for an
-      // explicit-depth gas instead of this (environment-aware) ppO2 against
-      // outcome.maxPpO2 (the flat-model one), a mismatch a Copilot review
-      // caught disagreeing in salt water/at altitude.
+      // explicit-depth gas instead of this ppO2.
       //
       // A loop segment's ppO2 follows the setpoint, not its diluent's O2
       // fraction, so those per-gas layers (OC deco gas limits) do not apply
@@ -1858,6 +1853,9 @@ class PlanEngine {
               actualPpO2: outcome.maxPpO2,
               environment: environment,
             );
+      final workingLimitExceeded = segmentIsLoop
+          ? outcome.maxPpO2 > config.ppO2Working
+          : ppO2OverLimit(outcome.maxPpO2, config.ppO2Working);
 
       // Where on this leg a depth limit is first passed (#3738).
       int onset(bool Function(double depth) exceeds) => legOnsetRuntime(
@@ -1875,7 +1873,7 @@ class PlanEngine {
               depth,
               segment: segment,
             ).inspiredAt(environment.pressureAtDepth(depth)).pO2
-          : O2ToxicityCalculator.calculatePpO2(depth, fO2);
+          : environment.pressureAtDepth(depth) * fO2;
       double densityAt(double depth) => gasDensityGPerL(
         fO2: fO2,
         fHe: fHe,
@@ -1893,6 +1891,11 @@ class PlanEngine {
               environment: environment,
             );
 
+      // The same working limit check as workingLimitExceeded, at any depth.
+      bool workingLimitExceededAt(double depth) => segmentIsLoop
+          ? ppO2At(depth) > config.ppO2Working
+          : ppO2OverLimit(ppO2At(depth), config.ppO2Working);
+
       if (decoCeilingBreached) {
         issues.add(
           PlanIssue(
@@ -1908,7 +1911,7 @@ class PlanEngine {
             threshold: segmentDecoPpO2,
           ),
         );
-      } else if (outcome.maxPpO2 > config.ppO2Working) {
+      } else if (workingLimitExceeded) {
         issues.add(
           PlanIssue(
             type: PlanIssueType.ppO2High,
@@ -1916,7 +1919,7 @@ class PlanEngine {
             message:
                 'ppO2 ${outcome.maxPpO2.toStringAsFixed(2)} bar exceeds the '
                 'working limit',
-            atRuntime: onset((d) => ppO2At(d) > config.ppO2Working),
+            atRuntime: onset(workingLimitExceededAt),
             atDepth: deeperEnd,
             segmentId: segment.id,
             value: outcome.maxPpO2,
@@ -2297,12 +2300,18 @@ class PlanEngine {
       // ppO2Deco) -- even for a bottom-role tank, which can still breach
       // it on a sufficiently deep hand-set MOD. A bottom-role tank under
       // that ceiling is a warning (it already exceeded its own, lower,
-      // bottom limit to get here at all). decoCeilingPpO2For, not
+      // bottom limit to get here at all). decoCeilingBreachedFor, not
       // check.limitPpO2: that is whatever limit THIS tank's own role
-      // calls for (bottom or deco), not necessarily the deco ceiling.
-      final isCritical =
-          check.ppO2 >
-          decoCeilingPpO2For(tank.gasMix, decoLimits, environment: environment);
+      // calls for (bottom or deco), not necessarily the deco ceiling. It is
+      // the check an authored leg gets, so the same ppO2 is classified the
+      // same way wherever it comes from (issue #3913).
+      final isCritical = decoCeilingBreachedFor(
+        tank.gasMix,
+        decoLimits,
+        depthMeters: tank.decoSwitchDepth!,
+        actualPpO2: check.ppO2,
+        environment: environment,
+      );
       issues.add(
         PlanIssue(
           type: isCritical
