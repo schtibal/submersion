@@ -543,6 +543,16 @@ void main() {
       expect(editor(c).initialOtu, greaterThan(40));
     });
 
+    test('the computed series counts it on a later dive too', () async {
+      final c = await makeContainer();
+      series(c).followDive(follow(), surfaceInterval: const Duration(hours: 1));
+      series(c).addDive();
+
+      final results = c.read(planSeriesResultsProvider);
+      expect(results[0].state.initialOtu, 40);
+      expect(results[1].state.initialOtu, greaterThan(40));
+    });
+
     test('the first dive drops the logged OTU once its interval passes '
         'a day', () async {
       final c = await makeContainer();

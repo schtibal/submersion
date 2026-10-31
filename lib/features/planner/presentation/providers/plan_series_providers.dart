@@ -183,9 +183,6 @@ class PlanSeriesNotifier extends StateNotifier<PlanSeries> {
       // load would otherwise read as an outside one at the next edit.
       _seenLoads = _editor.loadCount;
     }
-    // Loading the plan the editor already holds notifies no one, so
-    // [editorChanged] cannot be left to catch this count up.
-    _seenLoads = _editor.loadCount;
     state = edits.updateDiveState(
       state,
       state.selectedIndex,
@@ -227,9 +224,8 @@ final planSeriesNotifierProvider =
 final planSeriesResultsProvider = Provider<List<calculator.SeriesDiveResult>>((
   ref,
 ) {
-  final dives = ref
-      .watch(planSeriesNotifierProvider.select(_chainInputs))
-      .dives;
+  final inputs = ref.watch(planSeriesNotifierProvider.select(_chainInputs));
+  final dives = inputs.dives;
   // One dive is the plan in the editor, which that provider already runs.
   if (dives.length == 1) {
     return [
@@ -242,7 +238,7 @@ final planSeriesResultsProvider = Provider<List<calculator.SeriesDiveResult>>((
   return calculator.computeSeries(
     dives,
     config: ref.watch(planEngineConfigProvider),
-    follow: series.follow,
+    follow: inputs.follow,
   );
 });
 
@@ -250,6 +246,7 @@ final planSeriesResultsProvider = Provider<List<calculator.SeriesDiveResult>>((
 /// selection, so neither of those runs the engine again.
 PlanSeries _chainInputs(PlanSeries series) => PlanSeries(
   dives: [for (final dive in series.dives) dive.copyWith(clearName: true)],
+  follow: series.follow,
 );
 
 /// Whether a dive can be added after the last one.
